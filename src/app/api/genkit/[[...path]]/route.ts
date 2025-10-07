@@ -1,4 +1,5 @@
 import { nextHandler } from '@genkit-ai/next';
+import '@/ai/register';
 import { ai } from '@/ai/genkit';
 
 export const GET = nextHandler(ai);
