@@ -81,8 +81,16 @@
       "userId": "1759816290832",
       "message": "New assignment posted: \"dbms\"",
       "link": "/courses/1759821872336?tab=assignments",
+      "id": "1759825522435",
+      "isRead": true,
+      "createdAt": "2025-10-07T08:25:22.435Z"
+    },
+    {
+      "userId": "1759816290832",
+      "message": "New assignment posted: \"dbms\"",
+      "link": "/courses/1759821872336?tab=assignments",
       "id": "1759825188681",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2025-10-07T08:19:48.681Z"
     },
     {
@@ -90,7 +98,7 @@
       "message": "New assignment posted: \"dbms schema\"",
       "link": "/courses/1759821872336?tab=assignments",
       "id": "1759825020942",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2025-10-07T08:17:00.942Z"
     }
   ],

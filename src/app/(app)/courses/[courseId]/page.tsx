@@ -17,6 +17,8 @@ import DiscussionList from '@/components/discussions/discussion-list';
 import MaterialList from '@/components/materials/material-list';
 import AttendanceTracker from '@/components/attendance/attendance-tracker';
 
+export const revalidate = 0;
+
 export default async function CourseDetailPage({
   params,
   searchParams,
