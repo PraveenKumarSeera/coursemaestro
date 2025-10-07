@@ -33,7 +33,7 @@ Student Information:
 
 Academic Performance:
 \`\`\`json
-{{{JSON.stringify(gradedSubmissions)}}}
+{{{gradedSubmissions}}}
 \`\`\`
 
 Generate the full resume as a single Markdown string.
