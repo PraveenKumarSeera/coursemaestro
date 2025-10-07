@@ -39,7 +39,9 @@ export async function addMaterialLinkAction(
       link,
     });
     
-    revalidatePath(`/courses/${courseId}?tab=materials`);
+    // Revalidate the course detail page and the main courses page
+    revalidatePath(`/courses/${courseId}`);
+    revalidatePath('/courses');
 
     return {
       message: 'Successfully added material link.',

@@ -67,7 +67,15 @@
   "submissions": [],
   "discussionThreads": [],
   "discussionPosts": [],
-  "materials": [],
+  "materials": [
+    {
+      "courseId": "1759821872336",
+      "title": "chapter 1",
+      "link": "https://drive.google.com/file/d/1VcHxk3x4vo3ci5YSTGWAePVU8uTmgW22/view?usp=sharing",
+      "id": "1759824600875",
+      "createdAt": "2025-10-07T08:10:00.875Z"
+    }
+  ],
   "notifications": [],
   "attendance": [
     {
