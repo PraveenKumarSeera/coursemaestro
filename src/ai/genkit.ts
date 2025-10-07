@@ -1,6 +1,7 @@
-import {genkit, genkitPlugin} from 'genkit';
+'use server';
+import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/google-genai';
-import {next} from '@genkit-ai/next';
+import next from '@genkit-ai/next';
 import {courseMaestroAI} from './genkit-plugin';
 
 export const ai = genkit({

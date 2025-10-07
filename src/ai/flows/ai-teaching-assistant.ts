@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines the AI Teaching Assistant flow.
@@ -42,7 +43,7 @@ Student Submission:
 '''
 `;
 
-const teachingAssistantFlow = ai.defineFlow(
+export const teachingAssistantFlow = ai.defineFlow(
   {
     name: 'teachingAssistantFlow',
     inputSchema: TeachingAssistantInputSchema,
