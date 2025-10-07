@@ -9,7 +9,7 @@ type AiState = {
 };
 
 export async function askAI(
-  { courseMaterial }: { courseMaterial: string },
+  courseMaterial: string,
   prevState: AiState,
   formData: FormData
 ): Promise<AiState> {

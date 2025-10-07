@@ -33,11 +33,9 @@ export default function AiAssistant({ course }: { course: Course }) {
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const askAiWithCourse = askAI.bind(null, {
-    courseMaterial: `${course.title}: ${course.description}`,
-  });
-
-  const [state, dispatch] = useActionState(askAiWithCourse, {
+  const courseMaterial = `${course.title}: ${course.description}`;
+  
+  const [state, dispatch] = useActionState(askAI.bind(null, courseMaterial), {
     answer: '',
     question: '',
   });
