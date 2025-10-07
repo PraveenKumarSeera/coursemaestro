@@ -30,7 +30,7 @@ Keep the tone positive and supportive.
 
 Graded Assignments:
 \`\`\`json
-${"{{JSON.stringify(input.gradedSubmissions)}}"}
+{{{JSON.stringify gradedSubmissions}}}
 \`\`\`
 `,
 });
