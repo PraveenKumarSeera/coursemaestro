@@ -85,3 +85,11 @@ export type Attendance = {
     date: string; // YYYY-MM-DD
     isPresent: boolean;
 };
+
+export type Certificate = {
+    id: string;
+    studentId: string;
+    courseId: string;
+    issuedAt: string;
+    verificationId: string;
+};

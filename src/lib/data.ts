@@ -1,9 +1,10 @@
 
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate } from './types';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { randomUUID } from 'crypto';
 
 // In-memory "database" has been replaced with a file-based one.
 // The data is now persisted in `src/lib/db.json`
@@ -21,6 +22,7 @@ type Db = {
     materials: Material[];
     notifications: Notification[];
     attendance: Attendance[];
+    certificates: Certificate[];
 }
 
 const defaultDb: Db = {
@@ -37,7 +39,8 @@ const defaultDb: Db = {
     discussionPosts: [],
     materials: [],
     notifications: [],
-    attendance: []
+    attendance: [],
+    certificates: []
 };
 
 async function readDb(): Promise<Db> {
@@ -48,7 +51,10 @@ async function readDb(): Promise<Db> {
          await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
     }
     const data = await fs.readFile(dbPath, 'utf-8');
-    return JSON.parse(data);
+    const dbContent = JSON.parse(data);
+
+    // Ensure all data arrays exist
+    return { ...defaultDb, ...dbContent };
 }
 
 async function writeDb(data: Db): Promise<void> {
@@ -454,4 +460,80 @@ export async function getAllAttendance(): Promise<(Attendance & { student: User,
     }));
 
     return attendanceWithDetails.filter(Boolean).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()) as (Attendance & { student: User, course: Course })[];
+}
+
+// --- Certificate Functions ---
+
+const PASSING_GRADE = 70;
+
+export async function getCompletedCoursesForStudent(studentId: string): Promise<Course[]> {
+    const db = await readDb();
+    const enrollments = db.enrollments.filter(e => e.studentId === studentId);
+    const completedCourses: Course[] = [];
+
+    for (const enrollment of enrollments) {
+        const course = db.courses.find(c => c.id === enrollment.courseId);
+        if (!course) continue;
+
+        const assignments = db.assignments.filter(a => a.courseId === course.id);
+        if (assignments.length === 0) continue; // Cannot complete a course with no assignments
+
+        const submissions = db.submissions.filter(s => s.studentId === studentId && assignments.some(a => a.id === s.assignmentId));
+
+        const allAssignmentsSubmittedAndPassed = assignments.every(assignment => {
+            const submission = submissions.find(s => s.assignmentId === assignment.id);
+            return submission && submission.grade !== null && submission.grade >= PASSING_GRADE;
+        });
+
+        if (allAssignmentsSubmittedAndPassed) {
+            completedCourses.push(course);
+        }
+    }
+    return completedCourses;
+}
+
+export async function getStudentCertificates(studentId: string): Promise<(Certificate & { course: Course })[]> {
+    const db = await readDb();
+    const certificates = db.certificates.filter(c => c.studentId === studentId);
+    
+    return certificates.map(cert => {
+        const course = db.courses.find(c => c.id === cert.courseId);
+        if (!course) throw new Error(`Course not found for certificate ${cert.id}`);
+        return { ...cert, course };
+    }).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
+}
+
+export async function getCertificateById(id: string): Promise<(Certificate & { student: User; course: Course & { teacher: User } }) | undefined> {
+    const db = await readDb();
+    const certificate = db.certificates.find(c => c.id === id);
+    if (!certificate) return undefined;
+
+    const student = db.users.find(u => u.id === certificate.studentId);
+    if (!student) throw new Error("Student not found for certificate");
+
+    const course = await getCourseById(certificate.courseId);
+    if (!course) throw new Error("Course not found for certificate");
+
+    return { ...certificate, student, course };
+}
+
+
+export async function generateCertificate(studentId: string, courseId: string): Promise<Certificate | null> {
+    const db = await readDb();
+    const existingCertificate = db.certificates.find(c => c.studentId === studentId && c.courseId === courseId);
+    if (existingCertificate) {
+        return null; // Already generated
+    }
+
+    const newCertificate: Certificate = {
+        id: String(Date.now()),
+        studentId,
+        courseId,
+        issuedAt: new Date().toISOString(),
+        verificationId: randomUUID(),
+    };
+
+    db.certificates.push(newCertificate);
+    await writeDb(db);
+    return newCertificate;
 }

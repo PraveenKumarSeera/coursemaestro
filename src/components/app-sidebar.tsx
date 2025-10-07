@@ -16,6 +16,7 @@ import {
   FileDown,
   Trophy,
   CalendarCheck,
+  Award,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -44,6 +45,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
 
   const studentRoutes = [
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
+    { href: '/my-certificates', label: 'My Certificates', icon: Award },
     { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase },
     { href: '/resume-builder', label: 'Resume Builder', icon: FileDown },
@@ -76,7 +78,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>

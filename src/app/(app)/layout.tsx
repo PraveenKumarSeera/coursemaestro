@@ -8,10 +8,17 @@ export const revalidate = 0;
 
 export default async function AuthenticatedLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: { certificateId?: string };
 }) {
   const { user } = await getSession();
+
+  // Special case for certificate page, which has a different layout
+  if (params?.certificateId) {
+    return <>{children}</>;
+  }
 
   if (!user) {
     redirect('/login');
