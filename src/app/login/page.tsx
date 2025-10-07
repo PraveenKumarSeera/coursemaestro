@@ -7,8 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { LoginForm } from '@/components/auth/login-form';
-import { GraduationCap, Info } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { GraduationCap } from 'lucide-react';
 
 export default function LoginPage() {
   return (
@@ -40,23 +39,6 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertTitle>Demo Credentials</AlertTitle>
-          <AlertDescription>
-            <div className="text-sm">
-              <p>
-                <strong>Teacher:</strong> teacher@example.com
-              </p>
-              <p>
-                <strong>Student:</strong> student@example.com
-              </p>
-              <p>
-                <strong>Password:</strong> password
-              </p>
-            </div>
-          </AlertDescription>
-        </Alert>
       </div>
     </div>
   );

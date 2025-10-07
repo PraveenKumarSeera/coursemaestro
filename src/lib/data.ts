@@ -5,11 +5,7 @@ import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission
 import { format } from 'date-fns';
 
 // In-memory "database"
-let users: User[] = [
-  { id: '1', name: 'Alice Teacher', email: 'teacher@example.com', password: 'password', role: 'teacher' },
-  { id: '2', name: 'Bob Student', email: 'student@example.com', password: 'password', role: 'student' },
-  { id: '3', name: 'Charlie Student', email: 'charlie@example.com', password: 'password', role: 'student' },
-];
+let users: User[] = [];
 
 let courses: Course[] = [
   { id: '101', title: 'Introduction to Web Development', description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites. This course covers everything from basic syntax to responsive design and DOM manipulation.', teacherId: '1', duration: '8 Weeks', imageUrl: placeholderImages[0].imageUrl },
@@ -17,30 +13,15 @@ let courses: Course[] = [
   { id: '103', title: 'Data Structures & Algorithms', description: 'Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.', teacherId: '1', duration: '10 Weeks', imageUrl: placeholderImages[2].imageUrl },
 ];
 
-let enrollments: Enrollment[] = [
-  { id: '1001', studentId: '2', courseId: '101' },
-  { id: '1002', studentId: '2', courseId: '103' },
-  { id: '1003', studentId: '3', courseId: '101' },
-];
+let enrollments: Enrollment[] = [];
 
-let assignments: Assignment[] = [
-    { id: '201', courseId: '101', title: 'HTML & CSS Basics', description: 'Create a simple personal portfolio page.', dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: '202', courseId: '101', title: 'JavaScript DOM Manipulation', description: 'Build an interactive todo list app.', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: '203', courseId: '102', title: 'React Hooks Project', description: 'Refactor a class-based component to use hooks.', dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString() },
-];
+let assignments: Assignment[] = [];
 
-let submissions: Submission[] = [
-    { id: '301', assignmentId: '201', studentId: '2', content: 'Submitted portfolio link.', submittedAt: new Date().toISOString(), grade: 95, feedback: 'Great job on the design!' },
-];
+let submissions: Submission[] = [];
 
-let discussionThreads: DiscussionThread[] = [
-    { id: '401', courseId: '101', title: 'Question about CSS Flexbox', authorId: '2', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-];
+let discussionThreads: DiscussionThread[] = [];
 
-let discussionPosts: DiscussionPost[] = [
-    { id: '501', threadId: '401', authorId: '2', content: "I'm having trouble centering a div. Can anyone help?", createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: '502', threadId: '401', authorId: '1', content: 'Sure! Have you tried using `display: flex; justify-content: center; align-items: center;` on the parent container?', createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
-];
+let discussionPosts: DiscussionPost[] = [];
 
 let materials: Material[] = [];
 
