@@ -38,10 +38,10 @@ export default async function CourseDetailPage({
     redirect('/courses');
   }
 
+  const materials = await getMaterialsByCourse(params.courseId);
   const enrolledStudents = isTeacher ? await getStudentsByCourse(course.id) : [];
   const assignments = await getAssignmentsByCourse(params.courseId);
   const discussionThreads = await getThreadsByCourse(params.courseId);
-  const materials = await getMaterialsByCourse(params.courseId);
 
   // For students, fetch their submission status for each assignment
   const assignmentsWithSubmissions = user.role === 'student' ? await Promise.all(
