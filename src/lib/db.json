@@ -79,6 +79,14 @@
   "notifications": [
     {
       "userId": "1759816290832",
+      "message": "New assignment posted: \"see\"",
+      "link": "/courses/1759821872336?tab=assignments",
+      "id": "1759825698561",
+      "isRead": false,
+      "createdAt": "2025-10-07T08:28:18.561Z"
+    },
+    {
+      "userId": "1759816290832",
       "message": "New assignment posted: \"dbms\"",
       "link": "/courses/1759821872336?tab=assignments",
       "id": "1759825522435",

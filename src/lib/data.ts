@@ -45,8 +45,7 @@ const defaultDb: Db = {
 };
 
 // --- Caching Layer for DB Reads ---
-const getDb = unstable_cache(
-  async () => {
+const getDb = async (): Promise<Db> => {
     try {
         await fs.access(dbPath);
     } catch (error) {
@@ -58,10 +57,7 @@ const getDb = unstable_cache(
 
     // Ensure all data arrays exist
     return { ...defaultDb, ...dbContent } as Db;
-  },
-  ['database'],
-  { revalidate: 1 } // Revalidate cache every 1 second
-);
+};
 
 
 async function writeDb(data: Db): Promise<void> {
