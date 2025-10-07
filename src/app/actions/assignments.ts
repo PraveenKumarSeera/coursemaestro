@@ -4,9 +4,9 @@
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById } from '@/lib/data';
+import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById, getStudentGrades, findUserById, createNotification } from '@/lib/data';
 import { getSession } from '@/lib/session';
-import { createNotification } from '@/lib/data';
+import { generateMotivationalMessage } from '@/ai/flows/ai-motivation-bot';
 
 const createAssignmentSchema = z.object({
   courseId: z.string(),
@@ -122,28 +122,69 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
     }
     
     try {
+        const { submissionId, assignmentId, grade, feedback } = validatedFields.data;
+        
+        const submission = await getSubmissionById(submissionId);
+        if (!submission) {
+            return { message: 'Submission not found.', success: false };
+        }
+        
+        // --- Motivation Bot Logic ---
+        const allGrades = await getStudentGrades(submission.studentId);
+        const previousGrades = allGrades.filter(s => s.id !== submissionId);
+
+        if (previousGrades.length > 0) {
+            const total = previousGrades.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+            const averageGrade = total / previousGrades.length;
+
+            // Trigger if new grade is more than 10 points lower than average
+            if (averageGrade - grade > 10) {
+                const student = await findUserById(submission.studentId);
+                const assignment = await getAssignmentById(assignmentId);
+                const course = assignment ? await getCourseById(assignment.courseId) : null;
+                
+                if (student && course) {
+                    try {
+                        const { message } = await generateMotivationalMessage({
+                            studentName: student.name.split(' ')[0],
+                            courseTitle: course.title,
+                        });
+
+                        await createNotification({
+                            userId: student.id,
+                            message: message,
+                            link: '/my-grades',
+                        });
+                    } catch (aiError) {
+                        console.error("AI Motivation Bot failed:", aiError);
+                        // Don't block the grading process if AI fails
+                    }
+                }
+            }
+        }
+        // --- End Motivation Bot Logic ---
+
         await gradeSubmission(
-            validatedFields.data.submissionId,
-            validatedFields.data.grade,
-            validatedFields.data.feedback || ''
+            submissionId,
+            grade,
+            feedback || ''
         );
 
         // Create notification for the student
-        const submission = await getSubmissionById(validatedFields.data.submissionId);
-        const assignment = await getAssignmentById(validatedFields.data.assignmentId);
-
-        if (submission && assignment) {
+        const assignmentForNotification = await getAssignmentById(assignmentId);
+        if (submission && assignmentForNotification) {
             await createNotification({
                 userId: submission.studentId,
-                message: `Your submission for "${assignment.title}" has been graded.`,
+                message: `Your submission for "${assignmentForNotification.title}" has been graded.`,
                 link: '/my-grades',
             });
         }
 
-        revalidatePath(`/assignments/${validatedFields.data.assignmentId}`);
+        revalidatePath(`/assignments/${assignmentId}`);
         revalidatePath('/my-grades');
         return { message: 'Grade saved successfully.', success: true };
     } catch (e) {
+        console.error(e);
         return { message: 'Failed to save grade.', success: false };
     }
 }
