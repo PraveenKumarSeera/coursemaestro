@@ -1,4 +1,5 @@
-import { getCourseById, getStudentsByCourse } from '@/lib/data';
+
+import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -7,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BookText, ClipboardList, Users, Clock, User as UserIcon } from 'lucide-react';
 import AiAssistant from '@/components/ai-assistant';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import AssignmentList from '@/components/assignments/assignment-list';
 
 export default async function CourseDetailPage({
   params,
@@ -22,6 +24,16 @@ export default async function CourseDetailPage({
   
   const isTeacher = user.role === 'teacher' && user.id === course.teacherId;
   const enrolledStudents = isTeacher ? await getStudentsByCourse(course.id) : [];
+  const assignments = await getAssignmentsByCourse(params.courseId);
+
+  // For students, fetch their submission status for each assignment
+  const assignmentsWithSubmissions = user.role === 'student' ? await Promise.all(
+    assignments.map(async (assignment) => {
+      const submission = await getStudentSubmission(user.id, assignment.id);
+      return { ...assignment, submission };
+    })
+  ) : assignments;
+
 
   return (
     <div className="space-y-6">
@@ -79,17 +91,11 @@ export default async function CourseDetailPage({
           </Card>
         </TabsContent>
         <TabsContent value="assignments">
-          <Card>
-            <CardHeader>
-              <CardTitle>Assignments</CardTitle>
-              <CardDescription>
-                Here are the assignments for this course.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Assignment feature coming soon.</p>
-            </CardContent>
-          </Card>
+            <AssignmentList 
+                assignments={assignmentsWithSubmissions} 
+                user={user} 
+                courseId={course.id}
+            />
         </TabsContent>
         {isTeacher ? (
             <TabsContent value="students">
@@ -127,3 +133,4 @@ export default async function CourseDetailPage({
     </div>
   );
 }
+

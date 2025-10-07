@@ -1,5 +1,7 @@
+
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User } from './types';
+import type { Course, Enrollment, User, Assignment, Submission } from './types';
+import { format } from 'date-fns';
 
 // In-memory "database"
 let users: User[] = [
@@ -19,6 +21,17 @@ let enrollments: Enrollment[] = [
   { id: '1002', studentId: '2', courseId: '103' },
   { id: '1003', studentId: '3', courseId: '101' },
 ];
+
+let assignments: Assignment[] = [
+    { id: '201', courseId: '101', title: 'HTML & CSS Basics', description: 'Create a simple personal portfolio page.', dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: '202', courseId: '101', title: 'JavaScript DOM Manipulation', description: 'Build an interactive todo list app.', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: '203', courseId: '102', title: 'React Hooks Project', description: 'Refactor a class-based component to use hooks.', dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString() },
+];
+
+let submissions: Submission[] = [
+    { id: '301', assignmentId: '201', studentId: '2', content: 'Submitted portfolio link.', submittedAt: new Date().toISOString(), grade: 95, feedback: 'Great job on the design!' },
+];
+
 
 // --- User Functions ---
 export async function findUserByEmail(email: string): Promise<User | undefined> {
@@ -74,4 +87,84 @@ export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     const courseEnrollments = enrollments.filter(e => e.courseId === courseId);
     const studentIds = courseEnrollments.map(e => e.studentId);
     return users.filter(user => studentIds.includes(user.id));
+}
+
+// --- Assignment Functions ---
+export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
+    return assignments.filter(a => a.courseId === courseId);
+}
+
+export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> {
+    const teacherCourses = await getTeacherCourses(teacherId);
+    const courseIds = teacherCourses.map(c => c.id);
+    const teacherAssignments = assignments.filter(a => courseIds.includes(a.courseId));
+    
+    return teacherAssignments.map(assignment => {
+        const course = courses.find(c => c.id === assignment.courseId);
+        const submissionCount = submissions.filter(s => s.assignmentId === assignment.id).length;
+        return {
+            ...assignment,
+            courseTitle: course?.title || 'Unknown Course',
+            submissions: submissionCount,
+        };
+    });
+}
+
+export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<Assignment> {
+    const newAssignment: Assignment = { ...data, id: String(Date.now()) };
+    assignments.push(newAssignment);
+    return newAssignment;
+}
+
+export async function getAssignmentById(id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> {
+    const assignment = assignments.find(a => a.id === id);
+    if (!assignment) return undefined;
+
+    const assignmentSubmissions = submissions.filter(s => s.assignmentId === assignment.id);
+    const submissionsWithStudents = await Promise.all(
+        assignmentSubmissions.map(async sub => {
+            const student = await findUserById(sub.studentId);
+            return { ...sub, student: student! };
+        })
+    );
+
+    return { ...assignment, submissions: submissionsWithStudents };
+}
+
+
+// --- Submission Functions ---
+export async function getStudentSubmission(studentId: string, assignmentId: string): Promise<Submission | undefined> {
+    return submissions.find(s => s.studentId === studentId && s.assignmentId === assignmentId);
+}
+
+export async function createSubmission(data: Omit<Submission, 'id' | 'submittedAt' | 'grade' | 'feedback'>): Promise<Submission> {
+    const newSubmission: Submission = { 
+        ...data, 
+        id: String(Date.now()), 
+        submittedAt: new Date().toISOString(),
+        grade: null,
+        feedback: null
+    };
+    submissions.push(newSubmission);
+    return newSubmission;
+}
+
+export async function gradeSubmission(submissionId: string, grade: number, feedback: string): Promise<Submission | undefined> {
+    const submission = submissions.find(s => s.id === submissionId);
+    if (submission) {
+        submission.grade = grade;
+        submission.feedback = feedback;
+        return submission;
+    }
+    return undefined;
+}
+
+export async function getStudentGrades(studentId: string): Promise<(Submission & { assignment: Assignment, course: Course })[]> {
+    const studentSubmissions = submissions.filter(s => s.studentId === studentId && s.grade !== null);
+    
+    return Promise.all(studentSubmissions.map(async sub => {
+        const assignment = assignments.find(a => a.id === sub.assignmentId)!;
+        const course = courses.find(c => c.id === assignment.courseId)!;
+        return { ...sub, assignment, course };
+    }));
 }

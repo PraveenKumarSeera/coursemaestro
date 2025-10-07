@@ -1,3 +1,4 @@
+
 export type User = {
   id: string;
   name: string;
@@ -38,3 +39,4 @@ export type Submission = {
   grade: number | null;
   feedback: string | null;
 };
+    
