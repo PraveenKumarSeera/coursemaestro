@@ -65,6 +65,39 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   return { ...course, teacher };
 }
 
+export async function createCourse(data: Omit<Course, 'id' | 'imageUrl'>, teacherId: string): Promise<Course> {
+    const newCourse: Course = {
+        ...data,
+        id: String(Date.now()),
+        teacherId,
+        imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
+    };
+    courses.push(newCourse);
+    return newCourse;
+}
+
+export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' | 'teacherId' | 'imageUrl'>>): Promise<Course | undefined> {
+    const courseIndex = courses.findIndex(c => c.id === id);
+    if (courseIndex === -1) return undefined;
+    
+    courses[courseIndex] = { ...courses[courseIndex], ...data };
+    return courses[courseIndex];
+}
+
+export async function deleteCourse(id: string): Promise<boolean> {
+    const initialLength = courses.length;
+    courses = courses.filter(c => c.id !== id);
+    // Also delete associated enrollments, assignments, and submissions
+    enrollments = enrollments.filter(e => e.courseId !== id);
+    assignments = assignments.filter(a => a.courseId !== id);
+    
+    const assignmentIdsToDelete = assignments.filter(a => a.courseId === id).map(a => a.id);
+    submissions = submissions.filter(s => !assignmentIdsToDelete.includes(s.assignmentId));
+
+    return courses.length < initialLength;
+}
+
+
 export async function getTeacherById(id: string): Promise<User | undefined> {
     return users.find(user => user.id === id && user.role === 'teacher');
 }

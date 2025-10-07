@@ -3,12 +3,15 @@ import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudent
 import { getSession } from '@/lib/session';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles } from 'lucide-react';
+import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, Trash } from 'lucide-react';
 import AiAssistant from '@/components/ai-assistant';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AssignmentList from '@/components/assignments/assignment-list';
+import { Button } from '@/components/ui/button';
+import DeleteCourseButton from '@/components/courses/delete-course-button';
 
 export default async function CourseDetailPage({
   params,
@@ -61,6 +64,18 @@ export default async function CourseDetailPage({
           </div>
         </div>
       </div>
+      
+      {isTeacher && (
+        <div className="flex gap-2 justify-end">
+            <Button asChild variant="outline" size="sm">
+                <Link href={`/courses/${course.id}/edit`}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                </Link>
+            </Button>
+            <DeleteCourseButton courseId={course.id} />
+        </div>
+      )}
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3 md:grid-cols-4">
