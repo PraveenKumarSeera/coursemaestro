@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useActionState } from 'react';
+import { useState, useRef, useEffect, useActionState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { askAppGuide } from '@/app/actions/app-guide';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,7 @@ export default function AppGuideChatbot() {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
 
   const [state, dispatch] = useActionState(askAppGuide, {
     answer: '',
@@ -83,7 +84,9 @@ export default function AppGuideChatbot() {
         inputRef.current.value = question;
         const formData = new FormData(formRef.current!);
         setMessages(prev => [...prev, { role: 'user', content: question }]);
-        dispatch(formData);
+        startTransition(() => {
+          dispatch(formData);
+        });
     }
   }
 
@@ -128,6 +131,16 @@ export default function AppGuideChatbot() {
                  )}
               </div>
             ))}
+             {(isPending && messages[messages.length-1].role === 'user') && (
+                <div className="flex items-start gap-3">
+                    <div className="p-2 bg-muted rounded-full">
+                        <Bot className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="bg-muted rounded-lg p-3 text-sm flex items-center">
+                       <Loader2 className="h-4 w-4 animate-spin" />
+                    </div>
+                </div>
+            )}
           </div>
         </ScrollArea>
       </CardContent>
@@ -135,7 +148,7 @@ export default function AppGuideChatbot() {
          {messages.length === 0 && (
             <div className="flex flex-wrap gap-2 mb-2">
                 {suggestedQuestions.map(q => (
-                    <Button key={q} variant="outline" size="sm" onClick={() => handleSuggestedQuestion(q)}>
+                    <Button key={q} variant="outline" size="sm" onClick={() => handleSuggestedQuestion(q)} disabled={isPending}>
                         {q}
                     </Button>
                 ))}
