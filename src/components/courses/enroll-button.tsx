@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { enrollInCourseAction } from '@/app/actions/enrollments';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -28,6 +29,7 @@ export default function EnrollButton({ courseId }: { courseId: string }) {
   const enrollAction = enrollInCourseAction.bind(null, courseId);
   const [state, formAction] = useActionState(enrollAction, { message: '', success: false });
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     if (state.message) {
@@ -36,8 +38,11 @@ export default function EnrollButton({ courseId }: { courseId: string }) {
         description: state.message,
         variant: state.success ? 'default' : 'destructive',
       });
+      if (state.success) {
+        router.push('/courses');
+      }
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
   return (
     <form action={formAction}>
