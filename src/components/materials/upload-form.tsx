@@ -19,10 +19,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled: boolean }) {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending || !document.forms.namedItem('upload-form')?.querySelector('input[name="courseId"]')?.getAttribute('value')} size="lg">
+        <Button type="submit" disabled={pending || disabled} size="lg">
             {pending ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -48,6 +48,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
     const formRef = useRef<HTMLFormElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
+    const [selectedCourse, setSelectedCourse] = useState<string>('');
     const [isDragging, setIsDragging] = useState(false);
     const { toast } = useToast();
 
@@ -61,6 +62,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
             if (state.success) {
                 formRef.current?.reset();
                 setFile(null);
+                setSelectedCourse('');
                 if (fileInputRef.current) {
                     fileInputRef.current.value = '';
                 }
@@ -87,6 +89,9 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
         e.stopPropagation();
         setIsDragging(false);
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            if (fileInputRef.current) {
+                fileInputRef.current.files = e.dataTransfer.files;
+            }
             setFile(e.dataTransfer.files[0]);
         }
     }, []);
@@ -120,7 +125,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                 <CardContent className="space-y-4">
                         <div className="space-y-2">
                         <Label htmlFor="courseId">Course</Label>
-                        <Select name="courseId" required>
+                        <Select name="courseId" required onValueChange={setSelectedCourse} value={selectedCourse}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select a course" />
                         </SelectTrigger>
@@ -151,6 +156,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                         <input
                             ref={fileInputRef}
                             type="file"
+                            name="file"
                             className="hidden"
                             onChange={handleFileChange}
                             accept=".pdf,.docx,.pptx,.doc"
@@ -179,7 +185,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
 
                 </CardContent>
             </Card>
-            <SubmitButton />
+            <SubmitButton disabled={!selectedCourse || !file} />
         </form>
     );
 }
