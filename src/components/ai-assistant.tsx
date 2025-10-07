@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState, useRef, useEffect, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { askAI } from '@/app/actions/ai';
 import type { Course } from '@/lib/types';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,7 @@ export default function AiAssistant({ course }: { course: Course }) {
     courseMaterial: `${course.title}: ${course.description}`,
   });
 
-  const [state, dispatch] = useFormState(askAiWithCourse, {
+  const [state, dispatch] = useActionState(askAiWithCourse, {
     answer: '',
     question: '',
   });
