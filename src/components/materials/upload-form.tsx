@@ -1,6 +1,5 @@
-
 'use client';
-import { useState, useRef, useCallback, FormEvent } from 'react';
+import { useState, useRef, useCallback, FormEvent, useTransition } from 'react';
 import { uploadMaterialAction } from '@/app/actions/materials';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +36,7 @@ function SubmitButton({ disabled, isPending }: { disabled: boolean, isPending: b
 }
 
 export default function UploadForm({ courses }: { courses: Course[] }) {
-    const [isPending, setIsPending] = useState(false);
+    const [isPending, startTransition] = useTransition();
     const formRef = useRef<HTMLFormElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
@@ -48,6 +47,8 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+
         if (!file || !selectedCourse || !title) {
             toast({
                 title: 'Error',
@@ -56,33 +57,29 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
             });
             return;
         }
-
-        setIsPending(true);
-
-        const formData = new FormData();
-        formData.append('courseId', selectedCourse);
-        formData.append('title', title);
+        
+        // We need to append the file manually as it's managed by state
         formData.append('file', file);
-        
-        const result = await uploadMaterialAction({ message: '', success: false}, formData);
 
-        toast({
-            title: result.success ? 'Success' : 'Error',
-            description: result.message,
-            variant: result.success ? 'default' : 'destructive',
-        });
+        startTransition(async () => {
+            const result = await uploadMaterialAction(formData);
 
-        if (result.success) {
-            formRef.current?.reset();
-            setFile(null);
-            setSelectedCourse('');
-            setTitle('');
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+            toast({
+                title: result.success ? 'Success' : 'Error',
+                description: result.message,
+                variant: result.success ? 'default' : 'destructive',
+            });
+
+            if (result.success) {
+                formRef.current?.reset();
+                setFile(null);
+                setSelectedCourse('');
+                setTitle('');
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
             }
-        }
-        
-        setIsPending(false);
+        });
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,6 +90,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
     
     const clearFile = (e: React.MouseEvent) => {
         e.stopPropagation();
+        e.preventDefault();
         setFile(null);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -104,9 +102,6 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
         e.stopPropagation();
         setIsDragging(false);
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            if (fileInputRef.current) {
-                fileInputRef.current.files = e.dataTransfer.files;
-            }
             setFile(e.dataTransfer.files[0]);
         }
     }, []);
@@ -165,7 +160,6 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                         <input
                             ref={fileInputRef}
                             type="file"
-                            name="file"
                             className="hidden"
                             onChange={handleFileChange}
                             accept=".pdf,.docx,.pptx,.doc"

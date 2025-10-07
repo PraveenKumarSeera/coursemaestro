@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { parseMaterial } from "@/ai/flows/ai-material-parser";
 import { addMaterial } from "@/lib/data";
 
@@ -9,7 +10,6 @@ type FormState = {
 };
 
 export async function uploadMaterialAction(
-  prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
   const courseId = formData.get('courseId') as string;
@@ -43,6 +43,9 @@ export async function uploadMaterialAction(
       fileType: file.type,
       content: textContent,
     });
+    
+    // In a real app with a persistent DB, you would likely revalidate a path here
+    // e.g., revalidatePath(`/courses/${courseId}?tab=materials`);
 
     return {
       message: 'Successfully uploaded and parsed material.',
