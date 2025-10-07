@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "course-intro-to-web-dev",
+      "description": "An introductory course on web development.",
+      "imageUrl": "https://picsum.photos/seed/1/600/400",
+      "imageHint": "programming computer"
+    },
+    {
+      "id": "course-advanced-react",
+      "description": "A course on advanced React concepts.",
+      "imageUrl": "https://picsum.photos/seed/2/600/400",
+      "imageHint": "abstract code"
+    },
+    {
+      "id": "course-data-structures",
+      "description": "A course on data structures and algorithms.",
+      "imageUrl": "https://picsum.photos/seed/3/600/400",
+      "imageHint": "network data"
+    },
+    {
+      "id": "course-ui-ux-design",
+      "description": "A course on UI/UX design principles.",
+      "imageUrl": "https://images.unsplash.com/photo-1723537814964-7e8382aaafb2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkZXNpZ24lMjBza2V0Y2h8ZW58MHx8fHwxNzU5NzY3NzUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "design sketch"
+    },
+    {
+      "id": "course-machine-learning",
+      "description": "An introduction to machine learning.",
+      "imageUrl": "https://images.unsplash.com/photo-1549925245-f20a1bac6454?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb2JvdCUyMGJyYWlufGVufDB8fHx8MTc1OTczMDQxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "robot brain"
+    },
+    {
+      "id": "course-digital-marketing",
+      "description": "A course on digital marketing strategies.",
+      "imageUrl": "https://images.unsplash.com/photo-1603145733146-ae562a55031e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzb2NpYWwlMjBtZWRpYXxlbnwwfHx8fDE3NTk3Njc1ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "social media"
+    }
+  ]
 }
