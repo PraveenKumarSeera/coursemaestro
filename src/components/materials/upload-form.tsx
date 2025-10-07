@@ -1,7 +1,6 @@
 
 'use client';
-import { useState, useActionState, useRef, useCallback, useEffect } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useState, useRef, useCallback, FormEvent } from 'react';
 import { uploadMaterialAction } from '@/app/actions/materials';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,11 +18,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-function SubmitButton({ disabled }: { disabled: boolean }) {
-    const { pending } = useFormStatus();
+function SubmitButton({ disabled, isPending }: { disabled: boolean, isPending: boolean }) {
     return (
-        <Button type="submit" disabled={pending || disabled} size="lg">
-            {pending ? (
+        <Button type="submit" disabled={isPending || disabled} size="lg">
+            {isPending ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Uploading...
@@ -38,37 +36,54 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
     );
 }
 
-const initialState = {
-    message: '',
-    success: false,
-};
-
 export default function UploadForm({ courses }: { courses: Course[] }) {
-    const [state, formAction] = useActionState(uploadMaterialAction, initialState);
+    const [isPending, setIsPending] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
     const [selectedCourse, setSelectedCourse] = useState<string>('');
+    const [title, setTitle] = useState('');
     const [isDragging, setIsDragging] = useState(false);
     const { toast } = useToast();
 
-    useEffect(() => {
-        if(state.message) {
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!file || !selectedCourse || !title) {
             toast({
-                title: state.success ? 'Success' : 'Error',
-                description: state.message,
-                variant: state.success ? 'default' : 'destructive',
+                title: 'Error',
+                description: 'Please fill out all fields and select a file.',
+                variant: 'destructive',
             });
-            if (state.success) {
-                formRef.current?.reset();
-                setFile(null);
-                setSelectedCourse('');
-                if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                }
+            return;
+        }
+
+        setIsPending(true);
+
+        const formData = new FormData();
+        formData.append('courseId', selectedCourse);
+        formData.append('title', title);
+        formData.append('file', file);
+        
+        const result = await uploadMaterialAction({ message: '', success: false}, formData);
+
+        toast({
+            title: result.success ? 'Success' : 'Error',
+            description: result.message,
+            variant: result.success ? 'default' : 'destructive',
+        });
+
+        if (result.success) {
+            formRef.current?.reset();
+            setFile(null);
+            setSelectedCourse('');
+            setTitle('');
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
             }
         }
-    }, [state, toast]);
+        
+        setIsPending(false);
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -108,15 +123,9 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
         setIsDragging(false);
     }, []);
     
-    const formActionWithFile = (formData: FormData) => {
-        if (file) {
-            formData.append('file', file);
-        }
-        formAction(formData);
-    }
 
     return (
-        <form ref={formRef} action={formActionWithFile} id="upload-form" className="space-y-4 max-w-2xl">
+        <form ref={formRef} onSubmit={handleSubmit} id="upload-form" className="space-y-4 max-w-2xl">
             <Card>
                 <CardHeader>
                     <CardTitle>Material Details</CardTitle>
@@ -140,7 +149,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                     </div>
                         <div className="space-y-2">
                         <Label htmlFor="title">Material Title</Label>
-                        <Input id="title" name="title" required placeholder="e.g., Chapter 1: Introduction" />
+                        <Input id="title" name="title" required placeholder="e.g., Chapter 1: Introduction" value={title} onChange={(e) => setTitle(e.target.value)} />
                     </div>
                     <div
                         className={cn(
@@ -185,7 +194,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
 
                 </CardContent>
             </Card>
-            <SubmitButton disabled={!selectedCourse || !file} />
+            <SubmitButton isPending={isPending} disabled={!selectedCourse || !file || !title} />
         </form>
     );
 }
