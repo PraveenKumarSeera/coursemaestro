@@ -7,19 +7,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
-
-export const AiStudyAssistantInputSchema = z.object({
-  courseMaterial: z
-    .string()
-    .describe('The course material to be used as context for answering questions.'),
-  studentQuestion: z.string().describe('The question from the student about the course material.'),
-});
-export type AiStudyAssistantInput = z.infer<typeof AiStudyAssistantInputSchema>;
-
-export const AiStudyAssistantOutputSchema = z.object({
-  answer: z.string().describe('The answer to the student question, based on the course material.'),
-});
-export type AiStudyAssistantOutput = z.infer<typeof AiStudyAssistantOutputSchema>;
+import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/app/actions/ai';
+import { AiStudyAssistantInputSchema, AiStudyAssistantOutputSchema } from '@/app/actions/ai';
 
 
 export async function aiStudyAssistant(input: AiStudyAssistantInput): Promise<AiStudyAssistantOutput> {
@@ -44,7 +33,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-export const aiStudyAssistantFlow = ai.defineFlow(
+const aiStudyAssistantFlow = ai.defineFlow(
   {
     name: 'aiStudyAssistantFlow',
     inputSchema: AiStudyAssistantInputSchema,

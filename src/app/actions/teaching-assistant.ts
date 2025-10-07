@@ -1,10 +1,20 @@
 
 'use server';
 
-import { runTeachingAssistant, TeachingAssistantInputSchema } from "@/ai/flows/ai-teaching-assistant";
-import type { TeachingAssistantInput, TeachingAssistantOutput } from "@/ai/flows/ai-teaching-assistant";
+import { runTeachingAssistant } from "@/ai/flows/ai-teaching-assistant";
+import { z } from 'zod';
 
-export type { TeachingAssistantInput, TeachingAssistantOutput };
+export const TeachingAssistantInputSchema = z.object({
+  submissionText: z.string().describe('The text of the student submission to be analyzed.'),
+  task: z.enum(['summarize', 'grammarCheck']).describe("The specific task to perform: 'summarize' or 'grammarCheck'."),
+});
+export type TeachingAssistantInput = z.infer<typeof TeachingAssistantInputSchema>;
+
+export const TeachingAssistantOutputSchema = z.object({
+  analysis: z.string().describe('The result of the AI analysis, formatted as a markdown string.'),
+});
+export type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
+
 
 type ActionState = {
   analysis: string | null;

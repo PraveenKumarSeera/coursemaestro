@@ -6,9 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById, getStudentGrades, findUserById, createNotification } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { generateMotivationalMessage } from '@/ai/flows/ai-motivation-bot';
-import type { MotivationBotInput, MotivationBotOutput } from '@/ai/flows/ai-motivation-bot';
-
-export type { MotivationBotInput, MotivationBotOutput };
 
 const createAssignmentSchema = z.object({
   courseId: z.string(),

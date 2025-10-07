@@ -6,18 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-export const TeachingAssistantInputSchema = z.object({
-  submissionText: z.string().describe('The text of the student submission to be analyzed.'),
-  task: z.enum(['summarize', 'grammarCheck']).describe("The specific task to perform: 'summarize' or 'grammarCheck'."),
-});
-export type TeachingAssistantInput = z.infer<typeof TeachingAssistantInputSchema>;
-
-export const TeachingAssistantOutputSchema = z.object({
-  analysis: z.string().describe('The result of the AI analysis, formatted as a markdown string.'),
-});
-export type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
+import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type TeachingAssistantInput, type TeachingAssistantOutput } from '@/app/actions/teaching-assistant';
 
 
 export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
