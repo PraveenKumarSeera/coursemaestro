@@ -30,7 +30,7 @@ export async function findUserById(id: string): Promise<User | undefined> {
 }
 
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
-  const newUser: User = { ...data, id: String(users.length + 1) };
+  const newUser: User = { ...data, id: String(Date.now()) };
   users.push(newUser);
   return newUser;
 }
