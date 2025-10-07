@@ -1,10 +1,12 @@
 
+
 'use server';
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { createAssignment, createSubmission, gradeSubmission } from '@/lib/data';
+import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById } from '@/lib/data';
 import { getSession } from '@/lib/session';
+import { createNotification } from '@/lib/data';
 
 const createAssignmentSchema = z.object({
   courseId: z.string(),
@@ -36,11 +38,23 @@ export async function createAssignmentAction(
   }
   
   try {
-    await createAssignment({
+    const newAssignment = await createAssignment({
         ...validatedFields.data,
         dueDate: new Date(validatedFields.data.dueDate).toISOString(),
     });
+
+    // Create notifications for all enrolled students
+    const students = await getStudentsByCourse(newAssignment.courseId);
+    for (const student of students) {
+        await createNotification({
+            userId: student.id,
+            message: `New assignment posted: "${newAssignment.title}"`,
+            link: `/courses/${newAssignment.courseId}?tab=assignments`,
+        });
+    }
+
     revalidatePath('/assignments');
+    revalidatePath(`/courses/${newAssignment.courseId}`);
     return { message: 'Assignment created successfully.', success: true };
   } catch (error) {
     return { message: 'Failed to create assignment.', success: false };
@@ -68,10 +82,22 @@ export async function submitAssignmentAction(prevState: FormState, formData: For
     }
 
     try {
-        await createSubmission({
+        const submission = await createSubmission({
             ...validatedFields.data,
             studentId: user.id,
         });
+
+        // Create notification for the teacher
+        const course = await getCourseById(submission.courseId);
+        const assignment = await getAssignmentById(submission.assignmentId);
+        if (course && assignment) {
+            await createNotification({
+                userId: course.teacherId,
+                message: `${user.name} submitted "${assignment.title}"`,
+                link: `/assignments/${submission.assignmentId}`,
+            });
+        }
+
         revalidatePath(`/courses/${validatedFields.data.courseId}`);
         return { message: 'Assignment submitted successfully!', success: true };
     } catch (e) {
@@ -101,7 +127,21 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
             validatedFields.data.grade,
             validatedFields.data.feedback || ''
         );
+
+        // Create notification for the student
+        const submission = await getSubmissionById(validatedFields.data.submissionId);
+        const assignment = await getAssignmentById(validatedFields.data.assignmentId);
+
+        if (submission && assignment) {
+            await createNotification({
+                userId: submission.studentId,
+                message: `Your submission for "${assignment.title}" has been graded.`,
+                link: '/my-grades',
+            });
+        }
+
         revalidatePath(`/assignments/${validatedFields.data.assignmentId}`);
+        revalidatePath('/my-grades');
         return { message: 'Grade saved successfully.', success: true };
     } catch (e) {
         return { message: 'Failed to save grade.', success: false };

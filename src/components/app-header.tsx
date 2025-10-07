@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import {
   DropdownMenu,
@@ -14,18 +15,22 @@ import type { User } from '@/lib/types';
 import { logout } from '@/app/actions/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AppSidebar from './app-sidebar';
+import NotificationBell from './notifications/notification-bell';
+import { getNotificationsForUser } from '@/lib/data';
 
 type AppHeaderProps = {
   user: User;
 };
 
-export default function AppHeader({ user }: AppHeaderProps) {
+export default async function AppHeader({ user }: AppHeaderProps) {
   const getInitials = (name: string) => {
     return name
       .split(' ')
       .map((n) => n[0])
       .join('');
   };
+
+  const notifications = await getNotificationsForUser(user.id);
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
@@ -47,6 +52,8 @@ export default function AppHeader({ user }: AppHeaderProps) {
                 <span className="font-headline">CourseMaestro</span>
             </Link>
         </div>
+
+      <NotificationBell notifications={notifications} />
         
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

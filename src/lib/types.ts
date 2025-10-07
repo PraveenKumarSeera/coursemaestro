@@ -68,3 +68,12 @@ export type Material = {
     content: string; // The parsed text content
     createdAt: string;
 };
+
+export type Notification = {
+  id: string;
+  userId: string;
+  message: string;
+  link: string;
+  isRead: boolean;
+  createdAt: string;
+};

@@ -1,7 +1,7 @@
 
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification } from './types';
 import { format } from 'date-fns';
 
 // In-memory "database"
@@ -44,6 +44,7 @@ let discussionPosts: DiscussionPost[] = [
 
 let materials: Material[] = [];
 
+let notifications: Notification[] = [];
 
 // --- User Functions ---
 export async function findUserByEmail(email: string): Promise<User | undefined> {
@@ -228,6 +229,10 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
 
 
 // --- Submission Functions ---
+export async function getSubmissionById(id: string): Promise<Submission | undefined> {
+    return submissions.find(s => s.id === id);
+}
+
 export async function getStudentSubmission(studentId: string, assignmentId: string): Promise<Submission | undefined> {
     return submissions.find(s => s.studentId === studentId && s.assignmentId === assignmentId);
 }
@@ -322,4 +327,29 @@ export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Pro
 
 export async function getMaterialsByCourse(courseId: string): Promise<Material[]> {
     return materials.filter(m => m.courseId === courseId);
+}
+
+// --- Notification Functions ---
+export async function createNotification(data: Omit<Notification, 'id' | 'isRead' | 'createdAt'>): Promise<Notification> {
+    const newNotification: Notification = {
+        ...data,
+        id: String(Date.now()),
+        isRead: false,
+        createdAt: new Date().toISOString(),
+    };
+    notifications.unshift(newNotification); // Add to the beginning of the array
+    return newNotification;
+}
+
+export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
+    return notifications.filter(n => n.userId === userId);
+}
+
+export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
+    const notificationIndex = notifications.findIndex(n => n.id === notificationId);
+    if (notificationIndex > -1) {
+        notifications[notificationIndex].isRead = true;
+        return true;
+    }
+    return false;
 }

@@ -1,7 +1,10 @@
+
 import AppHeader from '@/components/app-header';
 import AppSidebar from '@/components/app-sidebar';
 import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
+
+export const revalidate = 0;
 
 export default async function AuthenticatedLayout({
   children,
