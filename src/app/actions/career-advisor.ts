@@ -23,8 +23,15 @@ export async function suggestCareersAction(
     };
   }
 
+  // Map GradedSubmission to the format expected by the AI
+  const aiSubmissions = gradedSubmissions.map(sub => ({
+    course: { title: sub.course.title },
+    assignment: { title: sub.assignment.title },
+    grade: sub.grade,
+  }));
+
   try {
-    const result = await suggestCareers({ gradedSubmissions });
+    const result = await suggestCareers({ gradedSubmissions: aiSubmissions });
     return {
       suggestions: result.suggestions,
       message: 'Analysis successful.',

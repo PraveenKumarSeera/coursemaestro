@@ -8,16 +8,19 @@
 import { ai } from '@/ai/genkit';
 import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/lib/ai-types';
 
-
 export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {
   return resumeBuilderFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'resumeBuilderPrompt',
-  input: { schema: ResumeBuilderInputSchema },
-  output: { schema: ResumeBuilderOutputSchema },
-  prompt: `You are an expert resume writer helping a student create a professional resume.
+const resumeBuilderFlow = ai.defineFlow(
+  {
+    name: 'resumeBuilderFlow',
+    inputSchema: ResumeBuilderInputSchema,
+    outputSchema: ResumeBuilderOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+        prompt: `You are an expert resume writer helping a student create a professional resume.
   
 Generate a resume in Markdown format based on the student's information and academic performance.
 
@@ -29,26 +32,21 @@ The resume should include the following sections:
 5.  **Projects / Coursework:** Frame their best-performing assignments as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title. Only highlight assignments where the grade was 85% or higher.
 
 Student Information:
-- Name: {{studentName}}
-- Email: {{studentEmail}}
+- Name: ${input.studentName}
+- Email: ${input.studentEmail}
 
 Academic Performance:
 \`\`\`json
-{{{jsonStringify gradedSubmissions}}}
+${JSON.stringify(input.gradedSubmissions)}
 \`\`\`
 
 Generate the full resume as a single Markdown string.
 `,
-});
+        output: {
+            schema: ResumeBuilderOutputSchema
+        }
+    });
 
-export const resumeBuilderFlow = ai.defineFlow(
-  {
-    name: 'resumeBuilderFlow',
-    inputSchema: ResumeBuilderInputSchema,
-    outputSchema: ResumeBuilderOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
     if (!output) {
       throw new Error('Failed to generate resume.');
     }

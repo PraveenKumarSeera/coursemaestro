@@ -12,11 +12,15 @@ export async function suggestCareers(input: CareerAdvisorInput): Promise<CareerA
   return careerAdvisorFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'careerAdvisorPrompt',
-  input: { schema: CareerAdvisorInputSchema },
-  output: { schema: CareerAdvisorOutputSchema },
-  prompt: `You are an expert career advisor for students.
+const careerAdvisorFlow = ai.defineFlow(
+  {
+    name: 'careerAdvisorFlow',
+    inputSchema: CareerAdvisorInputSchema,
+    outputSchema: CareerAdvisorOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+        prompt: `You are an expert career advisor for students.
   
 Analyze the student's performance based on their grades in different courses.
 Based on their strengths, suggest 3-5 potential career paths.
@@ -28,21 +32,14 @@ For each career path, provide:
 
 Student's Graded Assignments:
 \`\`\`json
-{{{jsonStringify gradedSubmissions}}}
+${JSON.stringify(input.gradedSubmissions)}
 \`\`\`
-
-Generate the suggestions in the specified JSON format.
 `,
-});
+        output: {
+            schema: CareerAdvisorOutputSchema,
+        },
+    });
 
-const careerAdvisorFlow = ai.defineFlow(
-  {
-    name: 'careerAdvisorFlow',
-    inputSchema: CareerAdvisorInputSchema,
-    outputSchema: CareerAdvisorOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
     if (!output) {
       throw new Error('Failed to generate career suggestions.');
     }

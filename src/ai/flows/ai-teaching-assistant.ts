@@ -13,26 +13,6 @@ export async function runTeachingAssistant(input: TeachingAssistantInput): Promi
   return teachingAssistantFlow(input);
 }
 
-const grammarCheckPrompt = `You are an expert grammar and style checker for a teaching assistant.
-Analyze the following student submission for grammatical errors, spelling mistakes, and clarity.
-Provide a bulleted list of suggested improvements. If there are no errors, state that the submission is well-written.
-Keep the feedback constructive and encouraging.
-
-Student Submission:
-'''
-{{submissionText}}
-'''
-`;
-
-const summarizePrompt = `You are an expert summarizer for a teaching assistant.
-Provide a concise, 2-3 sentence summary of the key points in the following student submission.
-
-Student Submission:
-'''
-{{submissionText}}
-'''
-`;
-
 const teachingAssistantFlow = ai.defineFlow(
   {
     name: 'teachingAssistantFlow',
@@ -40,10 +20,23 @@ const teachingAssistantFlow = ai.defineFlow(
     outputSchema: TeachingAssistantOutputSchema,
   },
   async ({ submissionText, task }) => {
-    const promptText = task === 'grammarCheck' ? grammarCheckPrompt : summarizePrompt;
+    const promptText = task === 'grammarCheck' 
+        ? `You are an expert grammar and style checker for a teaching assistant.
+Analyze the following student submission for grammatical errors, spelling mistakes, and clarity.
+Provide a bulleted list of suggested improvements. If there are no errors, state that the submission is well-written.
+Keep the feedback constructive and encouraging.`
+        : `You are an expert summarizer for a teaching assistant.
+Provide a concise, 2-3 sentence summary of the key points in the following student submission.`;
+
+    const fullPrompt = `${promptText}
+
+Student Submission:
+'''
+${submissionText}
+'''`;
 
     const { output } = await ai.generate({
-      prompt: promptText.replace('{{submissionText}}', submissionText),
+      prompt: fullPrompt,
       output: {
         schema: TeachingAssistantOutputSchema,
       }

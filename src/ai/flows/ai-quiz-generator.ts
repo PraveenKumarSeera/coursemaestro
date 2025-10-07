@@ -6,20 +6,21 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema } from '@/lib/ai-types';
-import type { z } from 'zod';
+import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema, type QuizGeneratorInput, type QuizGeneratorOutput } from '@/lib/ai-types';
 
-export async function generateQuizAndFlashcards(
-  input: z.infer<typeof QuizGeneratorInputSchema>
-): Promise<z.infer<typeof QuizGeneratorOutputSchema>> {
+export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Promise<QuizGeneratorOutput> {
   return quizGeneratorFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'quizGeneratorPrompt',
-  input: { schema: QuizGeneratorInputSchema },
-  output: { schema: QuizGeneratorOutputSchema },
-  prompt: `You are an AI assistant that creates educational materials for teachers.
+const quizGeneratorFlow = ai.defineFlow(
+  {
+    name: 'quizGeneratorFlow',
+    inputSchema: QuizGeneratorInputSchema,
+    outputSchema: QuizGeneratorOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+        prompt: `You are an AI assistant that creates educational materials for teachers.
   Based on the provided course material, generate a quiz and a set of flashcards.
 
   The quiz should contain 5-7 multiple-choice questions that test the key concepts from the material.
@@ -29,21 +30,16 @@ const prompt = ai.definePrompt({
 
   Course Material:
   '''
-  {{courseMaterial}}
+  ${input.courseMaterial}
   '''
 
   Generate the quiz and flashcards in the specified JSON format.
   `,
-});
+        output: {
+            schema: QuizGeneratorOutputSchema,
+        },
+    });
 
-export const quizGeneratorFlow = ai.defineFlow(
-  {
-    name: 'quizGeneratorFlow',
-    inputSchema: QuizGeneratorInputSchema,
-    outputSchema: QuizGeneratorOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
     if (!output) {
         throw new Error("Failed to generate quiz content.");
     }

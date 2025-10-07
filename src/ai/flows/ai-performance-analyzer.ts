@@ -12,11 +12,16 @@ export async function analyzePerformance(input: PerformanceAnalyzerInput): Promi
   return performanceAnalyzerFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'performanceAnalyzerPrompt',
-  input: { schema: PerformanceAnalyzerInputSchema },
-  output: { schema: PerformanceAnalyzerOutputSchema },
-  prompt: `You are an expert academic advisor bot named "Maestro". Your role is to analyze a student's performance based on their grades and provide encouraging, actionable feedback. Attendance data is not available.
+const performanceAnalyzerFlow = ai.defineFlow(
+  {
+    name: 'performanceAnalyzerFlow',
+    inputSchema: PerformanceAnalyzerInputSchema,
+    outputSchema: PerformanceAnalyzerOutputSchema,
+  },
+  async (input) => {
+    
+    const { output } = await ai.generate({
+        prompt: `You are an expert academic advisor bot named "Maestro". Your role is to analyze a student's performance based on their grades and provide encouraging, actionable feedback. Attendance data is not available.
 
 Analyze the following list of graded assignments. Identify patterns, strengths, and areas for improvement.
 
@@ -30,22 +35,12 @@ Keep the tone positive and supportive.
 
 Graded Assignments:
 \`\`\`json
-{{{jsonStringify gradedSubmissions}}}
+${JSON.stringify(input.gradedSubmissions)}
 \`\`\`
 `,
-});
-
-
-export const performanceAnalyzerFlow = ai.defineFlow(
-  {
-    name: 'performanceAnalyzerFlow',
-    inputSchema: PerformanceAnalyzerInputSchema,
-    outputSchema: PerformanceAnalyzerOutputSchema,
-  },
-  async (input) => {
-    
-    const { output } = await prompt({
-        gradedSubmissions: input.gradedSubmissions,
+        output: {
+            schema: PerformanceAnalyzerOutputSchema,
+        }
     });
 
     if (!output) {

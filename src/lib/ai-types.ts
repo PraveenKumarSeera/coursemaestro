@@ -14,6 +14,8 @@ const GradedSubmissionSchema = z.object({
   }),
   grade: z.number().nullable(),
 });
+export type GradedSubmissionForAI = z.infer<typeof GradedSubmissionSchema>;
+
 
 // AI Study Assistant
 export const AiStudyAssistantInputSchema = z.object({
@@ -81,11 +83,14 @@ export type Quiz = z.infer<typeof QuizSchema>;
 export const QuizGeneratorInputSchema = z.object({
     courseMaterial: z.string().min(50).describe('The course notes or material to generate a quiz from.'),
 });
+export type QuizGeneratorInput = z.infer<typeof QuizGeneratorInputSchema>;
+
 
 export const QuizGeneratorOutputSchema = z.object({
   quiz: QuizSchema,
   flashcards: z.array(FlashcardSchema).describe('An array of flashcards with key terms.'),
 });
+export type QuizGeneratorOutput = z.infer<typeof QuizGeneratorOutputSchema>;
 
 
 // Resume Builder

@@ -23,8 +23,15 @@ export async function analyzePerformanceAction(
     };
   }
 
+  // Map GradedSubmission to the format expected by the AI
+  const aiSubmissions = gradedSubmissions.map(sub => ({
+    course: { title: sub.course.title },
+    assignment: { title: sub.assignment.title },
+    grade: sub.grade,
+  }));
+
   try {
-    const result = await analyzePerformance({ gradedSubmissions });
+    const result = await analyzePerformance({ gradedSubmissions: aiSubmissions });
     return {
       analysis: result.analysis,
       message: 'Analysis successful.',
