@@ -63,8 +63,27 @@
       "courseId": "1759821872336"
     }
   ],
-  "assignments": [],
-  "submissions": [],
+  "assignments": [
+    {
+      "courseId": "1759821872336",
+      "title": "dbms",
+      "description": "see the data",
+      "dueDate": "2025-10-08T00:00:00.000Z",
+      "id": "1759826751201"
+    }
+  ],
+  "submissions": [
+    {
+      "assignmentId": "1759826751201",
+      "courseId": "1759821872336",
+      "content": "completed sirr",
+      "studentId": "1759816290832",
+      "id": "1759826852014",
+      "submittedAt": "2025-10-07T08:47:32.014Z",
+      "grade": null,
+      "feedback": null
+    }
+  ],
   "discussionThreads": [],
   "discussionPosts": [],
   "materials": [
@@ -78,11 +97,27 @@
   ],
   "notifications": [
     {
+      "userId": "1759816272542",
+      "message": "Praveen Kumar submitted \"dbms\"",
+      "link": "/assignments/1759826751201",
+      "id": "1759826852056",
+      "isRead": false,
+      "createdAt": "2025-10-07T08:47:32.056Z"
+    },
+    {
+      "userId": "1759816290832",
+      "message": "New assignment posted: \"dbms\"",
+      "link": "/courses/1759821872336?tab=assignments",
+      "id": "1759826751211",
+      "isRead": true,
+      "createdAt": "2025-10-07T08:45:51.211Z"
+    },
+    {
       "userId": "1759816290832",
       "message": "New assignment posted: \"see\"",
       "link": "/courses/1759821872336?tab=assignments",
       "id": "1759825698561",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2025-10-07T08:28:18.561Z"
     },
     {

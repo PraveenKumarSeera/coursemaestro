@@ -9,16 +9,16 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const TeachingAssistantInputSchema = z.object({
+const TeachingAssistantInputSchema = z.object({
   submissionText: z.string().describe('The text of the student submission to be analyzed.'),
   task: z.enum(['summarize', 'grammarCheck']).describe("The specific task to perform: 'summarize' or 'grammarCheck'."),
 });
-export type TeachingAssistantInput = z.infer<typeof TeachingAssistantInputSchema>;
+type TeachingAssistantInput = z.infer<typeof TeachingAssistantInputSchema>;
 
-export const TeachingAssistantOutputSchema = z.object({
+const TeachingAssistantOutputSchema = z.object({
   analysis: z.string().describe('The result of the AI analysis, formatted as a markdown string.'),
 });
-export type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
+type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
 
 export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
   return teachingAssistantFlow(input);
@@ -44,7 +44,7 @@ Student Submission:
 '''
 `;
 
-export const teachingAssistantFlow = ai.defineFlow(
+const teachingAssistantFlow = ai.defineFlow(
   {
     name: 'teachingAssistantFlow',
     inputSchema: TeachingAssistantInputSchema,
