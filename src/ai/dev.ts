@@ -9,4 +9,3 @@ import '@/ai/flows/ai-material-parser.ts';
 import '@/ai/flows/ai-resume-builder.ts';
 import '@/ai/flows/ai-teaching-assistant.ts';
 import '@/ai/flows/ai-motivation-bot.ts';
-import '@/ai/flows/ai-app-guide.ts';
