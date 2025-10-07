@@ -10,6 +10,7 @@ import {
   Sparkles,
   Users,
   FileText,
+  Briefcase,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -36,6 +37,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const studentRoutes = [
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
     { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
+    { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase },
   ];
   
   const navItems = user.role === 'teacher' 
@@ -65,7 +67,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
