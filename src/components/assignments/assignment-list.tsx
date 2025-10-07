@@ -91,4 +91,3 @@ export default function AssignmentList({ assignments, user, courseId }: Assignme
     </Card>
   );
 }
-
