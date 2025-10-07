@@ -6,9 +6,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema } from '@/app/actions/quiz-generator';
-
+import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema } from '@/lib/ai-types';
+import type { z } from 'zod';
 
 export async function generateQuizAndFlashcards(
   input: z.infer<typeof QuizGeneratorInputSchema>

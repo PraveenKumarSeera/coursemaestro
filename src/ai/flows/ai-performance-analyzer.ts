@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { PerformanceAnalyzerInputSchema, PerformanceAnalyzerOutputSchema, type PerformanceAnalyzerInput, type PerformanceAnalyzerOutput } from '@/app/actions/performance-analyzer';
+import { PerformanceAnalyzerInputSchema, PerformanceAnalyzerOutputSchema, type PerformanceAnalyzerInput, type PerformanceAnalyzerOutput } from '@/lib/ai-types';
 
 export async function analyzePerformance(input: PerformanceAnalyzerInput): Promise<PerformanceAnalyzerOutput> {
   return performanceAnalyzerFlow(input);

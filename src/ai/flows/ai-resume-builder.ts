@@ -6,7 +6,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/app/actions/resume-builder';
+import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/lib/ai-types';
+
 
 export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {
   return resumeBuilderFlow(input);

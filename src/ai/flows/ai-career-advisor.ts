@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema, type CareerAdvisorInput, type CareerAdvisorOutput } from '@/app/actions/career-advisor';
+import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema, type CareerAdvisorInput, type CareerAdvisorOutput } from '@/lib/ai-types';
 
 export async function suggestCareers(input: CareerAdvisorInput): Promise<CareerAdvisorOutput> {
   return careerAdvisorFlow(input);

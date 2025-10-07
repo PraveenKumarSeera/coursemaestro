@@ -6,10 +6,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'zod';
-import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/app/actions/ai';
-import { AiStudyAssistantInputSchema, AiStudyAssistantOutputSchema } from '@/app/actions/ai';
-
+import { AiStudyAssistantInputSchema, AiStudyAssistantOutputSchema, type AiStudyAssistantInput, type AiStudyAssistantOutput } from '@/lib/ai-types';
 
 export async function aiStudyAssistant(input: AiStudyAssistantInput): Promise<AiStudyAssistantOutput> {
   return aiStudyAssistantFlow(input);
