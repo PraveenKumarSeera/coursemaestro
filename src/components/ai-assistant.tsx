@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useActionState } from 'react';
@@ -35,7 +36,7 @@ export default function AiAssistant({ course }: { course: Course }) {
 
   const courseMaterial = `${course.title}: ${course.description}`;
   
-  const [state, dispatch] = useActionState(askAI.bind(null, courseMaterial), {
+  const [state, dispatch] = useActionState(askAI, {
     answer: '',
     question: '',
   });
@@ -110,6 +111,7 @@ export default function AiAssistant({ course }: { course: Course }) {
       </CardContent>
       <CardFooter>
         <form ref={formRef} action={dispatch} className="flex w-full items-center space-x-2">
+          <input type="hidden" name="courseMaterial" value={courseMaterial} />
           <Input
             name="studentQuestion"
             placeholder="Ask a question about the course..."

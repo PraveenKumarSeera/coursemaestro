@@ -9,17 +9,24 @@ type AiState = {
 };
 
 export async function askAI(
-  courseMaterial: string,
   prevState: AiState,
   formData: FormData
 ): Promise<AiState> {
   const studentQuestion = formData.get('studentQuestion') as string;
+  const courseMaterial = formData.get('courseMaterial') as string;
 
   if (!studentQuestion) {
     return {
       answer: 'Please enter a question.',
       question: '',
     };
+  }
+  
+  if (!courseMaterial) {
+    return {
+        answer: 'Error: Course context is missing.',
+        question: studentQuestion,
+    }
   }
 
   try {
