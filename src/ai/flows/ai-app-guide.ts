@@ -75,6 +75,13 @@ User's current question: {{question}}
 Answer:
 `;
 
+const appGuidePrompt = ai.definePrompt({
+    name: 'appGuidePrompt',
+    prompt: promptTemplate,
+    input: { schema: z.object({ question: z.string(), formattedHistory: z.string() }) },
+    output: { schema: AppGuideOutputSchema },
+});
+
 
 const appGuideFlow = ai.defineFlow(
   {
@@ -93,14 +100,7 @@ const appGuideFlow = ai.defineFlow(
         })
         .join('\n');
     
-    const prompt = ai.definePrompt({
-        name: 'appGuidePrompt',
-        prompt: promptTemplate,
-        input: { schema: z.object({ question: z.string(), formattedHistory: z.string() }) },
-        output: { schema: AppGuideOutputSchema },
-    });
-
-    const { output } = await prompt({
+    const { output } = await appGuidePrompt({
         question: input.question,
         formattedHistory,
     });

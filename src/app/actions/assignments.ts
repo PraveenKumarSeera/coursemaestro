@@ -131,7 +131,7 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
         
         // --- Motivation Bot Logic ---
         const allGrades = await getStudentGrades(submission.studentId);
-        const previousGrades = allGrades.filter(s => s.id !== submissionId);
+        const previousGrades = allGrades.filter(s => s.assignmentId !== submission.assignmentId);
 
         if (previousGrades.length > 0) {
             const total = previousGrades.reduce((acc, sub) => acc + (sub.grade || 0), 0);

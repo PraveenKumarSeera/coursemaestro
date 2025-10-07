@@ -52,6 +52,7 @@ const teachingAssistantFlow = ai.defineFlow(
     const promptText = task === 'grammarCheck' ? grammarCheckPrompt : summarizePrompt;
 
     const { output } = await ai.generate({
+      model: 'googleai/gemini-2.5-flash',
       prompt: promptText.replace('{{submissionText}}', submissionText),
       output: {
         schema: TeachingAssistantOutputSchema,
