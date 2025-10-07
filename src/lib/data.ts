@@ -1,7 +1,7 @@
 
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance } from './types';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -20,6 +20,7 @@ type Db = {
     discussionPosts: DiscussionPost[];
     materials: Material[];
     notifications: Notification[];
+    attendance: Attendance[];
 }
 
 const defaultDb: Db = {
@@ -35,7 +36,8 @@ const defaultDb: Db = {
     discussionThreads: [],
     discussionPosts: [],
     materials: [],
-    notifications: []
+    notifications: [],
+    attendance: []
 };
 
 async function readDb(): Promise<Db> {
@@ -409,4 +411,47 @@ export async function getStudentRankings(): Promise<{ user: User, averageGrade: 
         }
         return b.assignmentsCompleted - a.assignmentsCompleted;
     });
+}
+
+// --- Attendance Functions ---
+export async function markAttendance(studentId: string, courseId: string): Promise<Attendance | null> {
+    const db = await readDb();
+    const today = new Date().toISOString().split('T')[0]; // Get YYYY-MM-DD
+    
+    const existingRecord = db.attendance.find(a => 
+        a.studentId === studentId && 
+        a.courseId === courseId && 
+        a.date === today
+    );
+
+    if (existingRecord) {
+        return null; // Already marked for today
+    }
+
+    const newAttendanceRecord: Attendance = {
+        id: String(Date.now()),
+        studentId,
+        courseId,
+        date: today,
+        isPresent: true,
+    };
+    db.attendance.push(newAttendanceRecord);
+    await writeDb(db);
+    return newAttendanceRecord;
+}
+
+export async function getAllAttendance(): Promise<(Attendance & { student: User, course: Course })[]> {
+    const db = await readDb();
+    
+    const attendanceWithDetails = await Promise.all(db.attendance.map(async (record) => {
+        const student = db.users.find(u => u.id === record.studentId);
+        const course = db.courses.find(c => c.id === record.courseId);
+
+        if (student && course) {
+            return { ...record, student, course };
+        }
+        return null; // or handle missing data appropriately
+    }));
+
+    return attendanceWithDetails.filter(Boolean).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()) as (Attendance & { student: User, course: Course })[];
 }

@@ -1,4 +1,5 @@
 
+
 import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse, getThreadsByCourse, isEnrolled, getMaterialsByCourse } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { notFound, redirect } from 'next/navigation';
@@ -6,14 +7,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, Trash, MessageSquare, FileText } from 'lucide-react';
+import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, MessageSquare, FileText } from 'lucide-react';
 import AiAssistant from '@/components/ai-assistant';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import AssignmentList from '@/components/assignments/assignment-list';
 import { Button } from '@/components/ui/button';
 import DeleteCourseButton from '@/components/courses/delete-course-button';
 import DiscussionList from '@/components/discussions/discussion-list';
 import MaterialList from '@/components/materials/material-list';
+import AttendanceTracker from '@/components/attendance/attendance-tracker';
 
 export default async function CourseDetailPage({
   params,
@@ -55,6 +57,7 @@ export default async function CourseDetailPage({
 
   return (
     <div className="space-y-6">
+      {user.role === 'student' && <AttendanceTracker courseId={course.id} />}
       <div className="relative h-64 w-full rounded-lg overflow-hidden">
         <Image
           src={course.imageUrl}

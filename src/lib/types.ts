@@ -9,7 +9,7 @@ export type User = {
 };
 
 export type Course = {
-  id: string;
+  id:string;
   title: string;
   description: string;
   duration: string; // e.g., "8 weeks"
@@ -76,4 +76,12 @@ export type Notification = {
   link: string;
   isRead: boolean;
   createdAt: string;
+};
+
+export type Attendance = {
+    id: string;
+    studentId: string;
+    courseId: string;
+    date: string; // YYYY-MM-DD
+    isPresent: boolean;
 };

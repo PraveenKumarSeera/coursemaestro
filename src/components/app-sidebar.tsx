@@ -15,6 +15,7 @@ import {
   UploadCloud,
   FileDown,
   Trophy,
+  CalendarCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -36,6 +37,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const teacherRoutes = [
     { href: '/students', label: 'My Students', icon: Users },
     { href: '/assignments', label: 'Assignments', icon: ClipboardList },
+    { href: '/attendance', label: 'Attendance', icon: CalendarCheck },
     { href: '/materials/upload', label: 'Upload Materials', icon: UploadCloud },
     { href: '/quiz-generator', label: 'Quiz Generator', icon: FileText },
   ];
@@ -74,7 +76,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
