@@ -28,7 +28,7 @@ For each career path, provide:
 
 Student's Graded Assignments:
 \`\`\`json
-{{{JSON.stringify gradedSubmissions}}}
+{{{JSON.stringify(gradedSubmissions)}}}
 \`\`\`
 `,
 });
