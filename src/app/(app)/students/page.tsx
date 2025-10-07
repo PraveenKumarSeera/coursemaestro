@@ -1,55 +1,32 @@
+
 import { getSession } from '@/lib/session';
-import { getTeacherCourses } from '@/lib/data';
+import { getTeacherCourses, getStudentsByCourse, findUserById } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { notFound } from 'next/navigation';
-import type { User, Course, Enrollment } from '@/lib/types';
+import type { User, Course } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-async function getStudentData(teacherId: string) {
+async function getTeacherStudents(teacherId: string) {
     const courses = await getTeacherCourses(teacherId);
-    const studentMap = new Map<string, { user: User, courses: Course[] }>();
+    const studentMap = new Map<string, { user: User, courses: string[] }>();
 
     for (const course of courses) {
-        // Assuming getStudentsByCourse is available and returns users for a course
-        const response = await fetch(`https://.../api/students?courseId=${course.id}`); // Placeholder
-        const students: User[] = (course.enrollments as any)
-          .map((e: Enrollment) => e.student)
-          .filter((s: User | undefined): s is User => !!s);
-
-
+        const students = await getStudentsByCourse(course.id);
         for (const student of students) {
             if (!studentMap.has(student.id)) {
                 studentMap.set(student.id, { user: student, courses: [] });
             }
-            studentMap.get(student.id)!.courses.push(course);
+            studentMap.get(student.id)!.courses.push(course.title);
         }
     }
-    return Array.from(studentMap.values());
-}
 
-// Dummy implementation since we don't have a live user fetch for enrollments
-async function getTeacherStudents(teacherId: string) {
-    const courses = await getTeacherCourses(teacherId);
-    const studentIds = new Set<string>();
-    const allStudents: User[] = [];
-    
-    // This is not efficient, but it's for demo data.
-    const enrollmentsResponse = await fetch('.../api/enrollments'); // placeholder
-    const allEnrollments: Enrollment[] = []; // In a real app, you'd fetch this.
-    
-    const studentResponse = await fetch('.../api/users'); // placeholder
-    const allUsers: User[] = [];
-
-    const courseIds = new Set(courses.map(c => c.id));
-    
-    // This is a placeholder for the logic that would exist in a real application
-    // to get all students for a teacher. The current data structure isn't optimized for it.
-    // For now, let's just return a static list for the UI.
-    return [
-        {id: '2', name: 'Bob Student', email: 'student@example.com', courses: courses.filter(c => c.id === '101' || c.id === '103').map(c => c.title)},
-        {id: '3', name: 'Charlie Student', email: 'charlie@example.com', courses: courses.filter(c => c.id === '101').map(c => c.title)},
-    ]
+    return Array.from(studentMap.values()).map(item => ({
+        id: item.user.id,
+        name: item.user.name,
+        email: item.user.email,
+        courses: item.courses,
+    }));
 }
 
 
