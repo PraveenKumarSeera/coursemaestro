@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -20,9 +21,10 @@ type StudentWithStats = {
 
 type StudentListProps = {
   students: StudentWithStats[];
+  currentFilter: string;
 };
 
-function FilterButton({ label, filterValue, currentFilter }: { label: string, filterValue: string, currentFilter: string | null }) {
+function FilterButton({ label, filterValue, currentFilter }: { label: string, filterValue: string, currentFilter: string }) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -42,7 +44,7 @@ function FilterButton({ label, filterValue, currentFilter }: { label: string, fi
         router.push(`${pathname}${query}`);
     };
     
-    const isActive = (currentFilter === null && filterValue === 'all') || currentFilter === filterValue;
+    const isActive = currentFilter === filterValue;
 
     return (
         <Button
@@ -61,9 +63,7 @@ const getGradeBadgeVariant = (grade: number) => {
     return 'outline';
 };
 
-export default function StudentList({ students }: StudentListProps) {
-    const searchParams = useSearchParams();
-    const currentFilter = searchParams.get('filter');
+export default function StudentList({ students, currentFilter }: StudentListProps) {
     
   return (
     <div className="space-y-4">

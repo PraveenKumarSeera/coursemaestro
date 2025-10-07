@@ -1,18 +1,10 @@
 
+
 import { getSession } from '@/lib/session';
 import { getTeacherStudents } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { notFound } from 'next/navigation';
-import type { User } from '@/lib/types';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Badge } from '@/components/ui/badge';
 import StudentList from '@/components/students/student-list';
-
-async function getStudentsWithPerformance(teacherId: string) {
-    const students = await getTeacherStudents(teacherId);
-    return students.sort((a, b) => b.averageGrade - a.averageGrade);
-}
 
 export default async function StudentsPage({ searchParams }: { searchParams?: { filter?: string } }) {
   const { user } = await getSession();
@@ -21,15 +13,16 @@ export default async function StudentsPage({ searchParams }: { searchParams?: { 
     notFound();
   }
 
-  const allStudents = await getStudentsWithPerformance(user.id);
+  const allStudents = await getTeacherStudents(user.id);
   const filter = searchParams?.filter;
 
   const filteredStudents = allStudents.filter(student => {
+    if (!filter || filter === 'all') return true;
     if (filter === 'high') return student.averageGrade >= 90;
     if (filter === 'average') return student.averageGrade >= 70 && student.averageGrade < 90;
     if (filter === 'at_risk') return student.averageGrade > 0 && student.averageGrade < 70;
     return true;
-  });
+  }).sort((a, b) => b.averageGrade - a.averageGrade);
 
   return (
     <div className="space-y-6">
@@ -43,7 +36,7 @@ export default async function StudentsPage({ searchParams }: { searchParams?: { 
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <StudentList students={filteredStudents} />
+          <StudentList students={filteredStudents} currentFilter={filter || 'all'}/>
         </CardContent>
       </Card>
     </div>
