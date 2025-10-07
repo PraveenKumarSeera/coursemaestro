@@ -1,4 +1,3 @@
-
 'use client';
 import type { Material } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
