@@ -13,6 +13,13 @@
       "password": "123456",
       "role": "student",
       "id": "1759816290832"
+    },
+    {
+      "name": "Praveen",
+      "email": "boyohe6541@dextrago.com",
+      "password": "123456",
+      "role": "teacher",
+      "id": "1759821661427"
     }
   ],
   "courses": [
@@ -39,15 +46,37 @@
       "teacherId": "1",
       "duration": "10 Weeks",
       "imageUrl": "https://picsum.photos/seed/3/600/400"
+    },
+    {
+      "title": "DBMS",
+      "description": "this is demo avoid this ",
+      "duration": "2weeks",
+      "id": "1759821872336",
+      "teacherId": "1759816272542",
+      "imageUrl": "https://images.unsplash.com/photo-1723537814964-7e8382aaafb2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkZXNpZ24lMjBza2V0Y2h8ZW58MHx8fHwxNzU5NzY3NzUwfDA&ixlib=rb-4.1.0&q=80&w=1080"
     }
   ],
-  "enrollments": [],
+  "enrollments": [
+    {
+      "id": "1759821886869",
+      "studentId": "1759816290832",
+      "courseId": "1759821872336"
+    }
+  ],
   "assignments": [],
   "submissions": [],
   "discussionThreads": [],
   "discussionPosts": [],
   "materials": [],
   "notifications": [],
-  "attendance": [],
+  "attendance": [
+    {
+      "id": "1759821891302",
+      "studentId": "1759816290832",
+      "courseId": "1759821872336",
+      "date": "2025-10-07",
+      "isPresent": true
+    }
+  ],
   "certificates": []
 }
