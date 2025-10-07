@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import PerformanceAnalyzer from '@/components/performance-analyzer';
+import type { GradedSubmission } from '@/lib/types';
+
 
 export default async function MyGradesPage() {
   const { user } = await getSession();
@@ -13,11 +16,14 @@ export default async function MyGradesPage() {
     notFound();
   }
 
-  const gradedSubmissions = await getStudentGrades(user.id);
+  const gradedSubmissions: GradedSubmission[] = await getStudentGrades(user.id);
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold font-headline">My Grades</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold font-headline">My Grades</h1>
+        {gradedSubmissions.length > 0 && <PerformanceAnalyzer gradedSubmissions={gradedSubmissions} />}
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>Graded Assignments</CardTitle>
@@ -59,4 +65,3 @@ export default async function MyGradesPage() {
     </div>
   );
 }
-
