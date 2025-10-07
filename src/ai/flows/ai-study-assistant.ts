@@ -3,27 +3,13 @@
 
 /**
  * @fileOverview This file defines the AI Study Assistant flow, which allows students to ask questions about course material.
- *
- * @exports aiStudyAssistant - A function that processes student questions and returns answers using an LLM.
- * @exports AiStudyAssistantInput - The input type for the aiStudyAssistant function.
- * @exports AiStudyAssistantOutput - The output type for the aiStudyAssistant function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
+import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/app/actions/ai';
+import { AiStudyAssistantInputSchema, AiStudyAssistantOutputSchema } from '@/app/actions/ai';
 
-const AiStudyAssistantInputSchema = z.object({
-  courseMaterial: z
-    .string()
-    .describe('The course material to be used as context for answering questions.'),
-  studentQuestion: z.string().describe('The question from the student about the course material.'),
-});
-export type AiStudyAssistantInput = z.infer<typeof AiStudyAssistantInputSchema>;
-
-const AiStudyAssistantOutputSchema = z.object({
-  answer: z.string().describe('The answer to the student question, based on the course material.'),
-});
-export type AiStudyAssistantOutput = z.infer<typeof AiStudyAssistantOutputSchema>;
 
 export async function aiStudyAssistant(input: AiStudyAssistantInput): Promise<AiStudyAssistantOutput> {
   return aiStudyAssistantFlow(input);

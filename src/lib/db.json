@@ -80,8 +80,8 @@
       "studentId": "1759816290832",
       "id": "1759826852014",
       "submittedAt": "2025-10-07T08:47:32.014Z",
-      "grade": null,
-      "feedback": null
+      "grade": 95,
+      "feedback": "nice "
     }
   ],
   "discussionThreads": [],
@@ -96,6 +96,14 @@
     }
   ],
   "notifications": [
+    {
+      "userId": "1759816290832",
+      "message": "Your submission for \"dbms\" has been graded.",
+      "link": "/my-grades",
+      "id": "1759826977030",
+      "isRead": true,
+      "createdAt": "2025-10-07T08:49:37.030Z"
+    },
     {
       "userId": "1759816272542",
       "message": "Praveen Kumar submitted \"dbms\"",

@@ -3,33 +3,12 @@
 /**
  * @fileOverview This file defines the AI Performance Analyzer flow.
  * It takes a student's graded assignments as input and provides an analysis and suggestions.
- *
- * @exports analyzePerformance - The main function to call the flow.
- * @exports PerformanceAnalyzerInput - The input type for the analyzePerformance function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const GradedSubmissionSchema = z.object({
-  course: z.object({
-    title: z.string(),
-  }),
-  assignment: z.object({
-    title: z.string(),
-  }),
-  grade: z.number().nullable(),
-});
-
-const PerformanceAnalyzerInputSchema = z.object({
-  gradedSubmissions: z.array(GradedSubmissionSchema).describe("An array of the student's graded assignments."),
-});
-
-export type PerformanceAnalyzerInput = z.infer<typeof PerformanceAnalyzerInputSchema>;
-
-const PerformanceAnalyzerOutputSchema = z.object({
-    analysis: z.string().describe('A detailed analysis of the student\'s performance, formatted as a markdown string. Include headings, bullet points, and bold text.'),
-});
+import type { PerformanceAnalyzerInput } from '@/app/actions/performance-analyzer';
+import { PerformanceAnalyzerInputSchema, PerformanceAnalyzerOutputSchema } from '@/app/actions/performance-analyzer';
 
 export async function analyzePerformance(input: PerformanceAnalyzerInput): Promise<z.infer<typeof PerformanceAnalyzerOutputSchema>> {
   return performanceAnalyzerFlow(input);

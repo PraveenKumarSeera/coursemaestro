@@ -3,43 +3,12 @@
 /**
  * @fileOverview This file defines the AI Quiz Generator flow.
  * It takes course material as input and generates a quiz and a set of flashcards.
- *
- * @exports generateQuizAndFlashcards - The main function to call the flow.
- * @exports Quiz - The type definition for the generated quiz.
- * @exports Flashcard - The type definition for a single flashcard.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema } from '@/app/actions/quiz-generator';
 
-const QuestionSchema = z.object({
-  question: z.string().describe('The quiz question.'),
-  options: z.array(z.string()).describe('An array of possible answers.'),
-  answer: z.string().describe('The correct answer from the options.'),
-  type: z.literal('multiple-choice').describe('The type of the question.'),
-});
-
-const FlashcardSchema = z.object({
-  term: z.string().describe('The term or concept for the flashcard.'),
-  definition: z.string().describe('The definition or explanation of the term.'),
-});
-export type Flashcard = z.infer<typeof FlashcardSchema>;
-
-
-const QuizSchema = z.object({
-  title: z.string().describe('A suitable title for the quiz based on the material.'),
-  questions: z.array(QuestionSchema).describe('An array of quiz questions.'),
-});
-export type Quiz = z.infer<typeof QuizSchema>;
-
-const QuizGeneratorInputSchema = z.object({
-    courseMaterial: z.string().min(50).describe('The course notes or material to generate a quiz from.'),
-});
-
-const QuizGeneratorOutputSchema = z.object({
-  quiz: QuizSchema,
-  flashcards: z.array(FlashcardSchema).describe('An array of flashcards with key terms.'),
-});
 
 export async function generateQuizAndFlashcards(
   input: z.infer<typeof QuizGeneratorInputSchema>

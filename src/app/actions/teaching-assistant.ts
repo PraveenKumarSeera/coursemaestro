@@ -4,12 +4,13 @@
 import { runTeachingAssistant } from "@/ai/flows/ai-teaching-assistant";
 import { z } from 'zod';
 
-const TeachingAssistantInputSchema = z.object({
+export const TeachingAssistantInputSchema = z.object({
   submissionText: z.string().describe('The text of the student submission to be analyzed.'),
   task: z.enum(['summarize', 'grammarCheck']).describe("The specific task to perform: 'summarize' or 'grammarCheck'."),
 });
+export type TeachingAssistantInput = z.infer<typeof TeachingAssistantInputSchema>;
 
-const TeachingAssistantOutputSchema = z.object({
+export const TeachingAssistantOutputSchema = z.object({
   analysis: z.string().describe('The result of the AI analysis, formatted as a markdown string.'),
 });
 export type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
