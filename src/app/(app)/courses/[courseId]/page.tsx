@@ -1,23 +1,26 @@
 
-import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse, getThreadsByCourse, isEnrolled } from '@/lib/data';
+import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse, getThreadsByCourse, isEnrolled, getMaterialsByCourse } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { notFound, redirect } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, Trash, MessageSquare } from 'lucide-react';
+import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, Trash, MessageSquare, FileText } from 'lucide-react';
 import AiAssistant from '@/components/ai-assistant';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AssignmentList from '@/components/assignments/assignment-list';
 import { Button } from '@/components/ui/button';
 import DeleteCourseButton from '@/components/courses/delete-course-button';
 import DiscussionList from '@/components/discussions/discussion-list';
+import MaterialList from '@/components/materials/material-list';
 
 export default async function CourseDetailPage({
   params,
+  searchParams,
 }: {
   params: { courseId: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }) {
   const { user } = await getSession();
   const course = await getCourseById(params.courseId);
@@ -38,6 +41,7 @@ export default async function CourseDetailPage({
   const enrolledStudents = isTeacher ? await getStudentsByCourse(course.id) : [];
   const assignments = await getAssignmentsByCourse(params.courseId);
   const discussionThreads = await getThreadsByCourse(params.courseId);
+  const materials = await getMaterialsByCourse(params.courseId);
 
   // For students, fetch their submission status for each assignment
   const assignmentsWithSubmissions = user.role === 'student' ? await Promise.all(
@@ -47,6 +51,7 @@ export default async function CourseDetailPage({
     })
   ) : assignments;
 
+  const defaultTab = typeof searchParams?.tab === 'string' ? searchParams.tab : 'overview';
 
   return (
     <div className="space-y-6">
@@ -87,8 +92,8 @@ export default async function CourseDetailPage({
         </div>
       )}
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue={defaultTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">
             <BookText className="mr-2 h-4 w-4" /> Overview
           </TabsTrigger>
@@ -97,6 +102,9 @@ export default async function CourseDetailPage({
           </TabsTrigger>
            <TabsTrigger value="discussions">
             <MessageSquare className="mr-2 h-4 w-4" /> Discussions
+          </TabsTrigger>
+           <TabsTrigger value="materials">
+            <FileText className="mr-2 h-4 w-4" /> Materials
           </TabsTrigger>
            {isTeacher ? (
              <TabsTrigger value="students">
@@ -129,6 +137,11 @@ export default async function CourseDetailPage({
             <DiscussionList 
                 courseId={course.id}
                 threads={discussionThreads}
+            />
+        </TabsContent>
+        <TabsContent value="materials">
+            <MaterialList 
+                materials={materials}
             />
         </TabsContent>
         {isTeacher ? (
