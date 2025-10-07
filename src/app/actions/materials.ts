@@ -1,4 +1,3 @@
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -11,28 +10,18 @@ type FormState = {
 };
 
 export async function uploadMaterialAction(
-  prevState: FormState,
-  formData: FormData
+  courseId: string,
+  title: string,
+  fileName: string,
+  fileType: string,
+  fileDataUri: string,
 ): Promise<FormState> {
-  const courseId = formData.get('courseId') as string;
-  const title = formData.get('title') as string;
-  const file = formData.get('file') as File | null;
 
-  if (!courseId || !title || !file || file.size === 0) {
+  if (!courseId || !title || !fileDataUri) {
     return {
         message: 'Please select a course, provide a title, and choose a file.',
         success: false,
     };
-  }
-
-  let fileDataUri: string;
-  try {
-    const buffer = await file.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    fileDataUri = `data:${file.type};base64,${base64}`;
-  } catch(error) {
-    console.error('Error processing file:', error);
-    return { message: 'Failed to process file.', success: false };
   }
   
   try {
@@ -41,8 +30,8 @@ export async function uploadMaterialAction(
     await addMaterial({
       courseId,
       title,
-      fileName: file.name,
-      fileType: file.type,
+      fileName: fileName,
+      fileType: fileType,
       content: textContent,
     });
     
@@ -56,7 +45,7 @@ export async function uploadMaterialAction(
   } catch (error) {
     console.error('Material upload error:', error);
     return {
-      message: 'Sorry, I encountered an error. Please try again.',
+      message: 'Sorry, I encountered an error processing the document. Please try again.',
       success: false
     };
   }
