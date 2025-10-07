@@ -22,7 +22,7 @@ import { Label } from '@/components/ui/label';
 function SubmitButton() {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending} size="lg">
+        <Button type="submit" disabled={pending || !document.forms.namedItem('upload-form')?.querySelector('input[name="courseId"]')?.getAttribute('value')} size="lg">
             {pending ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -73,6 +73,14 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
             setFile(e.target.files[0]);
         }
     };
+    
+    const clearFile = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
 
     const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -80,9 +88,6 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
         setIsDragging(false);
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             setFile(e.dataTransfer.files[0]);
-            if(fileInputRef.current) {
-                fileInputRef.current.files = e.dataTransfer.files;
-            }
         }
     }, []);
 
@@ -97,9 +102,16 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
         e.stopPropagation();
         setIsDragging(false);
     }, []);
+    
+    const formActionWithFile = (formData: FormData) => {
+        if (file) {
+            formData.append('file', file);
+        }
+        formAction(formData);
+    }
 
     return (
-        <form ref={formRef} action={formAction} className="space-y-4 max-w-2xl">
+        <form ref={formRef} action={formActionWithFile} id="upload-form" className="space-y-4 max-w-2xl">
             <Card>
                 <CardHeader>
                     <CardTitle>Material Details</CardTitle>
@@ -139,7 +151,6 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                         <input
                             ref={fileInputRef}
                             type="file"
-                            name="file"
                             className="hidden"
                             onChange={handleFileChange}
                             accept=".pdf,.docx,.pptx,.doc"
@@ -153,11 +164,7 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                                     variant="ghost"
                                     size="icon"
                                     className="h-6 w-6 rounded-full"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setFile(null);
-                                        if (fileInput.current) fileInput.current.value = '';
-                                    }}
+                                    onClick={clearFile}
                                 >
                                     <X className="h-4 w-4" />
                                 </Button>
