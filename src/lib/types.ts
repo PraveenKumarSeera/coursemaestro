@@ -42,4 +42,20 @@ export type Submission = {
 };
 
 export type GradedSubmission = Submission & { assignment: Assignment, course: Course };
+
+export type DiscussionThread = {
+    id: string;
+    courseId: string;
+    title: string;
+    authorId: string;
+    createdAt: string;
+};
+
+export type DiscussionPost = {
+    id: string;
+    threadId: string;
+    authorId: string;
+    content: string;
+    createdAt: string;
+};
     

@@ -1,17 +1,18 @@
 
-import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse } from '@/lib/data';
+import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse, getThreadsByCourse, isEnrolled } from '@/lib/data';
 import { getSession } from '@/lib/session';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, Trash } from 'lucide-react';
+import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, Trash, MessageSquare } from 'lucide-react';
 import AiAssistant from '@/components/ai-assistant';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AssignmentList from '@/components/assignments/assignment-list';
 import { Button } from '@/components/ui/button';
 import DeleteCourseButton from '@/components/courses/delete-course-button';
+import DiscussionList from '@/components/discussions/discussion-list';
 
 export default async function CourseDetailPage({
   params,
@@ -26,8 +27,17 @@ export default async function CourseDetailPage({
   }
   
   const isTeacher = user.role === 'teacher' && user.id === course.teacherId;
+  const isUserEnrolled = user.role === 'student' ? await isEnrolled(user.id, course.id) : false;
+
+  // For teachers or enrolled students, fetch course data
+  if (!isTeacher && !isUserEnrolled) {
+    // If a student is not enrolled, redirect them to the main courses page
+    redirect('/courses');
+  }
+
   const enrolledStudents = isTeacher ? await getStudentsByCourse(course.id) : [];
   const assignments = await getAssignmentsByCourse(params.courseId);
+  const discussionThreads = await getThreadsByCourse(params.courseId);
 
   // For students, fetch their submission status for each assignment
   const assignmentsWithSubmissions = user.role === 'student' ? await Promise.all(
@@ -78,12 +88,15 @@ export default async function CourseDetailPage({
       )}
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">
             <BookText className="mr-2 h-4 w-4" /> Overview
           </TabsTrigger>
           <TabsTrigger value="assignments">
             <ClipboardList className="mr-2 h-4 w-4" /> Assignments
+          </TabsTrigger>
+           <TabsTrigger value="discussions">
+            <MessageSquare className="mr-2 h-4 w-4" /> Discussions
           </TabsTrigger>
            {isTeacher ? (
              <TabsTrigger value="students">
@@ -110,6 +123,12 @@ export default async function CourseDetailPage({
                 assignments={assignmentsWithSubmissions} 
                 user={user} 
                 courseId={course.id}
+            />
+        </TabsContent>
+        <TabsContent value="discussions">
+            <DiscussionList 
+                courseId={course.id}
+                threads={discussionThreads}
             />
         </TabsContent>
         {isTeacher ? (

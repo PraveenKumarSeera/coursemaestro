@@ -1,6 +1,6 @@
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost } from './types';
 import { format } from 'date-fns';
 
 // In-memory "database"
@@ -30,6 +30,15 @@ let assignments: Assignment[] = [
 
 let submissions: Submission[] = [
     { id: '301', assignmentId: '201', studentId: '2', content: 'Submitted portfolio link.', submittedAt: new Date().toISOString(), grade: 95, feedback: 'Great job on the design!' },
+];
+
+let discussionThreads: DiscussionThread[] = [
+    { id: '401', courseId: '101', title: 'Question about CSS Flexbox', authorId: '2', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+];
+
+let discussionPosts: DiscussionPost[] = [
+    { id: '501', threadId: '401', authorId: '2', content: "I'm having trouble centering a div. Can anyone help?", createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: '502', threadId: '401', authorId: '1', content: 'Sure! Have you tried using `display: flex; justify-content: center; align-items: center;` on the parent container?', createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
 ];
 
 
@@ -110,12 +119,16 @@ export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' |
 export async function deleteCourse(id: string): Promise<boolean> {
     const initialLength = courses.length;
     courses = courses.filter(c => c.id !== id);
-    // Also delete associated enrollments, assignments, and submissions
+    // Also delete associated enrollments, assignments, submissions, and discussions
     enrollments = enrollments.filter(e => e.courseId !== id);
     assignments = assignments.filter(a => a.courseId !== id);
     
     const assignmentIdsToDelete = assignments.filter(a => a.courseId === id).map(a => a.id);
     submissions = submissions.filter(s => !assignmentIdsToDelete.includes(s.assignmentId));
+
+    const threadIdsToDelete = discussionThreads.filter(t => t.courseId === id).map(t => t.id);
+    discussionThreads = discussionThreads.filter(t => t.courseId !== id);
+    discussionPosts = discussionPosts.filter(p => !threadIdsToDelete.includes(p.threadId));
 
     return courses.length < initialLength;
 }
@@ -158,6 +171,11 @@ export async function enrollInCourse(studentId: string, courseId: string): Promi
     enrollments.push(newEnrollment);
     return newEnrollment;
 }
+
+export async function isEnrolled(studentId: string, courseId: string): Promise<boolean> {
+    return enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+}
+
 
 // --- Assignment Functions ---
 export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
@@ -245,4 +263,45 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
         if (!course) throw new Error("Course not found");
         return { ...sub, assignment, course };
     }));
+}
+
+
+// --- Discussion Functions ---
+export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
+    const threads = discussionThreads.filter(t => t.courseId === courseId);
+    return Promise.all(threads.map(async thread => {
+        const author = await findUserById(thread.authorId);
+        const postCount = discussionPosts.filter(p => p.threadId === thread.id).length;
+        if (!author) throw new Error("Author not found for thread");
+        return { ...thread, author, postCount };
+    }));
+}
+
+export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
+    const thread = discussionThreads.find(t => t.id === threadId);
+    if (!thread) return undefined;
+    const author = await findUserById(thread.authorId);
+    if (!author) throw new Error("Author not found for thread");
+    return { ...thread, author };
+}
+
+export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
+    const posts = discussionPosts.filter(p => p.threadId === threadId);
+    return Promise.all(posts.map(async post => {
+        const author = await findUserById(post.authorId);
+        if (!author) throw new Error("Author not found for post");
+        return { ...post, author };
+    }));
+}
+
+export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
+    const newThread: DiscussionThread = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
+    discussionThreads.push(newThread);
+    return newThread;
+}
+
+export async function createPost(data: Omit<DiscussionPost, 'id' | 'createdAt'>): Promise<DiscussionPost> {
+    const newPost: DiscussionPost = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
+    discussionPosts.push(newPost);
+    return newPost;
 }
