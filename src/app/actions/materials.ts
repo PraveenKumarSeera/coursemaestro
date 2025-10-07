@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -10,6 +11,7 @@ type FormState = {
 };
 
 export async function uploadMaterialAction(
+  prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
   const courseId = formData.get('courseId') as string;
