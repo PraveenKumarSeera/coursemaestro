@@ -55,6 +55,7 @@ export async function createAssignmentAction(
 
     revalidatePath('/assignments');
     revalidatePath(`/courses/${newAssignment.courseId}`);
+    revalidatePath('/', 'layout');
     return { message: 'Assignment created successfully.', success: true };
   } catch (error) {
     return { message: 'Failed to create assignment.', success: false };
@@ -99,6 +100,7 @@ export async function submitAssignmentAction(prevState: FormState, formData: For
         }
 
         revalidatePath(`/courses/${validatedFields.data.courseId}`);
+        revalidatePath('/', 'layout');
         return { message: 'Assignment submitted successfully!', success: true };
     } catch (e) {
         return { message: 'Failed to submit assignment.', success: false };
@@ -183,6 +185,7 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
 
         revalidatePath(`/assignments/${assignmentId}`);
         revalidatePath('/my-grades');
+        revalidatePath('/', 'layout');
         return { message: 'Grade saved successfully.', success: true };
     } catch (e) {
         console.error(e);
