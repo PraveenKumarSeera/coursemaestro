@@ -6,26 +6,19 @@ import { format } from 'date-fns';
 
 // In-memory "database"
 let users: User[] = [];
-
 let courses: Course[] = [
   { id: '101', title: 'Introduction to Web Development', description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites. This course covers everything from basic syntax to responsive design and DOM manipulation.', teacherId: '1', duration: '8 Weeks', imageUrl: placeholderImages[0].imageUrl },
   { id: '102', title: 'Advanced React Patterns', description: 'Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns for building large-scale applications.', teacherId: '1', duration: '6 Weeks', imageUrl: placeholderImages[1].imageUrl },
   { id: '103', title: 'Data Structures & Algorithms', description: 'Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.', teacherId: '1', duration: '10 Weeks', imageUrl: placeholderImages[2].imageUrl },
 ];
-
 let enrollments: Enrollment[] = [];
-
 let assignments: Assignment[] = [];
-
 let submissions: Submission[] = [];
-
 let discussionThreads: DiscussionThread[] = [];
-
 let discussionPosts: DiscussionPost[] = [];
-
 let materials: Material[] = [];
-
 let notifications: Notification[] = [];
+
 
 // --- User Functions ---
 export async function findUserByEmail(email: string): Promise<User | undefined> {
@@ -78,8 +71,11 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   const course = courses.find(c => c.id === id);
   if (!course) return undefined;
   const teacher = await findUserById(course.teacherId);
-  if (!teacher) throw new Error("Teacher not found for course");
-  return { ...course, teacher };
+  // This case can happen if a teacher is deleted but their courses are not.
+  // In a real app, this would be handled by cascading deletes or setting the teacher to null.
+  // For now, we'll create a placeholder teacher.
+  const effectiveTeacher = teacher || { id: 'deleted-user', name: 'Unknown Teacher', email: '', role: 'teacher' };
+  return { ...course, teacher: effectiveTeacher };
 }
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
@@ -106,10 +102,11 @@ export async function deleteCourse(id: string): Promise<boolean> {
     courses = courses.filter(c => c.id !== id);
     // Also delete associated enrollments, assignments, submissions, and discussions
     enrollments = enrollments.filter(e => e.courseId !== id);
-    assignments = assignments.filter(a => a.courseId !== id);
     
     const assignmentIdsToDelete = assignments.filter(a => a.courseId === id).map(a => a.id);
     submissions = submissions.filter(s => !assignmentIdsToDelete.includes(s.assignmentId));
+    assignments = assignments.filter(a => a.courseId !== id);
+
 
     const threadIdsToDelete = discussionThreads.filter(t => t.courseId === id).map(t => t.id);
     discussionThreads = discussionThreads.filter(t => t.courseId !== id);
