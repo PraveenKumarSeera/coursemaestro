@@ -63,9 +63,7 @@ export type Material = {
     id: string;
     courseId: string;
     title: string;
-    fileName: string;
-    fileType: string;
-    content: string; // The parsed text content
+    link: string; 
     createdAt: string;
 };
 

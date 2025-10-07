@@ -15,9 +15,9 @@ export default async function UploadMaterialsPage() {
     return (
         <div className="space-y-6">
             <div className='space-y-1'>
-                <h1 className="text-3xl font-bold font-headline">Upload Course Materials</h1>
+                <h1 className="text-3xl font-bold font-headline">Add Course Materials</h1>
                 <p className="text-muted-foreground">
-                    Upload documents for your courses. These can be used later for students to view or for generating AI content.
+                    Add a shareable link to a document (e.g., Google Drive) for your course.
                 </p>
             </div>
 

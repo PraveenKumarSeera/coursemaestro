@@ -1,9 +1,11 @@
+
 'use client';
-import { useState, useRef, useEffect } from 'react';
-import { uploadMaterialAction } from '@/app/actions/materials';
+import { useActionState, useEffect, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
+import { addMaterialLinkAction } from '@/app/actions/materials';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Link2, Loader2 } from 'lucide-react';
 import type { Course } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -16,14 +18,32 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-type FormState = {
-    message: string;
-    success: boolean;
+function SubmitButton() {
+    const { pending } = useFormStatus();
+    return (
+        <Button type="submit" disabled={pending} size="lg">
+            {pending ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adding Link...
+                </>
+            ) : (
+                <>
+                    <Link2 className="mr-2 h-4 w-4" />
+                    Add Material Link
+                </>
+            )}
+        </Button>
+    );
+}
+
+const initialState = {
+    message: '',
+    success: false,
 };
 
 export default function UploadForm({ courses }: { courses: Course[] }) {
-    const [state, setState] = useState<FormState>({ message: '', success: false });
-    const [pending, setPending] = useState(false);
+    const [state, formAction] = useActionState(addMaterialLinkAction, initialState);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
 
@@ -40,44 +60,13 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
         }
     }, [state, toast]);
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setPending(true);
-
-        const formData = new FormData(event.currentTarget);
-        const courseId = formData.get('courseId') as string;
-        const title = formData.get('title') as string;
-        const file = formData.get('file') as File | null;
-
-        if (!courseId || !title || !file || file.size === 0) {
-            setState({
-                message: 'Please select a course, provide a title, and choose a file.',
-                success: false,
-            });
-            setPending(false);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = async () => {
-            const fileDataUri = reader.result as string;
-            const result = await uploadMaterialAction(courseId, title, file.name, file.type, fileDataUri);
-            setState(result);
-            setPending(false);
-        };
-        reader.onerror = () => {
-            setState({ message: 'Failed to read file.', success: false });
-            setPending(false);
-        };
-    };
 
     return (
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
+        <form ref={formRef} action={formAction} className="space-y-4 max-w-2xl">
             <Card>
                 <CardHeader>
                     <CardTitle>Material Details</CardTitle>
-                    <CardDescription>Select a course, give your material a title, and upload the file.</CardDescription>
+                    <CardDescription>Select a course, give your material a title, and provide a shareable link (e.g., from Google Drive).</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
@@ -97,34 +86,22 @@ export default function UploadForm({ courses }: { courses: Course[] }) {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="title">Material Title</Label>
-                        <Input id="title" name="title" required placeholder="e.g., Chapter 1: Introduction" />
+                        <Input id="title" name="title" required placeholder="e.g., Chapter 1 Slides" />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="file">File</Label>
+                        <Label htmlFor="link">Shareable Link</Label>
                         <Input
-                            id="file"
-                            name="file"
-                            type="file"
+                            id="link"
+                            name="link"
+                            type="url"
                             required
-                            accept=".pdf,.docx,.pptx"
+                            placeholder="https://docs.google.com/..."
                         />
-                         <p className="text-sm text-muted-foreground">Supported formats: PDF, DOCX, PPTX.</p>
+                         <p className="text-sm text-muted-foreground">Make sure the link is publicly accessible or shared with your students.</p>
                     </div>
                 </CardContent>
             </Card>
-            <Button type="submit" disabled={pending} size="lg">
-                {pending ? (
-                    <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Uploading...
-                    </>
-                ) : (
-                    <>
-                        <UploadCloud className="mr-2 h-4 w-4" />
-                        Upload and Process
-                    </>
-                )}
-            </Button>
+            <SubmitButton />
         </form>
     );
 }

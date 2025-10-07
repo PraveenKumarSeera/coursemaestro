@@ -43,7 +43,6 @@ export const materialParserFlow = ai.defineFlow(
   },
   async (input) => {
     // The Gemini model can handle text extraction from various formats directly.
-    // The complex logic with mammoth and mime-type checking is not necessary and was causing errors.
     const { output } = await prompt(input);
     if (!output) {
       throw new Error("Failed to parse document content.");
