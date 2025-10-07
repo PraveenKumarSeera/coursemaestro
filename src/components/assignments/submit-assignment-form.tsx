@@ -31,6 +31,31 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
   const [state, formAction] = useActionState(submitAssignmentAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  
+  const playSuccessSound = () => {
+    try {
+      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (!context) return;
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(800, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(1200, context.currentTime + 0.05);
+
+      gainNode.gain.setValueAtTime(0.2, context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.15);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+
+      oscillator.start(context.currentTime);
+      oscillator.stop(context.currentTime + 0.15);
+    } catch (e) {
+      console.error("Failed to play sound", e);
+    }
+  };
+
 
   useEffect(() => {
     if (state.message) {
@@ -41,6 +66,7 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
       });
       if (state.success) {
         formRef.current?.reset();
+        playSuccessSound();
       }
     }
   }, [state, toast]);
