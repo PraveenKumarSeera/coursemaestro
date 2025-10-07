@@ -14,6 +14,7 @@ import {
   Briefcase,
   UploadCloud,
   FileDown,
+  Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -29,6 +30,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const commonRoutes = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/courses', label: 'Courses', icon: BookOpen },
+    { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   ];
 
   const teacherRoutes = [
@@ -72,7 +74,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>

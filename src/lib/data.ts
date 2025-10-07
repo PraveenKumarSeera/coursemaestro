@@ -40,13 +40,13 @@ const defaultDb: Db = {
 
 async function readDb(): Promise<Db> {
     try {
-        const data = await fs.readFile(dbPath, 'utf-8');
-        return JSON.parse(data);
+        await fs.access(dbPath);
     } catch (error) {
         // If the file doesn't exist, create it with default data
-        await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
-        return defaultDb;
+         await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
     }
+    const data = await fs.readFile(dbPath, 'utf-8');
+    return JSON.parse(data);
 }
 
 async function writeDb(data: Db): Promise<void> {
@@ -69,29 +69,6 @@ export async function createUser(data: Omit<User, 'id'>): Promise<User> {
   const db = await readDb();
   const newUser: User = { ...data, id: String(Date.now()) };
   db.users.push(newUser);
-
-  // Add sample data for new users
-  if (newUser.role === 'teacher') {
-    const newCourse: Course = {
-        id: String(Date.now() + 1),
-        title: `Your First Course: ${newUser.name.split(' ')[0]}'s Class`,
-        description: 'This is a sample course created just for you. You can edit or delete it.',
-        teacherId: newUser.id,
-        duration: '4 Weeks',
-        imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
-    };
-    db.courses.push(newCourse);
-  } else if (newUser.role === 'student' && db.courses.length > 0) {
-      // Enroll in the first course if it exists
-      const courseToEnroll = db.courses[0];
-      const newEnrollment: Enrollment = {
-          id: String(Date.now() + 1),
-          studentId: newUser.id,
-          courseId: courseToEnroll.id,
-      };
-      db.enrollments.push(newEnrollment);
-  }
-
   await writeDb(db);
   return newUser;
 }
@@ -252,11 +229,9 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
     const submissionsWithStudents = await Promise.all(
         assignmentSubmissions.map(async sub => {
             const student = db.users.find(u => u.id === sub.studentId);
-            if (!student) {
-                // In a real app, you might want to handle this case more gracefully
-                throw new Error(`Student with id ${sub.studentId} not found`);
-            }
-            return { ...sub, student };
+            // This case should ideally not happen in a real DB with foreign key constraints
+            const effectiveStudent = student || { id: sub.studentId, name: 'Unknown Student', email: '', role: 'student', password: '' };
+            return { ...sub, student: effectiveStudent };
         })
     );
 
@@ -410,4 +385,28 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
         return true;
     }
     return false;
+}
+
+// --- Leaderboard Functions ---
+export async function getStudentRankings(): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number }[]> {
+    const db = await readDb();
+    const students = db.users.filter(u => u.role === 'student');
+    const studentStats = students.map(student => {
+        const studentSubmissions = db.submissions.filter(s => s.studentId === student.id && s.grade !== null);
+        const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+        const averageGrade = studentSubmissions.length > 0 ? totalGrade / studentSubmissions.length : 0;
+        return {
+            user: student,
+            averageGrade: Math.round(averageGrade),
+            assignmentsCompleted: studentSubmissions.length
+        };
+    });
+
+    // Sort by average grade descending, then by assignments completed descending
+    return studentStats.sort((a, b) => {
+        if (b.averageGrade !== a.averageGrade) {
+            return b.averageGrade - a.averageGrade;
+        }
+        return b.assignmentsCompleted - a.assignmentsCompleted;
+    });
 }
