@@ -1,5 +1,5 @@
 'use client';
-import { useState, useActionState, useRef, useCallback } from 'react';
+import { useState, useActionState, useRef, useCallback, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { generateQuizAndFlashcardsAction } from '@/app/actions/quiz-generator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -104,6 +104,11 @@ export default function QuizGeneratorClient() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -135,6 +140,9 @@ export default function QuizGeneratorClient() {
         setIsDragging(false);
     }, []);
 
+    if (!isMounted) {
+        return null;
+    }
 
     return (
         <div className="space-y-6">
