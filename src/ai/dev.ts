@@ -6,3 +6,4 @@ import '@/ai/flows/ai-quiz-generator.ts';
 import '@/ai/flows/ai-performance-analyzer.ts';
 import '@/ai/flows/ai-career-advisor.ts';
 import '@/ai/flows/ai-material-parser.ts';
+import '@/ai/flows/ai-resume-builder.ts';
