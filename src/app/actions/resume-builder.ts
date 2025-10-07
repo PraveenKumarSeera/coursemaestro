@@ -2,32 +2,10 @@
 'use server';
 
 import { generateResume } from "@/ai/flows/ai-resume-builder";
+import type { ResumeBuilderInput, ResumeBuilderOutput } from "@/ai/flows/ai-resume-builder";
 import type { GradedSubmission, User } from "@/lib/types";
-import { z } from 'zod';
 
-const GradedSubmissionSchema = z.object({
-  course: z.object({
-    title: z.string(),
-  }),
-  assignment: z.object({
-    title: z.string(),
-  }),
-  grade: z.number().nullable(),
-});
-
-export const ResumeBuilderInputSchema = z.object({
-  studentName: z.string(),
-  studentEmail: z.string(),
-  gradedSubmissions: z.array(GradedSubmissionSchema).describe("An array of the student's graded assignments."),
-});
-export type ResumeBuilderInput = z.infer<typeof ResumeBuilderInputSchema>;
-
-
-export const ResumeBuilderOutputSchema = z.object({
-  resumeMarkdown: z.string().describe("The full resume formatted as a Markdown string."),
-});
-export type ResumeBuilderOutput = z.infer<typeof ResumeBuilderOutputSchema>;
-
+export type { ResumeBuilderInput, ResumeBuilderOutput };
 
 type ActionState = {
   resumeMarkdown: string | null;

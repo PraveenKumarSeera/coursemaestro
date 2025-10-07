@@ -7,8 +7,29 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import type { ResumeBuilderInput, ResumeBuilderOutput } from '@/app/actions/resume-builder';
-import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema } from '@/app/actions/resume-builder';
+
+const GradedSubmissionSchema = z.object({
+  course: z.object({
+    title: z.string(),
+  }),
+  assignment: z.object({
+    title: z.string(),
+  }),
+  grade: z.number().nullable(),
+});
+
+export const ResumeBuilderInputSchema = z.object({
+  studentName: z.string(),
+  studentEmail: z.string(),
+  gradedSubmissions: z.array(GradedSubmissionSchema).describe("An array of the student's graded assignments."),
+});
+export type ResumeBuilderInput = z.infer<typeof ResumeBuilderInputSchema>;
+
+
+export const ResumeBuilderOutputSchema = z.object({
+  resumeMarkdown: z.string().describe("The full resume formatted as a Markdown string."),
+});
+export type ResumeBuilderOutput = z.infer<typeof ResumeBuilderOutputSchema>;
 
 
 export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {

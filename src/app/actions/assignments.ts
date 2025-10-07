@@ -6,18 +6,9 @@ import { revalidatePath } from 'next/cache';
 import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById, getStudentGrades, findUserById, createNotification } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { generateMotivationalMessage } from '@/ai/flows/ai-motivation-bot';
+import type { MotivationBotInput, MotivationBotOutput } from '@/ai/flows/ai-motivation-bot';
 
-export const MotivationBotInputSchema = z.object({
-  studentName: z.string().describe("The first name of the student."),
-  courseTitle: z.string().describe("The title of the course."),
-});
-export type MotivationBotInput = z.infer<typeof MotivationBotInputSchema>;
-
-export const MotivationBotOutputSchema = z.object({
-  message: z.string().describe("A short, positive, and encouraging message for the student."),
-});
-export type MotivationBotOutput = z.infer<typeof MotivationBotOutputSchema>;
-
+export type { MotivationBotInput, MotivationBotOutput };
 
 const createAssignmentSchema = z.object({
   courseId: z.string(),
