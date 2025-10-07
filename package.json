@@ -1,9 +1,9 @@
 {
   "name": "nextn",
   "version": "0.1.0",
-  "private": true,
+  "private": "true",
   "scripts": {
-    "dev": "genkit start -- tsx src/ai/genkit-plugin.ts & next dev --turbopack -p 9002",
+    "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/genkit-plugin.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/genkit-plugin.ts",
     "build": "NODE_ENV=production next build",
