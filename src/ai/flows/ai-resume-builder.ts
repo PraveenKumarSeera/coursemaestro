@@ -62,7 +62,7 @@ Generate the full resume as a single Markdown string.
 `,
 });
 
-const resumeBuilderFlow = ai.defineFlow(
+export const resumeBuilderFlow = ai.defineFlow(
   {
     name: 'resumeBuilderFlow',
     inputSchema: ResumeBuilderInputSchema,

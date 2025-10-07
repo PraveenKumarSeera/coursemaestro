@@ -46,7 +46,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-const aiStudyAssistantFlow = ai.defineFlow(
+export const aiStudyAssistantFlow = ai.defineFlow(
   {
     name: 'aiStudyAssistantFlow',
     inputSchema: AiStudyAssistantInputSchema,
@@ -54,6 +54,9 @@ const aiStudyAssistantFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+        throw new Error('Failed to generate an answer.');
+    }
+    return output;
   }
 );

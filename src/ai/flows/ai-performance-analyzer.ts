@@ -58,7 +58,7 @@ Graded Assignments:
 });
 
 
-const performanceAnalyzerFlow = ai.defineFlow(
+export const performanceAnalyzerFlow = ai.defineFlow(
   {
     name: 'performanceAnalyzerFlow',
     inputSchema: PerformanceAnalyzerInputSchema,

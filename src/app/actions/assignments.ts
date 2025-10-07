@@ -131,14 +131,15 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
         
         // --- Motivation Bot Logic ---
         const allGrades = await getStudentGrades(submission.studentId);
-        const previousGrades = allGrades.filter(s => s.assignmentId !== submission.assignmentId);
+        const previousGrades = allGrades.filter(s => s.id !== submission.id);
+
 
         if (previousGrades.length > 0) {
             const total = previousGrades.reduce((acc, sub) => acc + (sub.grade || 0), 0);
             const averageGrade = total / previousGrades.length;
 
             // Trigger if new grade is more than 10 points lower than average
-            if (averageGrade - grade > 10) {
+            if (averageGrade > grade && (averageGrade - grade > 10)) {
                 const student = await findUserById(submission.studentId);
                 const assignment = await getAssignmentById(assignmentId);
                 const course = assignment ? await getCourseById(assignment.courseId) : null;

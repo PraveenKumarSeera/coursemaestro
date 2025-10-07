@@ -67,7 +67,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-const quizGeneratorFlow = ai.defineFlow(
+export const quizGeneratorFlow = ai.defineFlow(
   {
     name: 'quizGeneratorFlow',
     inputSchema: QuizGeneratorInputSchema,

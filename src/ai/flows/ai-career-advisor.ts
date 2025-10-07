@@ -60,7 +60,7 @@ Generate the suggestions in the specified JSON format.
 `,
 });
 
-const careerAdvisorFlow = ai.defineFlow(
+export const careerAdvisorFlow = ai.defineFlow(
   {
     name: 'careerAdvisorFlow',
     inputSchema: CareerAdvisorInputSchema,
