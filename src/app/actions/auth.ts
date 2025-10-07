@@ -66,7 +66,9 @@ export async function signup(
     };
   }
 
-  const existingUser = await findUserByEmail(validatedFields.data.email);
+  const { name, email, password, role } = validatedFields.data;
+
+  const existingUser = await findUserByEmail(email);
   if (existingUser) {
     return {
       message: 'An account with this email already exists.',
@@ -74,7 +76,7 @@ export async function signup(
     };
   }
 
-  const newUser = await createUser(validatedFields.data);
+  const newUser = await createUser({ name, email, password, role });
 
   await createSession(newUser.id);
   redirect('/dashboard');
