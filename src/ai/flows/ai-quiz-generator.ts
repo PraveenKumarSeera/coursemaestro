@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const QuestionSchema = z.object({
   question: z.string().describe('The quiz question.'),

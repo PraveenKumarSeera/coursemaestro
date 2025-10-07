@@ -6,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 export const TeachingAssistantInputSchema = z.object({
   submissionText: z.string().describe('The text of the student submission to be analyzed.'),

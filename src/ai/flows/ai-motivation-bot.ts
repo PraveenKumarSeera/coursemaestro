@@ -5,7 +5,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const MotivationBotInputSchema = z.object({
   studentName: z.string().describe("The first name of the student."),
