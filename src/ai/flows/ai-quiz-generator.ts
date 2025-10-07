@@ -12,15 +12,11 @@ export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Prom
   return quizGeneratorFlow(input);
 }
 
-const quizGeneratorFlow = ai.defineFlow(
-  {
-    name: 'quizGeneratorFlow',
-    inputSchema: QuizGeneratorInputSchema,
-    outputSchema: QuizGeneratorOutputSchema,
-  },
-  async (input) => {
-    const { output } = await ai.generate({
-        prompt: `You are an AI assistant that creates educational materials for teachers.
+const prompt = ai.definePrompt({
+    name: 'quizGeneratorPrompt',
+    input: { schema: QuizGeneratorInputSchema },
+    output: { schema: QuizGeneratorOutputSchema },
+    prompt: `You are an AI assistant that creates educational materials for teachers.
   Based on the provided course material, generate a quiz and a set of flashcards.
 
   The quiz should contain 5-7 multiple-choice questions that test the key concepts from the material.
@@ -30,15 +26,21 @@ const quizGeneratorFlow = ai.defineFlow(
 
   Course Material:
   '''
-  ${input.courseMaterial}
+  {{{courseMaterial}}}
   '''
 
   Generate the quiz and flashcards in the specified JSON format.
   `,
-        output: {
-            schema: QuizGeneratorOutputSchema,
-        },
-    });
+});
+
+const quizGeneratorFlow = ai.defineFlow(
+  {
+    name: 'quizGeneratorFlow',
+    inputSchema: QuizGeneratorInputSchema,
+    outputSchema: QuizGeneratorOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
 
     if (!output) {
         throw new Error("Failed to generate quiz content.");

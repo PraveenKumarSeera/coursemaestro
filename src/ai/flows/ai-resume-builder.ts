@@ -12,15 +12,11 @@ export async function generateResume(input: ResumeBuilderInput): Promise<ResumeB
   return resumeBuilderFlow(input);
 }
 
-const resumeBuilderFlow = ai.defineFlow(
-  {
-    name: 'resumeBuilderFlow',
-    inputSchema: ResumeBuilderInputSchema,
-    outputSchema: ResumeBuilderOutputSchema,
-  },
-  async (input) => {
-    const { output } = await ai.generate({
-        prompt: `You are an expert resume writer helping a student create a professional resume.
+const prompt = ai.definePrompt({
+    name: 'resumeBuilderPrompt',
+    input: { schema: ResumeBuilderInputSchema },
+    output: { schema: ResumeBuilderOutputSchema },
+    prompt: `You are an expert resume writer helping a student create a professional resume.
   
 Generate a resume in Markdown format based on the student's information and academic performance.
 
@@ -32,20 +28,26 @@ The resume should include the following sections:
 5.  **Projects / Coursework:** Frame their best-performing assignments as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title. Only highlight assignments where the grade was 85% or higher.
 
 Student Information:
-- Name: ${input.studentName}
-- Email: ${input.studentEmail}
+- Name: {{{studentName}}}
+- Email: {{{studentEmail}}}
 
 Academic Performance:
 \`\`\`json
-${JSON.stringify(input.gradedSubmissions)}
+${"{{JSON.stringify(input.gradedSubmissions)}}"}
 \`\`\`
 
 Generate the full resume as a single Markdown string.
 `,
-        output: {
-            schema: ResumeBuilderOutputSchema
-        }
-    });
+});
+
+const resumeBuilderFlow = ai.defineFlow(
+  {
+    name: 'resumeBuilderFlow',
+    inputSchema: ResumeBuilderInputSchema,
+    outputSchema: ResumeBuilderOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
 
     if (!output) {
       throw new Error('Failed to generate resume.');

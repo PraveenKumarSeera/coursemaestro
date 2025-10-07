@@ -28,15 +28,13 @@ Keep the feedback constructive and encouraging.`
         : `You are an expert summarizer for a teaching assistant.
 Provide a concise, 2-3 sentence summary of the key points in the following student submission.`;
 
-    const fullPrompt = `${promptText}
+    const { output } = await ai.generate({
+      prompt: `${promptText}
 
 Student Submission:
 '''
 ${submissionText}
-'''`;
-
-    const { output } = await ai.generate({
-      prompt: fullPrompt,
+'''`,
       output: {
         schema: TeachingAssistantOutputSchema,
       }
