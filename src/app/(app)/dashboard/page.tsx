@@ -1,6 +1,6 @@
 import { getSession } from '@/lib/session';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Users, GraduationCap, ArrowRight } from 'lucide-react';
+import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
