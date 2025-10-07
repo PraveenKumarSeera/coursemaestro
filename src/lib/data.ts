@@ -74,7 +74,7 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   // This case can happen if a teacher is deleted but their courses are not.
   // In a real app, this would be handled by cascading deletes or setting the teacher to null.
   // For now, we'll create a placeholder teacher.
-  const effectiveTeacher = teacher || { id: 'deleted-user', name: 'Unknown Teacher', email: '', role: 'teacher' };
+  const effectiveTeacher = teacher || { id: 'deleted-user', name: 'Unknown Teacher', email: '', role: 'teacher', password: '' };
   return { ...course, teacher: effectiveTeacher };
 }
 
