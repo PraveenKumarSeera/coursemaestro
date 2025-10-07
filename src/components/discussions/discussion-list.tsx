@@ -61,7 +61,6 @@ export default function DiscussionList({ courseId, threads }: DiscussionListProp
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://i.pravatar.cc/150?u=${thread.author.id}`} />
                                 <AvatarFallback>{thread.author.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div>
@@ -88,4 +87,3 @@ export default function DiscussionList({ courseId, threads }: DiscussionListProp
     </Card>
   );
 }
-

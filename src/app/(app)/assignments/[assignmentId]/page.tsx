@@ -36,7 +36,6 @@ export default async function AssignmentSubmissionsPage({ params }: { params: { 
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <Avatar>
-                                            <AvatarImage src={`https://i.pravatar.cc/150?u=${submission.student.id}`} />
                                             <AvatarFallback>{submission.student.name.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div>

@@ -51,7 +51,6 @@ export default async function DiscussionThreadPage({ params }: { params: { cours
                         <CardHeader className="flex flex-row items-start justify-between">
                              <div className="flex items-center gap-4">
                                 <Avatar>
-                                    <AvatarImage src={`https://i.pravatar.cc/150?u=${post.author.id}`} />
                                     <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div>
@@ -73,4 +72,3 @@ export default async function DiscussionThreadPage({ params }: { params: { cours
         </div>
     );
 }
-

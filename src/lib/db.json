@@ -1,6 +1,20 @@
-
 {
-  "users": [],
+  "users": [
+    {
+      "name": "Praveen Kumar",
+      "email": "praveen@mbu.edu",
+      "password": "123456",
+      "role": "student",
+      "id": "1759815119036"
+    },
+    {
+      "name": "rajesh",
+      "email": "rajesh@gmail.com",
+      "password": "123456",
+      "role": "teacher",
+      "id": "1759815164505"
+    }
+  ],
   "courses": [
     {
       "id": "101",
@@ -25,9 +39,28 @@
       "teacherId": "1",
       "duration": "10 Weeks",
       "imageUrl": "https://picsum.photos/seed/3/600/400"
+    },
+    {
+      "id": "1759815164506",
+      "title": "Your First Course: rajesh's Class",
+      "description": "This is a sample course created just for you. You can edit or delete it.",
+      "teacherId": "1759815164505",
+      "duration": "4 Weeks",
+      "imageUrl": "https://images.unsplash.com/photo-1603145733146-ae562a55031e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzb2NpYWwlMjBtZWRpYXxlbnwwfHx8fDE3NTk3Njc1ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
     }
   ],
-  "enrollments": [],
+  "enrollments": [
+    {
+      "id": "1759815119037",
+      "studentId": "1759815119036",
+      "courseId": "101"
+    },
+    {
+      "id": "1759815205636",
+      "studentId": "1759815119036",
+      "courseId": "1759815164506"
+    }
+  ],
   "assignments": [],
   "submissions": [],
   "discussionThreads": [],

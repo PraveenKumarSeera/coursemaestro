@@ -59,7 +59,6 @@ export default async function AppHeader({ user }: AppHeaderProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="secondary" size="icon" className="rounded-full">
             <Avatar>
-              <AvatarImage src={`https://i.pravatar.cc/150?u=${user.id}`} />
               <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
             </Avatar>
             <span className="sr-only">Toggle user menu</span>

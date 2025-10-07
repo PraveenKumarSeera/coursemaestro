@@ -58,7 +58,6 @@ export default async function StudentsPage() {
                   <AccordionTrigger>
                     <div className="flex items-center gap-4">
                       <Avatar>
-                        <AvatarImage src={`https://i.pravatar.cc/150?u=${student.id}`} />
                         <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
