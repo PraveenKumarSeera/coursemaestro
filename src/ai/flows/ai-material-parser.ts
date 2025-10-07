@@ -9,7 +9,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import mammoth from 'mammoth';
 
 const MaterialParserInputSchema = z.object({
   fileDataUri: z.string().describe("A document file (PDF, DOCX, PPTX) as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
@@ -43,30 +42,12 @@ export const materialParserFlow = ai.defineFlow(
     outputSchema: MaterialParserOutputSchema,
   },
   async (input) => {
-    const { mimeType, data } = extractFromDataUri(input.fileDataUri);
-    let textContent = '';
-
-    if (mimeType.includes('vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-        const buffer = Buffer.from(data, 'base64');
-        const result = await mammoth.extractRawText({ buffer });
-        textContent = result.value;
-    } else {
-         const { output } = await prompt(input);
-         if (!output) {
-            throw new Error("Failed to parse document content.");
-         }
-         textContent = output.textContent;
+    // The Gemini model can handle text extraction from various formats directly.
+    // The complex logic with mammoth and mime-type checking is not necessary and was causing errors.
+    const { output } = await prompt(input);
+    if (!output) {
+      throw new Error("Failed to parse document content.");
     }
-    
-    return { textContent };
+    return { textContent: output.textContent };
   }
 );
-
-
-function extractFromDataUri(dataUri: string): { mimeType: string, data: string } {
-    const parts = dataUri.split(',');
-    const meta = parts[0].split(';');
-    const mimeType = meta[0].split(':')[1];
-    const data = parts[1];
-    return { mimeType, data };
-}
