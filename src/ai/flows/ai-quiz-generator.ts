@@ -10,6 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import mammoth from 'mammoth';
 
 const QuestionSchema = z.object({
   question: z.string().describe('The quiz question.'),
@@ -32,7 +33,8 @@ const QuizSchema = z.object({
 export type Quiz = z.infer<typeof QuizSchema>;
 
 const QuizGeneratorInputSchema = z.object({
-  courseMaterial: z.string().min(50).describe('The course notes or material to generate a quiz from.'),
+    courseMaterial: z.string().min(50).optional().describe('The course notes or material to generate a quiz from.'),
+    fileDataUri: z.string().optional().describe("A document file (PDF, DOCX, PPTX) as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 
 const QuizGeneratorOutputSchema = z.object({
@@ -60,7 +62,8 @@ const prompt = ai.definePrompt({
 
   Course Material:
   '''
-  {{courseMaterial}}
+  {{#if courseMaterial}}{{courseMaterial}}{{/if}}
+  {{#if fileDataUri}}{{media url=fileDataUri}}{{/if}}
   '''
 
   Generate the quiz and flashcards in the specified JSON format.
@@ -74,10 +77,32 @@ const quizGeneratorFlow = ai.defineFlow(
     outputSchema: QuizGeneratorOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    let processedInput = { ...input };
+
+    if (input.fileDataUri) {
+        const { mimeType, data } = extractFromDataUri(input.fileDataUri);
+        
+        if (mimeType.includes('vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+            const buffer = Buffer.from(data, 'base64');
+            const result = await mammoth.extractRawText({ buffer });
+            processedInput.courseMaterial = result.value;
+            delete processedInput.fileDataUri; // Use the extracted text instead
+        }
+    }
+
+    const { output } = await prompt(processedInput);
     if (!output) {
         throw new Error("Failed to generate quiz content.");
     }
     return output;
   }
 );
+
+
+function extractFromDataUri(dataUri: string): { mimeType: string, data: string } {
+    const parts = dataUri.split(',');
+    const meta = parts[0].split(';');
+    const mimeType = meta[0].split(':')[1];
+    const data = parts[1];
+    return { mimeType, data };
+}
