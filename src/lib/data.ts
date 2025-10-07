@@ -2,36 +2,73 @@
 
 import { placeholderImages } from './placeholder-images.json';
 import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification } from './types';
-import { format } from 'date-fns';
+import { promises as fs } from 'fs';
+import path from 'path';
 
-// In-memory "database"
-let users: User[] = [];
-let courses: Course[] = [
-  { id: '101', title: 'Introduction to Web Development', description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites. This course covers everything from basic syntax to responsive design and DOM manipulation.', teacherId: '1', duration: '8 Weeks', imageUrl: placeholderImages[0].imageUrl },
-  { id: '102', title: 'Advanced React Patterns', description: 'Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns for building large-scale applications.', teacherId: '1', duration: '6 Weeks', imageUrl: placeholderImages[1].imageUrl },
-  { id: '103', title: 'Data Structures & Algorithms', description: 'Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.', teacherId: '1', duration: '10 Weeks', imageUrl: placeholderImages[2].imageUrl },
-];
-let enrollments: Enrollment[] = [];
-let assignments: Assignment[] = [];
-let submissions: Submission[] = [];
-let discussionThreads: DiscussionThread[] = [];
-let discussionPosts: DiscussionPost[] = [];
-let materials: Material[] = [];
-let notifications: Notification[] = [];
+// In-memory "database" has been replaced with a file-based one.
+// The data is now persisted in `src/lib/db.json`
+
+const dbPath = path.join(process.cwd(), 'src', 'lib', 'db.json');
+
+type Db = {
+    users: User[];
+    courses: Course[];
+    enrollments: Enrollment[];
+    assignments: Assignment[];
+    submissions: Submission[];
+    discussionThreads: DiscussionThread[];
+    discussionPosts: DiscussionPost[];
+    materials: Material[];
+    notifications: Notification[];
+}
+
+const defaultDb: Db = {
+    users: [],
+    courses: [
+        { id: '101', title: 'Introduction to Web Development', description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites. This course covers everything from basic syntax to responsive design and DOM manipulation.', teacherId: '1', duration: '8 Weeks', imageUrl: placeholderImages[0].imageUrl },
+        { id: '102', title: 'Advanced React Patterns', description: 'Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns for building large-scale applications.', teacherId: '1', duration: '6 Weeks', imageUrl: placeholderImages[1].imageUrl },
+        { id: '103', title: 'Data Structures & Algorithms', description: 'Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.', teacherId: '1', duration: '10 Weeks', imageUrl: placeholderImages[2].imageUrl },
+    ],
+    enrollments: [],
+    assignments: [],
+    submissions: [],
+    discussionThreads: [],
+    discussionPosts: [],
+    materials: [],
+    notifications: []
+};
+
+async function readDb(): Promise<Db> {
+    try {
+        const data = await fs.readFile(dbPath, 'utf-8');
+        return JSON.parse(data);
+    } catch (error) {
+        // If the file doesn't exist, create it with default data
+        await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
+        return defaultDb;
+    }
+}
+
+async function writeDb(data: Db): Promise<void> {
+    await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
+}
 
 
 // --- User Functions ---
 export async function findUserByEmail(email: string): Promise<User | undefined> {
-  return users.find(user => user.email === email);
+  const db = await readDb();
+  return db.users.find(user => user.email === email);
 }
 
 export async function findUserById(id: string): Promise<User | undefined> {
-  return users.find(user => user.id === id);
+  const db = await readDb();
+  return db.users.find(user => user.id === id);
 }
 
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
+  const db = await readDb();
   const newUser: User = { ...data, id: String(Date.now()) };
-  users.push(newUser);
+  db.users.push(newUser);
 
   // Add sample data for new users
   if (newUser.role === 'teacher') {
@@ -43,32 +80,35 @@ export async function createUser(data: Omit<User, 'id'>): Promise<User> {
         duration: '4 Weeks',
         imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
     };
-    courses.push(newCourse);
-  } else if (newUser.role === 'student' && courses.length > 0) {
+    db.courses.push(newCourse);
+  } else if (newUser.role === 'student' && db.courses.length > 0) {
       // Enroll in the first course if it exists
-      const courseToEnroll = courses[0];
+      const courseToEnroll = db.courses[0];
       const newEnrollment: Enrollment = {
           id: String(Date.now() + 1),
           studentId: newUser.id,
           courseId: courseToEnroll.id,
       };
-      enrollments.push(newEnrollment);
+      db.enrollments.push(newEnrollment);
   }
 
+  await writeDb(db);
   return newUser;
 }
 
 // --- Course Functions ---
 export async function getAllCourses(query?: string): Promise<Course[]> {
-  if (!query) return courses;
-  return courses.filter(course =>
+  const db = await readDb();
+  if (!query) return db.courses;
+  return db.courses.filter(course =>
     course.title.toLowerCase().includes(query.toLowerCase()) ||
     course.description.toLowerCase().includes(query.toLowerCase())
   );
 }
 
 export async function getCourseById(id: string): Promise<(Course & { teacher: User }) | undefined> {
-  const course = courses.find(c => c.id === id);
+  const db = await readDb();
+  const course = db.courses.find(c => c.id === id);
   if (!course) return undefined;
   const teacher = await findUserById(course.teacherId);
   // This case can happen if a teacher is deleted but their courses are not.
@@ -79,69 +119,80 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
 }
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
+    const db = await readDb();
     const newCourse: Course = {
         ...data,
         id: String(Date.now()),
         teacherId,
         imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
     };
-    courses.push(newCourse);
+    db.courses.push(newCourse);
+    await writeDb(db);
     return newCourse;
 }
 
 export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' | 'teacherId' | 'imageUrl'>>): Promise<Course | undefined> {
-    const courseIndex = courses.findIndex(c => c.id === id);
+    const db = await readDb();
+    const courseIndex = db.courses.findIndex(c => c.id === id);
     if (courseIndex === -1) return undefined;
     
-    courses[courseIndex] = { ...courses[courseIndex], ...data };
-    return courses[courseIndex];
+    db.courses[courseIndex] = { ...db.courses[courseIndex], ...data };
+    await writeDb(db);
+    return db.courses[courseIndex];
 }
 
 export async function deleteCourse(id: string): Promise<boolean> {
-    const initialLength = courses.length;
-    courses = courses.filter(c => c.id !== id);
+    const db = await readDb();
+    const initialLength = db.courses.length;
+    db.courses = db.courses.filter(c => c.id !== id);
     // Also delete associated enrollments, assignments, submissions, and discussions
-    enrollments = enrollments.filter(e => e.courseId !== id);
+    db.enrollments = db.enrollments.filter(e => e.courseId !== id);
     
-    const assignmentIdsToDelete = assignments.filter(a => a.courseId === id).map(a => a.id);
-    submissions = submissions.filter(s => !assignmentIdsToDelete.includes(s.assignmentId));
-    assignments = assignments.filter(a => a.courseId !== id);
+    const assignmentIdsToDelete = db.assignments.filter(a => a.courseId === id).map(a => a.id);
+    db.submissions = db.submissions.filter(s => !assignmentIdsToDelete.includes(s.assignmentId));
+    db.assignments = db.assignments.filter(a => a.courseId !== id);
 
 
-    const threadIdsToDelete = discussionThreads.filter(t => t.courseId === id).map(t => t.id);
-    discussionThreads = discussionThreads.filter(t => t.courseId !== id);
-    discussionPosts = discussionPosts.filter(p => !threadIdsToDelete.includes(p.threadId));
+    const threadIdsToDelete = db.discussionThreads.filter(t => t.courseId === id).map(t => t.id);
+    db.discussionThreads = db.discussionThreads.filter(t => t.courseId !== id);
+    db.discussionPosts = db.discussionPosts.filter(p => !threadIdsToDelete.includes(p.threadId));
 
-    return courses.length < initialLength;
+    await writeDb(db);
+    return db.courses.length < initialLength;
 }
 
 
 export async function getTeacherById(id: string): Promise<User | undefined> {
-    return users.find(user => user.id === id && user.role === 'teacher');
+    const db = await readDb();
+    return db.users.find(user => user.id === id && user.role === 'teacher');
 }
 
 export async function getTeacherCourses(teacherId: string): Promise<(Course & { enrollments: Enrollment[] })[]> {
-    const teacherCourses = courses.filter(c => c.teacherId === teacherId);
+    const db = await readDb();
+    const teacherCourses = db.courses.filter(c => c.teacherId === teacherId);
     return teacherCourses.map(course => ({
         ...course,
-        enrollments: enrollments.filter(e => e.courseId === course.id)
+        enrollments: db.enrollments.filter(e => e.courseId === course.id)
     }));
 }
 
 
 // --- Enrollment Functions ---
 export async function getStudentEnrollments(studentId: string): Promise<Enrollment[]> {
-  return enrollments.filter(e => e.studentId === studentId);
+  const db = await readDb();
+  return db.enrollments.filter(e => e.studentId === studentId);
 }
 
 export async function getStudentsByCourse(courseId: string): Promise<User[]> {
-    const courseEnrollments = enrollments.filter(e => e.courseId === courseId);
+    const db = await readDb();
+    const courseEnrollments = db.enrollments.filter(e => e.courseId === courseId);
     const studentIds = courseEnrollments.map(e => e.studentId);
-    return users.filter(user => studentIds.includes(user.id));
+    return db.users.filter(user => studentIds.includes(user.id));
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
-    const alreadyEnrolled = enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+    const db = await readDb();
+    const alreadyEnrolled = db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
     if (alreadyEnrolled) {
         return null;
     }
@@ -150,28 +201,32 @@ export async function enrollInCourse(studentId: string, courseId: string): Promi
         studentId,
         courseId,
     };
-    enrollments.push(newEnrollment);
+    db.enrollments.push(newEnrollment);
+    await writeDb(db);
     return newEnrollment;
 }
 
 export async function isEnrolled(studentId: string, courseId: string): Promise<boolean> {
-    return enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+    const db = await readDb();
+    return db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
 }
 
 
 // --- Assignment Functions ---
 export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
-    return assignments.filter(a => a.courseId === courseId);
+    const db = await readDb();
+    return db.assignments.filter(a => a.courseId === courseId);
 }
 
 export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> {
-    const teacherCourses = await getTeacherCourses(teacherId);
+    const db = await readDb();
+    const teacherCourses = db.courses.filter(c => c.teacherId === teacherId);
     const courseIds = teacherCourses.map(c => c.id);
-    const teacherAssignments = assignments.filter(a => courseIds.includes(a.courseId));
+    const teacherAssignments = db.assignments.filter(a => courseIds.includes(a.courseId));
     
     return teacherAssignments.map(assignment => {
-        const course = courses.find(c => c.id === assignment.courseId);
-        const submissionCount = submissions.filter(s => s.assignmentId === assignment.id).length;
+        const course = db.courses.find(c => c.id === assignment.courseId);
+        const submissionCount = db.submissions.filter(s => s.assignmentId === assignment.id).length;
         return {
             ...assignment,
             courseTitle: course?.title || 'Unknown Course',
@@ -181,19 +236,22 @@ export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assig
 }
 
 export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<Assignment> {
+    const db = await readDb();
     const newAssignment: Assignment = { ...data, id: String(Date.now()) };
-    assignments.push(newAssignment);
-return newAssignment;
+    db.assignments.push(newAssignment);
+    await writeDb(db);
+    return newAssignment;
 }
 
 export async function getAssignmentById(id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> {
-    const assignment = assignments.find(a => a.id === id);
+    const db = await readDb();
+    const assignment = db.assignments.find(a => a.id === id);
     if (!assignment) return undefined;
 
-    const assignmentSubmissions = submissions.filter(s => s.assignmentId === assignment.id);
+    const assignmentSubmissions = db.submissions.filter(s => s.assignmentId === assignment.id);
     const submissionsWithStudents = await Promise.all(
         assignmentSubmissions.map(async sub => {
-            const student = await findUserById(sub.studentId);
+            const student = db.users.find(u => u.id === sub.studentId);
             if (!student) {
                 // In a real app, you might want to handle this case more gracefully
                 throw new Error(`Student with id ${sub.studentId} not found`);
@@ -208,14 +266,17 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
 
 // --- Submission Functions ---
 export async function getSubmissionById(id: string): Promise<Submission | undefined> {
-    return submissions.find(s => s.id === id);
+    const db = await readDb();
+    return db.submissions.find(s => s.id === id);
 }
 
 export async function getStudentSubmission(studentId: string, assignmentId: string): Promise<Submission | undefined> {
-    return submissions.find(s => s.studentId === studentId && s.assignmentId === assignmentId);
+    const db = await readDb();
+    return db.submissions.find(s => s.studentId === studentId && s.assignmentId === assignmentId);
 }
 
 export async function createSubmission(data: Omit<Submission, 'id' | 'submittedAt' | 'grade' | 'feedback'>): Promise<Submission> {
+    const db = await readDb();
     const newSubmission: Submission = { 
         ...data, 
         id: String(Date.now()), 
@@ -223,29 +284,33 @@ export async function createSubmission(data: Omit<Submission, 'id' | 'submittedA
         grade: null,
         feedback: null
     };
-    submissions.push(newSubmission);
+    db.submissions.push(newSubmission);
+    await writeDb(db);
     return newSubmission;
 }
 
 export async function gradeSubmission(submissionId: string, grade: number, feedback: string): Promise<Submission | undefined> {
-    const submissionIndex = submissions.findIndex(s => s.id === submissionId);
+    const db = await readDb();
+    const submissionIndex = db.submissions.findIndex(s => s.id === submissionId);
     if (submissionIndex === -1) return undefined;
 
-    submissions[submissionIndex] = {
-        ...submissions[submissionIndex],
+    db.submissions[submissionIndex] = {
+        ...db.submissions[submissionIndex],
         grade,
         feedback,
     };
-    return submissions[submissionIndex];
+    await writeDb(db);
+    return db.submissions[submissionIndex];
 }
 
 export async function getStudentGrades(studentId: string): Promise<GradedSubmission[]> {
-    const studentSubmissions = submissions.filter(s => s.studentId === studentId && s.grade !== null);
+    const db = await readDb();
+    const studentSubmissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
     
     return Promise.all(studentSubmissions.map(async sub => {
-        const assignment = assignments.find(a => a.id === sub.assignmentId);
+        const assignment = db.assignments.find(a => a.id === sub.assignmentId);
         if (!assignment) throw new Error("Assignment not found");
-        const course = courses.find(c => c.id === assignment.courseId);
+        const course = db.courses.find(c => c.id === assignment.courseId);
         if (!course) throw new Error("Course not found");
         return { ...sub, assignment, course };
     }));
@@ -254,79 +319,94 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
 
 // --- Discussion Functions ---
 export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
-    const threads = discussionThreads.filter(t => t.courseId === courseId);
+    const db = await readDb();
+    const threads = db.discussionThreads.filter(t => t.courseId === courseId);
     return Promise.all(threads.map(async thread => {
-        const author = await findUserById(thread.authorId);
-        const postCount = discussionPosts.filter(p => p.threadId === thread.id).length;
+        const author = db.users.find(u => u.id === thread.authorId);
+        const postCount = db.discussionPosts.filter(p => p.threadId === thread.id).length;
         if (!author) throw new Error("Author not found for thread");
         return { ...thread, author, postCount };
     }));
 }
 
 export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
-    const thread = discussionThreads.find(t => t.id === threadId);
+    const db = await readDb();
+    const thread = db.discussionThreads.find(t => t.id === threadId);
     if (!thread) return undefined;
-    const author = await findUserById(thread.authorId);
+    const author = db.users.find(u => u.id === thread.authorId);
     if (!author) throw new Error("Author not found for thread");
     return { ...thread, author };
 }
 
 export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
-    const posts = discussionPosts.filter(p => p.threadId === threadId);
+    const db = await readDb();
+    const posts = db.discussionPosts.filter(p => p.threadId === threadId);
     return Promise.all(posts.map(async post => {
-        const author = await findUserById(post.authorId);
+        const author = db.users.find(u => u.id === post.authorId);
         if (!author) throw new Error("Author not found for post");
         return { ...post, author };
     }));
 }
 
 export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
+    const db = await readDb();
     const newThread: DiscussionThread = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
-    discussionThreads.push(newThread);
+    db.discussionThreads.push(newThread);
+    await writeDb(db);
     return newThread;
 }
 
 export async function createPost(data: Omit<DiscussionPost, 'id' | 'createdAt'>): Promise<DiscussionPost> {
+    const db = await readDb();
     const newPost: DiscussionPost = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
-    discussionPosts.push(newPost);
+    db.discussionPosts.push(newPost);
+    await writeDb(db);
     return newPost;
 }
 
 // --- Material Functions ---
 export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Promise<Material> {
+  const db = await readDb();
   const newMaterial: Material = {
     ...data,
     id: String(Date.now()),
     createdAt: new Date().toISOString(),
   };
-  materials.push(newMaterial);
+  db.materials.push(newMaterial);
+  await writeDb(db);
   return newMaterial;
 }
 
 export async function getMaterialsByCourse(courseId: string): Promise<Material[]> {
-    return materials.filter(m => m.courseId === courseId);
+    const db = await readDb();
+    return db.materials.filter(m => m.courseId === courseId);
 }
 
 // --- Notification Functions ---
 export async function createNotification(data: Omit<Notification, 'id' | 'isRead' | 'createdAt'>): Promise<Notification> {
+    const db = await readDb();
     const newNotification: Notification = {
         ...data,
         id: String(Date.now()),
         isRead: false,
         createdAt: new Date().toISOString(),
     };
-    notifications.unshift(newNotification); // Add to the beginning of the array
+    db.notifications.unshift(newNotification); // Add to the beginning of the array
+    await writeDb(db);
     return newNotification;
 }
 
 export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
-    return notifications.filter(n => n.userId === userId);
+    const db = await readDb();
+    return db.notifications.filter(n => n.userId === userId);
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
-    const notificationIndex = notifications.findIndex(n => n.id === notificationId);
+    const db = await readDb();
+    const notificationIndex = db.notifications.findIndex(n => n.id === notificationId);
     if (notificationIndex > -1) {
-        notifications[notificationIndex].isRead = true;
+        db.notifications[notificationIndex].isRead = true;
+        await writeDb(db);
         return true;
     }
     return false;

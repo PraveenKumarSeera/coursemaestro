@@ -1,0 +1,37 @@
+
+{
+  "users": [],
+  "courses": [
+    {
+      "id": "101",
+      "title": "Introduction to Web Development",
+      "description": "Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites. This course covers everything from basic syntax to responsive design and DOM manipulation.",
+      "teacherId": "1",
+      "duration": "8 Weeks",
+      "imageUrl": "https://picsum.photos/seed/1/600/400"
+    },
+    {
+      "id": "102",
+      "title": "Advanced React Patterns",
+      "description": "Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns for building large-scale applications.",
+      "teacherId": "1",
+      "duration": "6 Weeks",
+      "imageUrl": "https://picsum.photos/seed/2/600/400"
+    },
+    {
+      "id": "103",
+      "title": "Data Structures & Algorithms",
+      "description": "Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.",
+      "teacherId": "1",
+      "duration": "10 Weeks",
+      "imageUrl": "https://picsum.photos/seed/3/600/400"
+    }
+  ],
+  "enrollments": [],
+  "assignments": [],
+  "submissions": [],
+  "discussionThreads": [],
+  "discussionPosts": [],
+  "materials": [],
+  "notifications": []
+}
