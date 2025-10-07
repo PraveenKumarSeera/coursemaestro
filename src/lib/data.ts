@@ -1,4 +1,5 @@
 
+
 import { placeholderImages } from './placeholder-images.json';
 import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material } from './types';
 import { format } from 'date-fns';
