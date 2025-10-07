@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines the AI Quiz Generator flow.
@@ -9,7 +10,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { z } from 'genkit/zod';
 
 const QuestionSchema = z.object({
   question: z.string().describe('The quiz question.'),

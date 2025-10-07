@@ -1,4 +1,5 @@
 
+
 'use server';
 /**
  * @fileOverview This file defines the AI Teaching Assistant flow.
@@ -6,7 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { z } from 'genkit/zod';
 
 export const TeachingAssistantInputSchema = z.object({
   submissionText: z.string().describe('The text of the student submission to be analyzed.'),

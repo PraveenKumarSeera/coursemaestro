@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines the AI Resume Builder flow.
@@ -5,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { z } from 'genkit/zod';
 
 const GradedSubmissionSchema = z.object({
   course: z.object({

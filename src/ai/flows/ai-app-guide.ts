@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI chatbot that can answer questions about the features of this application.
@@ -7,7 +8,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import {z} from 'genkit/zod';
 
 const AppGuideInputSchema = z.object({
   chatHistory: z

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines the AI Material Parser flow.
@@ -7,7 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { z } from 'genkit/zod';
 import mammoth from 'mammoth';
 
 const MaterialParserInputSchema = z.object({

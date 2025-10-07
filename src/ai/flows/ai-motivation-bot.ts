@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview This file defines the AI Motivation Bot flow.
@@ -5,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { z } from 'genkit/zod';
 
 const MotivationBotInputSchema = z.object({
   studentName: z.string().describe("The first name of the student."),
