@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -38,6 +39,7 @@ const featuresList = `
 *   **Leaderboard:** See where they rank among their peers based on average grade.
 *   **Daily Attendance:** Automatically get marked as "Present" for a course just by visiting the course page.
 *   **In-App Notifications:** Receive real-time alerts for new assignments and when grades are posted.
+*   **Sound Effects:** Hear a satisfying chime when an assignment is successfully submitted.
 
 ### For Teachers
 
@@ -56,11 +58,7 @@ const featuresList = `
 *   **Automatic Dark Mode:** The UI automatically switches theme based on the user's system time.
 `;
 
-const prompt = ai.definePrompt({
-  name: 'appGuidePrompt',
-  input: { schema: AppGuideInputSchema },
-  output: { schema: AppGuideOutputSchema },
-  prompt: `You are "Maestro," a friendly and enthusiastic AI guide for the CourseMaestro application. Your goal is to welcome users, explain the features of the application, and answer their questions about it.
+const promptTemplate = `You are "Maestro," a friendly and enthusiastic AI guide for the CourseMaestro application. Your goal is to welcome users, explain the features of the application, and answer their questions about it.
 
 Keep your answers concise, friendly, and easy to understand. Use Markdown for formatting like lists and bold text.
 
@@ -70,21 +68,13 @@ ${featuresList}
 Use this information to answer the user's question. If the user asks something unrelated to CourseMaestro, politely steer the conversation back to the application's features.
 
 Conversation History:
-{{#if chatHistory}}
-  {{#each chatHistory}}
-    {{#if (eq role 'user')}}
-      User: {{content}}
-    {{else}}
-      Maestro: {{content}}
-    {{/if}}
-  {{/each}}
-{{/if}}
+{{{formattedHistory}}}
 
 User's current question: {{question}}
 
 Answer:
-`,
-});
+`;
+
 
 const appGuideFlow = ai.defineFlow(
   {
@@ -93,7 +83,28 @@ const appGuideFlow = ai.defineFlow(
     outputSchema: AppGuideOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+
+    const formattedHistory = (input.chatHistory || [])
+        .map(message => {
+            if (message.role === 'user') {
+                return `User: ${message.content}`;
+            }
+            return `Maestro: ${message.content}`;
+        })
+        .join('\n');
+    
+    const prompt = ai.definePrompt({
+        name: 'appGuidePrompt',
+        prompt: promptTemplate,
+        input: { schema: z.object({ question: z.string(), formattedHistory: z.string() }) },
+        output: { schema: AppGuideOutputSchema },
+    });
+
+    const { output } = await prompt({
+        question: input.question,
+        formattedHistory,
+    });
+    
     if (!output) {
       throw new Error('Failed to generate an answer.');
     }
