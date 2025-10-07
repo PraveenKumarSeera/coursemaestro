@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import GradeSubmissionForm from "@/components/assignments/grade-submission-form";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import AITeachingAssistant from "@/components/assignments/ai-teaching-assistant";
 
 export default async function AssignmentSubmissionsPage({ params }: { params: { assignmentId: string }}) {
     const { user } = await getSession();
@@ -51,7 +52,10 @@ export default async function AssignmentSubmissionsPage({ params }: { params: { 
                                 </CardHeader>
                                 <CardContent>
                                     <p className="mb-4 p-4 bg-background rounded-md ">{submission.content}</p>
-                                    <GradeSubmissionForm submission={submission} assignmentId={assignment.id} />
+                                    <AITeachingAssistant submissionText={submission.content} />
+                                    <div className="mt-4">
+                                        <GradeSubmissionForm submission={submission} assignmentId={assignment.id} />
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))

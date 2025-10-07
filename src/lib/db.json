@@ -1,5 +1,20 @@
 {
-  "users": [],
+  "users": [
+    {
+      "name": "rajesh",
+      "email": "rajesh@gmail.com",
+      "password": "123456",
+      "role": "teacher",
+      "id": "1759816272542"
+    },
+    {
+      "name": "Praveen Kumar",
+      "email": "praveen@mbu.edu",
+      "password": "123456",
+      "role": "student",
+      "id": "1759816290832"
+    }
+  ],
   "courses": [
     {
       "id": "101",
