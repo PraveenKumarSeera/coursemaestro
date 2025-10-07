@@ -1,6 +1,6 @@
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission } from './types';
 import { format } from 'date-fns';
 
 // In-memory "database"
@@ -45,6 +45,29 @@ export async function findUserById(id: string): Promise<User | undefined> {
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
   const newUser: User = { ...data, id: String(Date.now()) };
   users.push(newUser);
+
+  // Add sample data for new users
+  if (newUser.role === 'teacher') {
+    const newCourse: Course = {
+        id: String(Date.now() + 1),
+        title: `Your First Course: ${newUser.name.split(' ')[0]}'s Class`,
+        description: 'This is a sample course created just for you. You can edit or delete it.',
+        teacherId: newUser.id,
+        duration: '4 Weeks',
+        imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
+    };
+    courses.push(newCourse);
+  } else if (newUser.role === 'student' && courses.length > 0) {
+      // Enroll in the first course if it exists
+      const courseToEnroll = courses[0];
+      const newEnrollment: Enrollment = {
+          id: String(Date.now() + 1),
+          studentId: newUser.id,
+          courseId: courseToEnroll.id,
+      };
+      enrollments.push(newEnrollment);
+  }
+
   return newUser;
 }
 
@@ -65,7 +88,7 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   return { ...course, teacher };
 }
 
-export async function createCourse(data: Omit<Course, 'id' | 'imageUrl'>, teacherId: string): Promise<Course> {
+export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
     const newCourse: Course = {
         ...data,
         id: String(Date.now()),
@@ -160,7 +183,7 @@ export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assig
 export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<Assignment> {
     const newAssignment: Assignment = { ...data, id: String(Date.now()) };
     assignments.push(newAssignment);
-    return newAssignment;
+return newAssignment;
 }
 
 export async function getAssignmentById(id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> {
@@ -171,7 +194,11 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
     const submissionsWithStudents = await Promise.all(
         assignmentSubmissions.map(async sub => {
             const student = await findUserById(sub.studentId);
-            return { ...sub, student: student! };
+            if (!student) {
+                // In a real app, you might want to handle this case more gracefully
+                throw new Error(`Student with id ${sub.studentId} not found`);
+            }
+            return { ...sub, student };
         })
     );
 
@@ -197,21 +224,25 @@ export async function createSubmission(data: Omit<Submission, 'id' | 'submittedA
 }
 
 export async function gradeSubmission(submissionId: string, grade: number, feedback: string): Promise<Submission | undefined> {
-    const submission = submissions.find(s => s.id === submissionId);
-    if (submission) {
-        submission.grade = grade;
-        submission.feedback = feedback;
-        return submission;
-    }
-    return undefined;
+    const submissionIndex = submissions.findIndex(s => s.id === submissionId);
+    if (submissionIndex === -1) return undefined;
+
+    submissions[submissionIndex] = {
+        ...submissions[submissionIndex],
+        grade,
+        feedback,
+    };
+    return submissions[submissionIndex];
 }
 
-export async function getStudentGrades(studentId: string): Promise<(Submission & { assignment: Assignment, course: Course })[]> {
+export async function getStudentGrades(studentId: string): Promise<GradedSubmission[]> {
     const studentSubmissions = submissions.filter(s => s.studentId === studentId && s.grade !== null);
     
     return Promise.all(studentSubmissions.map(async sub => {
-        const assignment = assignments.find(a => a.id === sub.assignmentId)!;
-        const course = courses.find(c => c.id === assignment.courseId)!;
+        const assignment = assignments.find(a => a.id === sub.assignmentId);
+        if (!assignment) throw new Error("Assignment not found");
+        const course = courses.find(c => c.id === assignment.courseId);
+        if (!course) throw new Error("Course not found");
         return { ...sub, assignment, course };
     }));
 }

@@ -21,8 +21,8 @@ export default function AssignmentList({ assignments, user, courseId }: Assignme
         if (user.role === 'teacher') return null;
 
         if (assignment.submission) {
-            return <Badge variant={assignment.submission.grade ? "default" : "secondary"}>
-                {assignment.submission.grade ? `Graded: ${assignment.submission.grade}%` : 'Submitted'}
+            return <Badge variant={assignment.submission.grade !== null ? "default" : "secondary"}>
+                {assignment.submission.grade !== null ? `Graded: ${assignment.submission.grade}%` : 'Submitted'}
             </Badge>;
         }
 
