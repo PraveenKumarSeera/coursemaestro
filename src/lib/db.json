@@ -76,7 +76,16 @@
       "createdAt": "2025-10-07T08:10:00.875Z"
     }
   ],
-  "notifications": [],
+  "notifications": [
+    {
+      "userId": "1759816290832",
+      "message": "New assignment posted: \"dbms schema\"",
+      "link": "/courses/1759821872336?tab=assignments",
+      "id": "1759825020942",
+      "isRead": false,
+      "createdAt": "2025-10-07T08:17:00.942Z"
+    }
+  ],
   "attendance": [
     {
       "id": "1759821891302",
