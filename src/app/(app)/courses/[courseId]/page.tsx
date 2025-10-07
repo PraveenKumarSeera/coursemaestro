@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookText, ClipboardList, Users, Clock, User as UserIcon } from 'lucide-react';
+import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles } from 'lucide-react';
 import AiAssistant from '@/components/ai-assistant';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AssignmentList from '@/components/assignments/assignment-list';
@@ -76,7 +76,7 @@ export default async function CourseDetailPage({
             </TabsTrigger>
            ) : (
             <TabsTrigger value="ai-assistant">
-                <Users className="mr-2 h-4 w-4" /> AI Assistant
+                <Sparkles className="mr-2 h-4 w-4" /> AI Assistant
             </TabsTrigger>
            )}
         </TabsList>
@@ -133,4 +133,3 @@ export default async function CourseDetailPage({
     </div>
   );
 }
-

@@ -33,6 +33,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
 
   const studentRoutes = [
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
+    { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
   ];
   
   const navItems = user.role === 'teacher' 
@@ -56,26 +57,20 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                 href={href}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                  pathname === href && 'bg-muted text-primary'
+                  pathname.startsWith(href) && href !== '/dashboard' && 'bg-muted text-primary',
+                  pathname === href && href === '/dashboard' && 'bg-muted text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
                 {label}
+                {label === 'AI Assistant' && (
+                    <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
+                        New
+                    </Badge>
+                )}
               </Link>
             ))}
           </nav>
-        </div>
-        <div className="mt-auto p-4">
-           <Link
-                href="/ai-assistant"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <Sparkles className="h-4 w-4 text-accent" />
-                AI Study Assistant
-                <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
-                  New
-                </Badge>
-              </Link>
         </div>
       </div>
     </div>
