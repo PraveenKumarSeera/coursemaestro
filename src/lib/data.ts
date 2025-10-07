@@ -196,6 +196,41 @@ export async function isEnrolled(studentId: string, courseId: string): Promise<b
     return db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
 }
 
+export async function getTeacherStudents(teacherId: string) {
+    const db = await readDb();
+    const courses = db.courses.filter(c => c.teacherId === teacherId);
+    const studentMap = new Map<string, { user: User, courses: string[] }>();
+
+    for (const course of courses) {
+        const students = await getStudentsByCourse(course.id);
+        for (const student of students) {
+            if (!studentMap.has(student.id)) {
+                studentMap.set(student.id, { user: student, courses: [] });
+            }
+            studentMap.get(student.id)!.courses.push(course.title);
+        }
+    }
+    
+    const studentList = Array.from(studentMap.values());
+
+    const studentsWithStats = studentList.map(item => {
+        const studentSubmissions = db.submissions.filter(s => s.studentId === item.user.id && s.grade !== null);
+        const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+        const averageGrade = studentSubmissions.length > 0 ? Math.round(totalGrade / studentSubmissions.length) : 0;
+        
+        return {
+            id: item.user.id,
+            name: item.user.name,
+            email: item.user.email,
+            courses: item.courses,
+            averageGrade,
+            assignmentsCompleted: studentSubmissions.length
+        };
+    });
+
+    return studentsWithStats;
+}
+
 
 // --- Assignment Functions ---
 export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {

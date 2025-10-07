@@ -1,43 +1,35 @@
 
 import { getSession } from '@/lib/session';
-import { getTeacherCourses, getStudentsByCourse, findUserById } from '@/lib/data';
+import { getTeacherStudents } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { notFound } from 'next/navigation';
-import type { User, Course } from '@/lib/types';
+import type { User } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import StudentList from '@/components/students/student-list';
 
-async function getTeacherStudents(teacherId: string) {
-    const courses = await getTeacherCourses(teacherId);
-    const studentMap = new Map<string, { user: User, courses: string[] }>();
-
-    for (const course of courses) {
-        const students = await getStudentsByCourse(course.id);
-        for (const student of students) {
-            if (!studentMap.has(student.id)) {
-                studentMap.set(student.id, { user: student, courses: [] });
-            }
-            studentMap.get(student.id)!.courses.push(course.title);
-        }
-    }
-
-    return Array.from(studentMap.values()).map(item => ({
-        id: item.user.id,
-        name: item.user.name,
-        email: item.user.email,
-        courses: item.courses,
-    }));
+async function getStudentsWithPerformance(teacherId: string) {
+    const students = await getTeacherStudents(teacherId);
+    return students.sort((a, b) => b.averageGrade - a.averageGrade);
 }
 
-
-export default async function StudentsPage() {
+export default async function StudentsPage({ searchParams }: { searchParams?: { filter?: string } }) {
   const { user } = await getSession();
 
   if (!user || user.role !== 'teacher') {
     notFound();
   }
 
-  const students = await getTeacherStudents(user.id);
+  const allStudents = await getStudentsWithPerformance(user.id);
+  const filter = searchParams?.filter;
+
+  const filteredStudents = allStudents.filter(student => {
+    if (filter === 'high') return student.averageGrade >= 90;
+    if (filter === 'average') return student.averageGrade >= 70 && student.averageGrade < 90;
+    if (filter === 'at_risk') return student.averageGrade > 0 && student.averageGrade < 70;
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -47,41 +39,11 @@ export default async function StudentsPage() {
         <CardHeader>
           <CardTitle>Enrolled Students</CardTitle>
           <CardDescription>
-            A list of all students enrolled in your courses.
+            A list of all students enrolled in your courses, with performance metrics.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {students.length > 0 ? (
-            <Accordion type="single" collapsible className="w-full">
-              {students.map((student) => (
-                <AccordionItem value={student.id} key={student.id}>
-                  <AccordionTrigger>
-                    <div className="flex items-center gap-4">
-                      <Avatar>
-                        <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-left">{student.name}</p>
-                        <p className="text-sm text-muted-foreground text-left">{student.email}</p>
-                      </div>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="pl-16">
-                      <h4 className="font-semibold mb-2">Enrolled Courses:</h4>
-                      <ul className="list-disc list-inside text-muted-foreground">
-                        {student.courses.map((courseTitle) => (
-                          <li key={courseTitle}>{courseTitle}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          ) : (
-            <p className="text-muted-foreground">You do not have any students enrolled in your courses yet.</p>
-          )}
+          <StudentList students={filteredStudents} />
         </CardContent>
       </Card>
     </div>
