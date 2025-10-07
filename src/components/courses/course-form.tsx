@@ -49,7 +49,7 @@ export default function CourseForm({ course }: CourseFormProps) {
         router.push('/courses');
       }
       if (state.success && isEditing) {
-        router.push(`/courses/${course.id}`);
+        router.push(`/courses`);
       }
     }
   }, [state, toast, router, isEditing, course?.id]);

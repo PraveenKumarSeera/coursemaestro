@@ -84,6 +84,7 @@ export async function deleteCourseAction(courseId: string): Promise<void> {
         throw new Error('Permission denied');
     }
     
+    // In a real app, you'd also check if the user is the owner of the course
     await deleteCourse(courseId);
     revalidatePath('/courses');
     redirect('/courses');

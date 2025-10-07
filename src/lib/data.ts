@@ -122,6 +122,20 @@ export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     return users.filter(user => studentIds.includes(user.id));
 }
 
+export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
+    const alreadyEnrolled = enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+    if (alreadyEnrolled) {
+        return null;
+    }
+    const newEnrollment: Enrollment = {
+        id: String(Date.now()),
+        studentId,
+        courseId,
+    };
+    enrollments.push(newEnrollment);
+    return newEnrollment;
+}
+
 // --- Assignment Functions ---
 export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
     return assignments.filter(a => a.courseId === courseId);

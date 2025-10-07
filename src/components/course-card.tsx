@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import type { Course, User } from '@/lib/types';
 import { Clock, User as UserIcon } from 'lucide-react';
 import { getTeacherById } from '@/lib/data';
+import EnrollButton from './courses/enroll-button';
 
 type CourseCardProps = {
   course: Course;
@@ -47,11 +49,13 @@ export default async function CourseCard({ course, user, isEnrolled }: CourseCar
       </CardContent>
       <CardFooter>
         {user.role === 'student' ? (
-          <Button asChild className="w-full" disabled={isEnrolled}>
-            <Link href={isEnrolled ? `/courses/${course.id}` : '#'}>
-              {isEnrolled ? 'View Course' : 'Enroll Now'}
-            </Link>
-          </Button>
+            isEnrolled ? (
+                <Button asChild className="w-full">
+                    <Link href={`/courses/${course.id}`}>View Course</Link>
+                </Button>
+            ) : (
+                <EnrollButton courseId={course.id} />
+            )
         ) : (
           <Button asChild className="w-full" variant="outline">
             <Link href={`/courses/${course.id}`}>Manage Course</Link>
