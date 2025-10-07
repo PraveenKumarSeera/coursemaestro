@@ -1,16 +1,16 @@
 'use client';
-import { useState, useActionState, useRef, useCallback, useEffect } from 'react';
+import { useActionState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { generateQuizAndFlashcardsAction } from '@/app/actions/quiz-generator';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { FileText, Loader2, Wand2, UploadCloud, X } from 'lucide-react';
+import { FileText, Loader2, Wand2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Badge } from './ui/badge';
 import type { Quiz, Flashcard } from '@/app/actions/quiz-generator';
-import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 
 function SubmitButton() {
@@ -101,55 +101,13 @@ const initialState = {
 export default function QuizGeneratorClient() {
     const [state, formAction] = useActionState(generateQuizAndFlashcardsAction, initialState);
     const formRef = useRef<HTMLFormElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [file, setFile] = useState<File | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
-        }
-    };
-
-    const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            setFile(e.dataTransfer.files[0]);
-            if(fileInputRef.current) {
-                fileInputRef.current.files = e.dataTransfer.files;
-            }
-        }
-    }, []);
-
-    const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-    }, []);
-
-    if (!isMounted) {
-        return null;
-    }
 
     return (
         <div className="space-y-6">
             <div className='space-y-1'>
                 <h1 className="text-3xl font-bold font-headline">AI Quiz Generator</h1>
                 <p className="text-muted-foreground">
-                    Paste your course notes, or upload a file to let AI create a quiz and flashcards for you.
+                    Paste your course notes to let AI create a quiz and flashcards for you.
                 </p>
             </div>
 
@@ -157,62 +115,14 @@ export default function QuizGeneratorClient() {
                 <Card>
                     <CardHeader>
                         <CardTitle>Course Material</CardTitle>
-                        <CardDescription>Enter text, or upload a .pdf, .docx, or .pptx file.</CardDescription>
+                        <CardDescription>Enter text to generate a quiz from.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <Textarea
                             name="courseMaterial"
                             placeholder="Paste your notes here..."
-                            className="h-24"
+                            className="min-h-48"
                         />
-
-                        <div className="text-center text-muted-foreground my-2">OR</div>
-
-                        <div
-                            className={cn(
-                                'border-2 border-dashed border-muted-foreground/50 rounded-lg p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors',
-                                isDragging && 'bg-accent/10 border-accent',
-                                file && 'border-primary/50'
-                            )}
-                            onDrop={handleDrop}
-                            onDragOver={handleDragOver}
-                            onDragLeave={handleDragLeave}
-                            onClick={() => fileInputRef.current?.click()}
-                        >
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                name="file"
-                                className="hidden"
-                                onChange={handleFileChange}
-                                accept=".pdf,.docx,.pptx,.doc"
-                            />
-                            <UploadCloud className={cn("h-10 w-10 mb-4", file ? 'text-primary' : 'text-muted-foreground')} />
-                            
-                            {file ? (
-                                <div className="flex items-center gap-2">
-                                    <p className="font-semibold text-primary">{file.name}</p>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-6 w-6 rounded-full"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setFile(null);
-                                            if (fileInputRef.current) fileInputRef.current.value = '';
-                                        }}
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div>
-                                    <p className="font-semibold">Drag & drop a file here, or click to select</p>
-                                    <p className="text-sm text-muted-foreground">PDF, DOCX, or PPTX</p>
-                                </div>
-                            )}
-                        </div>
-
                     </CardContent>
                 </Card>
                 <SubmitButton />

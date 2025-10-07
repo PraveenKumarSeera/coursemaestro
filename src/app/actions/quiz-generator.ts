@@ -17,37 +17,25 @@ export async function generateQuizAndFlashcardsAction(
   formData: FormData
 ): Promise<FormState> {
   const courseMaterial = formData.get('courseMaterial') as string;
-  const file = formData.get('file') as File | null;
 
-  let fileDataUri: string | undefined;
-
-  if (file && file.size > 0) {
-    const buffer = await file.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    fileDataUri = `data:${file.type};base64,${base64}`;
-  }
-
-  if (!courseMaterial && !fileDataUri) {
+  if (!courseMaterial) {
       return {
           quiz: null,
           flashcards: null,
-          message: 'Please provide course material text or upload a file.',
+          message: 'Please provide course material text.',
       };
   }
   
-  if (courseMaterial && courseMaterial.length < 50 && !fileDataUri) {
+  if (courseMaterial.length < 50) {
     return {
       quiz: null,
       flashcards: null,
-      message: 'Please provide at least 50 characters of course material or upload a file.',
+      message: 'Please provide at least 50 characters of course material.',
     };
   }
 
   try {
-    const result = await generateQuizAndFlashcards({ 
-        courseMaterial: courseMaterial || '', // Send empty string if not provided
-        fileDataUri 
-    });
+    const result = await generateQuizAndFlashcards({ courseMaterial });
     return {
       quiz: result.quiz,
       flashcards: result.flashcards,

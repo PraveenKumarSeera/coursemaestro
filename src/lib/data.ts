@@ -1,6 +1,6 @@
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material } from './types';
 import { format } from 'date-fns';
 
 // In-memory "database"
@@ -40,6 +40,8 @@ let discussionPosts: DiscussionPost[] = [
     { id: '501', threadId: '401', authorId: '2', content: "I'm having trouble centering a div. Can anyone help?", createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
     { id: '502', threadId: '401', authorId: '1', content: 'Sure! Have you tried using `display: flex; justify-content: center; align-items: center;` on the parent container?', createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
 ];
+
+let materials: Material[] = [];
 
 
 // --- User Functions ---
@@ -304,4 +306,19 @@ export async function createPost(data: Omit<DiscussionPost, 'id' | 'createdAt'>)
     const newPost: DiscussionPost = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
     discussionPosts.push(newPost);
     return newPost;
+}
+
+// --- Material Functions ---
+export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Promise<Material> {
+  const newMaterial: Material = {
+    ...data,
+    id: String(Date.now()),
+    createdAt: new Date().toISOString(),
+  };
+  materials.push(newMaterial);
+  return newMaterial;
+}
+
+export async function getMaterialsByCourse(courseId: string): Promise<Material[]> {
+    return materials.filter(m => m.courseId === courseId);
 }
