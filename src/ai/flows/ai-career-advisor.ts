@@ -17,7 +17,7 @@ const prompt = ai.definePrompt({
   input: { schema: CareerAdvisorInputSchema },
   output: { schema: CareerAdvisorOutputSchema },
   prompt: `You are an expert career advisor for students.
-  
+
 Analyze the student's performance based on their grades in different courses.
 Based on their strengths, suggest 3-5 potential career paths.
 
@@ -25,11 +25,6 @@ For each career path, provide:
 1.  A title for the career.
 2.  A brief description explaining why it's a good fit based on their academic performance.
 3.  A list of key skills associated with that career.
-
-Student's Graded Assignments:
-\`\`\`json
-{{{gradedSubmissions}}}
-\`\`\`
 `,
 });
 
