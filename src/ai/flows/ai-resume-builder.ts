@@ -18,7 +18,7 @@ const prompt = ai.definePrompt({
     output: { schema: ResumeBuilderOutputSchema },
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
-Generate a resume in Markdown format based on the student's information and academic performance.
+Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
 
 The resume should include the following sections:
 1.  **Header:** Student's Name and Email.

@@ -25,6 +25,8 @@ For each career path, provide:
 1.  A title for the career.
 2.  A brief description explaining why it's a good fit based on their academic performance.
 3.  A list of key skills associated with that career.
+
+The student's performance data is provided in the input.
 `,
 });
 
