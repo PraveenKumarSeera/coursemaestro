@@ -13,11 +13,11 @@ import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialPar
 export async function parseMaterial(
   input: MaterialParserInput
 ): Promise<MaterialParserOutput> {
-  return await ai.run('materialParserFlow', input);
+  return await materialParserFlow(input);
 }
 
 
-ai.defineFlow(
+const materialParserFlow = ai.defineFlow(
   {
     name: 'materialParserFlow',
     inputSchema: MaterialParserInputSchema,

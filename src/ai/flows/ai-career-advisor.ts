@@ -9,10 +9,10 @@ import { ai } from '@/ai/genkit';
 import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema, type CareerAdvisorInput, type CareerAdvisorOutput } from '@/lib/ai-types';
 
 export async function suggestCareers(input: CareerAdvisorInput): Promise<CareerAdvisorOutput> {
-  return await ai.run('suggestCareersFlow', input);
+  return await suggestCareersFlow(input);
 }
 
-ai.defineFlow(
+const suggestCareersFlow = ai.defineFlow(
   {
     name: 'suggestCareersFlow',
     inputSchema: CareerAdvisorInputSchema,

@@ -9,10 +9,10 @@ import { ai } from '@/ai/genkit';
 import { MotivationBotInputSchema, MotivationBotOutputSchema, type MotivationBotInput, type MotivationBotOutput } from '@/lib/ai-types';
 
 export async function generateMotivationalMessage(input: MotivationBotInput): Promise<MotivationBotOutput> {
-  return await ai.run('motivationalMessageFlow', input);
+  return await motivationalMessageFlow(input);
 }
 
-ai.defineFlow(
+const motivationalMessageFlow = ai.defineFlow(
   {
     name: 'motivationalMessageFlow',
     inputSchema: MotivationBotInputSchema,

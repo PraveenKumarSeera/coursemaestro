@@ -9,11 +9,11 @@ import { ai } from '@/ai/genkit';
 import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/lib/ai-types';
 
 export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {
-  return await ai.run('resumeBuilderFlow', input);
+  return await resumeBuilderFlow(input);
 }
 
 
-ai.defineFlow(
+const resumeBuilderFlow = ai.defineFlow(
   {
     name: 'resumeBuilderFlow',
     inputSchema: ResumeBuilderInputSchema,

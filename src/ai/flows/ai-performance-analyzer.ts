@@ -17,11 +17,11 @@ import {
 export async function analyzePerformance(
   input: PerformanceAnalyzerInput
 ): Promise<PerformanceAnalyzerOutput> {
-  return await ai.run('analyzePerformanceFlow', input);
+  return await analyzePerformanceFlow(input);
 }
 
 
-ai.defineFlow(
+const analyzePerformanceFlow = ai.defineFlow(
   {
     name: 'analyzePerformanceFlow',
     inputSchema: PerformanceAnalyzerInputSchema,

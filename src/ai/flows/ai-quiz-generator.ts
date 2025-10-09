@@ -9,10 +9,10 @@ import { ai } from '@/ai/genkit';
 import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema, type QuizGeneratorInput, type QuizGeneratorOutput } from '@/lib/ai-types';
 
 export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Promise<QuizGeneratorOutput> {
-    return await ai.run('quizGeneratorFlow', input);
+    return await quizGeneratorFlow(input);
 }
 
-ai.defineFlow(
+const quizGeneratorFlow = ai.defineFlow(
     {
         name: 'quizGeneratorFlow',
         inputSchema: QuizGeneratorInputSchema,

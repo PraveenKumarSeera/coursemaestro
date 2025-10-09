@@ -10,10 +10,10 @@ import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type Teach
 
 
 export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
-  return await ai.run('teachingAssistantFlow', input);
+  return await teachingAssistantFlow(input);
 }
 
-ai.defineFlow(
+const teachingAssistantFlow = ai.defineFlow(
   {
     name: 'teachingAssistantFlow',
     inputSchema: TeachingAssistantInputSchema,

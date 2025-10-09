@@ -9,10 +9,10 @@ import {ai} from '@/ai/genkit';
 import { AiStudyAssistantInputSchema, AiStudyAssistantOutputSchema, type AiStudyAssistantInput, type AiStudyAssistantOutput } from '@/lib/ai-types';
 
 export async function aiStudyAssistant(input: AiStudyAssistantInput): Promise<AiStudyAssistantOutput> {
-  return await ai.run('studyAssistantFlow', input);
+  return await studyAssistantFlow(input);
 }
 
-ai.defineFlow(
+const studyAssistantFlow = ai.defineFlow(
   {
     name: 'studyAssistantFlow',
     inputSchema: AiStudyAssistantInputSchema,
