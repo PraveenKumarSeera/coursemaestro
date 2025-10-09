@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById, getStudentGrades, findUserById, createNotification } from '@/lib/data';
 import { getSession } from '@/lib/session';
-import { motivationalMessageFlow } from '@/ai/flows/ai-motivation-bot';
+import { generateMotivationalMessage } from '@/ai/flows/ai-motivation-bot';
 import type { MotivationBotOutput } from '@/lib/ai-types';
 
 const createAssignmentSchema = z.object({
@@ -148,7 +148,7 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
                 
                 if (student && course) {
                     try {
-                        const result: MotivationBotOutput = await motivationalMessageFlow({
+                        const result: MotivationBotOutput = await generateMotivationalMessage({
                             studentName: student.name.split(' ')[0],
                             courseTitle: course.title,
                         });
