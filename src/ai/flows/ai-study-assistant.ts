@@ -6,6 +6,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { AiStudyAssistantInputSchema, AiStudyAssistantOutputSchema, type AiStudyAssistantInput, type AiStudyAssistantOutput } from '@/lib/ai-types';
 
 export async function aiStudyAssistant(input: AiStudyAssistantInput): Promise<AiStudyAssistantOutput> {
@@ -32,7 +33,7 @@ const studyAssistantFlow = ai.defineFlow(
 
     Answer:
     `,
-      model: 'gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-flash-latest'),
       output: {
         schema: AiStudyAssistantOutputSchema,
       },

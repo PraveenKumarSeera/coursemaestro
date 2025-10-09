@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import {
   PerformanceAnalyzerInputSchema,
   PerformanceAnalyzerOutputSchema,
@@ -46,7 +47,7 @@ Structure your response in **Markdown** format with the following sections:
 
 Maintain a **positive and empathetic tone** throughout.
 `,
-      model: 'gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-flash-latest'),
       output: {
         schema: PerformanceAnalyzerOutputSchema,
       },

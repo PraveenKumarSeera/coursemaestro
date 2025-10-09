@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema, type QuizGeneratorInput, type QuizGeneratorOutput } from '@/lib/ai-types';
 
 export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Promise<QuizGeneratorOutput> {
@@ -35,7 +36,7 @@ const quizGeneratorFlow = ai.defineFlow(
     
       Generate the quiz and flashcards in the specified JSON format.
       `,
-            model: 'gemini-1.5-flash-latest',
+            model: googleAI.model('gemini-1.5-flash-latest'),
             output: {
                 schema: QuizGeneratorOutputSchema,
             },

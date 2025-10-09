@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { MotivationBotInputSchema, MotivationBotOutputSchema, type MotivationBotInput, type MotivationBotOutput } from '@/lib/ai-types';
 
 export async function generateMotivationalMessage(input: MotivationBotInput): Promise<MotivationBotOutput> {
@@ -36,7 +37,7 @@ Example: "Hey ${input.studentName}, just a friendly check-in. Remember that ever
 
 Generate the message in the specified JSON format.
 `,
-      model: 'gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-flash-latest'),
       output: {
         schema: MotivationBotOutputSchema,
       },

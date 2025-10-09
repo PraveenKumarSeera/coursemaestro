@@ -6,6 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type TeachingAssistantInput, type TeachingAssistantOutput } from '@/lib/ai-types';
 
 
@@ -40,7 +41,7 @@ ${input.submissionText}
     
     const { output } = await ai.generate({
       prompt: promptText,
-      model: 'gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-flash-latest'),
       output: {
         schema: TeachingAssistantOutputSchema,
       },

@@ -8,6 +8,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialParserInput, type MaterialParserOutput } from '@/lib/ai-types';
 
 export async function parseMaterial(
@@ -30,7 +31,7 @@ const materialParserFlow = ai.defineFlow(
   Document:
   {{media url=${input.fileDataUri}}}
   `,
-      model: 'gemini-1.5-flash-latest',
+      model: googleAI.model('gemini-1.5-flash-latest'),
       output: {
         schema: MaterialParserOutputSchema,
       },
