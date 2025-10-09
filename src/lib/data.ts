@@ -97,7 +97,8 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   const db = await getDb();
   const course = db.courses.find(c => c.id === id);
   if (!course) return undefined;
-  const teacher = await findUserById(course.teacherId) || { id: course.teacherId, name: 'Unknown Teacher', email: '', role: 'teacher', password: '' };
+  const teacher = await findUserById(course.teacherId);
+  if (!teacher) return undefined; // Return undefined if teacher not found
   return { ...course, teacher };
 }
 
@@ -145,13 +146,9 @@ export async function deleteCourse(id: string): Promise<boolean> {
 }
 
 
-export async function getTeacherById(id: string): Promise<User> {
+export async function getTeacherById(id: string): Promise<User | undefined> {
     const db = await getDb();
-    const user = await findUserById(id);
-    if (user) return user;
-
-    // Return a placeholder if the teacher is not found to avoid crashes
-    return { id: 'deleted-user', name: 'Unknown Teacher', email: '', role: 'teacher', password: '' };
+    return findUserById(id);
 }
 
 export async function getTeacherCourses(teacherId: string): Promise<(Course & { enrollments: Enrollment[] })[]> {
@@ -175,11 +172,8 @@ export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     const courseEnrollments = db.enrollments.filter(e => e.courseId === courseId);
     const studentIds = courseEnrollments.map(e => e.studentId);
     
-    const students = await Promise.all(studentIds.map(async id => {
-        const user = await findUserById(id);
-        return user || { id, name: 'Unknown Student', email: '', role: 'student', password: '' };
-    }));
-    return students;
+    const students = await Promise.all(studentIds.map(id => findUserById(id)));
+    return students.filter(Boolean) as User[];
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
@@ -276,12 +270,14 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
     if (!assignment) return undefined;
 
     const assignmentSubmissions = db.submissions.filter(s => s.assignmentId === assignment.id);
-    const submissionsWithStudents = await Promise.all(
+    
+    const submissionsWithStudents = (await Promise.all(
         assignmentSubmissions.map(async sub => {
-            const student = await findUserById(sub.studentId) || { id: sub.studentId, name: 'Unknown Student', email: '', role: 'student', password: '' };
+            const student = await findUserById(sub.studentId);
+            if (!student) return null; // Filter out submissions from deleted students
             return { ...sub, student };
         })
-    );
+    )).filter(Boolean) as (Submission & { student: User })[];
 
     return { ...assignment, submissions: submissionsWithStudents };
 }
@@ -346,11 +342,12 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
 export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
     const db = await getDb();
     const threads = db.discussionThreads.filter(t => t.courseId === courseId);
-    const threadsWithAuthors = await Promise.all(threads.map(async thread => {
-        const author = await findUserById(thread.authorId) || { id: thread.authorId, name: 'Unknown User', email: '', role: 'student', password: '' };
+    const threadsWithAuthors = (await Promise.all(threads.map(async thread => {
+        const author = await findUserById(thread.authorId);
+        if (!author) return null; // Filter out threads from deleted users
         const postCount = db.discussionPosts.filter(p => p.threadId === thread.id).length;
         return { ...thread, author, postCount };
-    }));
+    }))).filter(Boolean) as (DiscussionThread & { author: User, postCount: number })[];
     return threadsWithAuthors;
 }
 
@@ -358,17 +355,19 @@ export async function getThreadById(threadId: string): Promise<(DiscussionThread
     const db = await getDb();
     const thread = db.discussionThreads.find(t => t.id === threadId);
     if (!thread) return undefined;
-    const author = await findUserById(thread.authorId) || { id: thread.authorId, name: 'Unknown User', email: '', role: 'student', password: '' };
+    const author = await findUserById(thread.authorId);
+    if (!author) return undefined; // Do not return thread if author is deleted
     return { ...thread, author };
 }
 
 export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
     const db = await getDb();
     const posts = db.discussionPosts.filter(p => p.threadId === threadId);
-    const postsWithAuthors = await Promise.all(posts.map(async post => {
-        const author = await findUserById(post.authorId) || { id: post.authorId, name: 'Unknown User', email: '', role: 'student', password: '' };
+    const postsWithAuthors = (await Promise.all(posts.map(async post => {
+        const author = await findUserById(post.authorId);
+        if (!author) return null; // Filter out posts from deleted users
         return { ...post, author };
-    }));
+    }))).filter(Boolean) as (DiscussionPost & { author: User })[];
     return postsWithAuthors;
 }
 
@@ -490,17 +489,17 @@ export async function markAttendance(studentId: string, courseId: string): Promi
 export async function getAllAttendance(): Promise<(Attendance & { student: User, course: Course })[]> {
     const db = await getDb();
     
-    const attendanceWithDetails = await Promise.all(db.attendance.map(async (record) => {
-        const student = await findUserById(record.studentId) || { id: record.studentId, name: 'Unknown Student', email: '', role: 'student', password: '' };
+    const attendanceWithDetails = (await Promise.all(db.attendance.map(async (record) => {
+        const student = await findUserById(record.studentId);
         const course = db.courses.find(c => c.id === record.courseId);
 
         if (student && course) {
             return { ...record, student, course };
         }
         return null; // or handle missing data appropriately
-    }));
+    }))).filter(Boolean);
 
-    return attendanceWithDetails.filter(Boolean).sort((a,b) => new Date(b!.date).getTime() - new Date(a!.date).getTime()) as (Attendance & { student: User, course: Course })[];
+    return attendanceWithDetails.sort((a,b) => new Date(b!.date).getTime() - new Date(a!.date).getTime()) as (Attendance & { student: User, course: Course })[];
 }
 
 // --- Certificate Functions ---
