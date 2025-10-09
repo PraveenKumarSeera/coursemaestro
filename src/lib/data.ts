@@ -97,12 +97,8 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   const db = await getDb();
   const course = db.courses.find(c => c.id === id);
   if (!course) return undefined;
-  const teacher = await findUserById(course.teacherId);
-  // This case can happen if a teacher is deleted but their courses are not.
-  // In a real app, this would be handled by cascading deletes or setting the teacher to null.
-  // For now, we'll create a placeholder teacher.
-  const effectiveTeacher = teacher || { id: 'deleted-user', name: 'Unknown Teacher', email: '', role: 'teacher', password: '' };
-  return { ...course, teacher: effectiveTeacher };
+  const teacher = await findUserById(course.teacherId) || { id: course.teacherId, name: 'Unknown Teacher', email: '', role: 'teacher', password: '' };
+  return { ...course, teacher };
 }
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
@@ -149,7 +145,7 @@ export async function deleteCourse(id: string): Promise<boolean> {
 }
 
 
-export async function getTeacherById(id: string): Promise<User | undefined> {
+export async function getTeacherById(id: string): Promise<User> {
     const db = await getDb();
     const user = db.users.find(user => user.id === id && user.role === 'teacher');
     if (user) return user;
@@ -277,10 +273,8 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
     const assignmentSubmissions = db.submissions.filter(s => s.assignmentId === assignment.id);
     const submissionsWithStudents = await Promise.all(
         assignmentSubmissions.map(async sub => {
-            const student = db.users.find(u => u.id === sub.studentId);
-            // This case should ideally not happen in a real DB with foreign key constraints
-            const effectiveStudent = student || { id: sub.studentId, name: 'Unknown Student', email: '', role: 'student', password: '' };
-            return { ...sub, student: effectiveStudent };
+            const student = await findUserById(sub.studentId) || { id: sub.studentId, name: 'Unknown Student', email: '', role: 'student', password: '' };
+            return { ...sub, student };
         })
     );
 
@@ -331,13 +325,15 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
     const db = await getDb();
     const studentSubmissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
     
-    return Promise.all(studentSubmissions.map(async sub => {
+    const gradedSubmissions = await Promise.all(studentSubmissions.map(async sub => {
         const assignment = db.assignments.find(a => a.id === sub.assignmentId);
-        if (!assignment) throw new Error("Assignment not found");
+        if (!assignment) return null; // Assignment deleted
         const course = db.courses.find(c => c.id === assignment.courseId);
-        if (!course) throw new Error("Course not found");
+        if (!course) return null; // Course deleted
         return { ...sub, assignment, course };
     }));
+    
+    return gradedSubmissions.filter(Boolean) as GradedSubmission[];
 }
 
 
@@ -345,31 +341,33 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
 export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
     const db = await getDb();
     const threads = db.discussionThreads.filter(t => t.courseId === courseId);
-    return Promise.all(threads.map(async thread => {
-        const author = db.users.find(u => u.id === thread.authorId);
+    const threadsWithAuthors = await Promise.all(threads.map(async thread => {
+        const author = await findUserById(thread.authorId);
         const postCount = db.discussionPosts.filter(p => p.threadId === thread.id).length;
-        if (!author) throw new Error("Author not found for thread");
+        if (!author) return null;
         return { ...thread, author, postCount };
     }));
+    return threadsWithAuthors.filter(Boolean) as (DiscussionThread & { author: User, postCount: number })[];
 }
 
 export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
     const db = await getDb();
     const thread = db.discussionThreads.find(t => t.id === threadId);
     if (!thread) return undefined;
-    const author = db.users.find(u => u.id === thread.authorId);
-    if (!author) throw new Error("Author not found for thread");
+    const author = await findUserById(thread.authorId);
+    if (!author) return undefined;
     return { ...thread, author };
 }
 
 export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
     const db = await getDb();
     const posts = db.discussionPosts.filter(p => p.threadId === threadId);
-    return Promise.all(posts.map(async post => {
-        const author = db.users.find(u => u.id === post.authorId);
-        if (!author) throw new Error("Author not found for post");
+    const postsWithAuthors = await Promise.all(posts.map(async post => {
+        const author = await findUserById(post.authorId);
+        if (!author) return null;
         return { ...post, author };
     }));
+    return postsWithAuthors.filter(Boolean) as (DiscussionPost & { author: User })[];
 }
 
 export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
@@ -491,7 +489,7 @@ export async function getAllAttendance(): Promise<(Attendance & { student: User,
     const db = await getDb();
     
     const attendanceWithDetails = await Promise.all(db.attendance.map(async (record) => {
-        const student = db.users.find(u => u.id === record.studentId);
+        const student = await findUserById(record.studentId) || { id: record.studentId, name: 'Unknown Student', email: '', role: 'student', password: '' };
         const course = db.courses.find(c => c.id === record.courseId);
 
         if (student && course) {
@@ -500,7 +498,7 @@ export async function getAllAttendance(): Promise<(Attendance & { student: User,
         return null; // or handle missing data appropriately
     }));
 
-    return attendanceWithDetails.filter(Boolean).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()) as (Attendance & { student: User, course: Course })[];
+    return attendanceWithDetails.filter(Boolean).sort((a,b) => new Date(b!.date).getTime() - new Date(a!.date).getTime()) as (Attendance & { student: User, course: Course })[];
 }
 
 // --- Certificate Functions ---
@@ -537,11 +535,13 @@ export async function getStudentCertificates(studentId: string): Promise<(Certif
     const db = await getDb();
     const certificates = db.certificates.filter(c => c.studentId === studentId);
     
-    return certificates.map(cert => {
+    const certificatesWithCourses = certificates.map(cert => {
         const course = db.courses.find(c => c.id === cert.courseId);
-        if (!course) throw new Error(`Course not found for certificate ${cert.id}`);
+        if (!course) return null;
         return { ...cert, course };
-    }).sort((a, b) => new Date(b.issuedAt).getTime() - new Date(a.issuedAt).getTime());
+    }).filter(Boolean);
+
+    return certificatesWithCourses.sort((a, b) => new Date(b!.issuedAt).getTime() - new Date(a!.issuedAt).getTime()) as (Certificate & { course: Course })[];
 }
 
 export async function getCertificateById(id: string): Promise<(Certificate & { student: User; course: Course & { teacher: User } }) | undefined> {
@@ -549,11 +549,11 @@ export async function getCertificateById(id: string): Promise<(Certificate & { s
     const certificate = db.certificates.find(c => c.id === id);
     if (!certificate) return undefined;
 
-    const student = db.users.find(u => u.id === certificate.studentId);
-    if (!student) throw new Error("Student not found for certificate");
+    const student = await findUserById(certificate.studentId);
+    if (!student) return undefined;
 
     const course = await getCourseById(certificate.courseId);
-    if (!course) throw new Error("Course not found for certificate");
+    if (!course) return undefined;
 
     return { ...certificate, student, course };
 }
