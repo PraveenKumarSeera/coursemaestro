@@ -4,19 +4,6 @@
  */
 import { z } from 'zod';
 
-// Graded Submission Schema (used by multiple AI features)
-export const GradedSubmissionSchema = z.object({
-  course: z.object({
-    title: z.string(),
-  }),
-  assignment: z.object({
-    title: z.string(),
-  }),
-  grade: z.number().nullable(),
-});
-export type GradedSubmissionForAI = z.infer<typeof GradedSubmissionSchema>;
-
-
 // AI Study Assistant
 export const AiStudyAssistantInputSchema = z.object({
   courseMaterial: z.string().describe('The course material to be used as context for answering questions.'),
@@ -118,6 +105,7 @@ export const TeachingAssistantOutputSchema = z.object({
   analysis: z.string().describe('The result of the AI analysis, formatted as a markdown string.'),
 });
 export type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
+
 
 // Motivation Bot
 export const MotivationBotInputSchema = z.object({

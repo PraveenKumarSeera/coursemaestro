@@ -35,7 +35,7 @@ Generate the message in the specified JSON format.
 `,
 });
 
-export const motivationBotFlow = ai.defineFlow(
+const motivationBotFlow = ai.defineFlow(
   {
     name: 'motivationBotFlow',
     inputSchema: MotivationBotInputSchema,

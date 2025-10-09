@@ -4,8 +4,6 @@
 import { runTeachingAssistant } from "@/ai/flows/ai-teaching-assistant";
 import { TeachingAssistantInputSchema, type TeachingAssistantOutput } from "@/lib/ai-types";
 
-export type { TeachingAssistantInput, TeachingAssistantOutput } from "@/lib/ai-types";
-
 type ActionState = {
   analysis: string | null;
   message: string | null;

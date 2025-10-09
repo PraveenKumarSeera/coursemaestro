@@ -5,8 +5,6 @@ import { generateResume } from "@/ai/flows/ai-resume-builder";
 import type { GradedSubmission, User } from "@/lib/types";
 import type { ResumeBuilderOutput } from '@/lib/ai-types';
 
-export type { ResumeBuilderInput, ResumeBuilderOutput } from '@/lib/ai-types';
-
 type ActionState = {
   resumeMarkdown: string | null;
   message: string | null;

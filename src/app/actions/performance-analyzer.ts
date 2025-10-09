@@ -5,8 +5,6 @@ import { analyzePerformance } from "@/ai/flows/ai-performance-analyzer";
 import type { GradedSubmission } from "@/lib/types";
 import type { PerformanceAnalyzerOutput } from "@/lib/ai-types";
 
-export type { PerformanceAnalyzerInput, PerformanceAnalyzerOutput } from '@/lib/ai-types';
-
 type ActionState = {
   analysis: string | null;
   message: string | null;

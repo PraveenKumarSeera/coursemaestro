@@ -60,15 +60,8 @@ const performanceAnalyzerFlow = ai.defineFlow(
     outputSchema: PerformanceAnalyzerOutputSchema,
   },
   async (input) => {
-    // ✅ Validate input
-    if (!input.studentPerformanceData) {
-      throw new Error('No performance data found. Please provide valid input.');
-    }
-
-    // 🧠 Call the AI prompt
     const { output } = await performanceAnalyzerPrompt(input);
 
-    // ⚠️ Handle missing AI output
     if (!output) {
       throw new Error('Failed to generate performance analysis.');
     }

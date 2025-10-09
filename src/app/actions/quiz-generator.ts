@@ -4,8 +4,6 @@
 import { generateQuizAndFlashcards } from "@/ai/flows/ai-quiz-generator";
 import type { Quiz, Flashcard } from '@/lib/ai-types';
 
-export type { Quiz, Flashcard };
-
 type FormState = {
   quiz: Quiz | null;
   flashcards: Flashcard[] | null;

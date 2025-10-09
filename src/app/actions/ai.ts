@@ -4,8 +4,6 @@
 import { aiStudyAssistant } from '@/ai/flows/ai-study-assistant';
 import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/lib/ai-types';
 
-export type { AiStudyAssistantInput, AiStudyAssistantOutput };
-
 type AiState = {
   answer: string;
   question: string;

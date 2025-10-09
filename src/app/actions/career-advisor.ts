@@ -5,8 +5,6 @@ import { suggestCareers } from "@/ai/flows/ai-career-advisor";
 import type { GradedSubmission } from "@/lib/types";
 import type { CareerAdvisorOutput } from '@/lib/ai-types';
 
-export type { CareerAdvisorInput, CareerAdvisorOutput } from '@/lib/ai-types';
-
 type ActionState = {
   suggestions: CareerAdvisorOutput['suggestions'] | null;
   message: string | null;
