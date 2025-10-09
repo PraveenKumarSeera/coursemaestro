@@ -176,11 +176,14 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
         // Create notification for the student
         const assignmentForNotification = await getAssignmentById(assignmentId);
         if (submission && assignmentForNotification) {
-            await createNotification({
-                userId: submission.studentId,
-                message: `Your submission for "${assignmentForNotification.title}" has been graded.`,
-                link: '/my-grades',
-            });
+            const student = await findUserById(submission.studentId);
+            if (student) {
+                await createNotification({
+                    userId: submission.studentId,
+                    message: `Your submission for "${assignmentForNotification.title}" has been graded.`,
+                    link: '/my-grades',
+                });
+            }
         }
 
         revalidatePath(`/assignments/${assignmentId}`);
