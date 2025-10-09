@@ -47,7 +47,7 @@ Structure your response in **Markdown** format with the following sections:
 
 Maintain a **positive and empathetic tone** throughout.
 `,
-      model: 'gemini-pro',
+      model: googleAI.model('gemini-1.0-pro'),
       output: {
         schema: PerformanceAnalyzerOutputSchema,
       },

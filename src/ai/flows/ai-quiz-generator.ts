@@ -36,7 +36,7 @@ const quizGeneratorFlow = ai.defineFlow(
     
       Generate the quiz and flashcards in the specified JSON format.
       `,
-            model: 'gemini-pro',
+            model: googleAI.model('gemini-1.0-pro'),
             output: {
                 schema: QuizGeneratorOutputSchema,
             },

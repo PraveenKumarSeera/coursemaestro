@@ -41,7 +41,7 @@ ${input.submissionText}
     
     const { output } = await ai.generate({
       prompt: promptText,
-      model: 'gemini-pro',
+      model: googleAI.model('gemini-1.0-pro'),
       output: {
         schema: TeachingAssistantOutputSchema,
       },
