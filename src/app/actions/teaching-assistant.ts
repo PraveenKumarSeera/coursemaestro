@@ -32,11 +32,11 @@ export async function analyzeSubmissionAction(
       message: 'Analysis successful.',
       task: task,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Teaching assistant error:', error);
     return {
       analysis: null,
-      message: 'Sorry, I encountered an error while analyzing the submission. Please try again.',
+      message: error.message || 'Sorry, I encountered an error while analyzing the submission. Please try again.',
       task: task,
     };
   }

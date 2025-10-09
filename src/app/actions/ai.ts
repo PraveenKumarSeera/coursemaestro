@@ -7,6 +7,7 @@ import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/lib/ai-typ
 type AiState = {
   answer: string;
   question: string;
+  error?: string;
 };
 
 export async function askAI(
@@ -39,11 +40,12 @@ export async function askAI(
       answer: result.answer,
       question: studentQuestion,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI assistant error:', error);
     return {
-      answer: 'Sorry, I encountered an error. Please try again.',
+      answer: '',
       question: studentQuestion,
+      error: error.message || 'Sorry, I encountered an error. Please try again.',
     };
   }
 }

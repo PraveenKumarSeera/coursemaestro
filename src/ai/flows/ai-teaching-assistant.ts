@@ -10,54 +10,35 @@ import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type Teach
 
 
 export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
-  return teachingAssistantFlow(input);
-}
-
-
-const grammarPrompt = ai.definePrompt({
-    name: 'grammarCheckPrompt',
-    input: { schema: TeachingAssistantInputSchema },
-    output: { schema: TeachingAssistantOutputSchema },
-    prompt: `You are an expert grammar and style checker for a teaching assistant.
+  
+  const promptText = input.task === 'grammarCheck' 
+  ? `You are an expert grammar and style checker for a teaching assistant.
 Analyze the following student submission for grammatical errors, spelling mistakes, and clarity.
 Provide a bulleted list of suggested improvements. If there are no errors, state that the submission is well-written.
 Keep the feedback constructive and encouraging.
 
 Student Submission:
 '''
-{{{submissionText}}}
+${input.submissionText}
 '''`
-});
-
-const summarizePrompt = ai.definePrompt({
-    name: 'summarizePrompt',
-    input: { schema: TeachingAssistantInputSchema },
-    output: { schema: TeachingAssistantOutputSchema },
-    prompt: `You are an expert summarizer for a teaching assistant.
+  : `You are an expert summarizer for a teaching assistant.
 Provide a concise, 2-3 sentence summary of the key points in the following student submission.
 
 Student Submission:
 '''
-{{{submissionText}}}
-'''`
-});
-
-
-const teachingAssistantFlow = ai.defineFlow(
-  {
-    name: 'teachingAssistantFlow',
-    inputSchema: TeachingAssistantInputSchema,
-    outputSchema: TeachingAssistantOutputSchema,
-  },
-  async ({ submissionText, task }) => {
-    
-    const prompt = task === 'grammarCheck' ? grammarPrompt : summarizePrompt;
-    
-    const { output } = await prompt({ submissionText, task });
-    
-    if (!output) {
-      throw new Error('Failed to generate analysis.');
-    }
-    return output;
+${input.submissionText}
+'''`;
+  
+  const { output } = await ai.generate({
+    prompt: promptText,
+    model: 'googleai/gemini-1.5-flash-latest',
+    output: {
+      schema: TeachingAssistantOutputSchema,
+    },
+  });
+  
+  if (!output) {
+    throw new Error('Failed to generate analysis.');
   }
-);
+  return output;
+}

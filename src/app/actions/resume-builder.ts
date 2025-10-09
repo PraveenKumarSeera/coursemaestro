@@ -44,11 +44,11 @@ export async function generateResumeAction(
       resumeMarkdown: result.resumeMarkdown,
       message: 'Resume generated successfully.',
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Resume builder error:', error);
     return {
       resumeMarkdown: null,
-      message: 'Sorry, I encountered an error while generating your resume. Please try again.',
+      message: error.message || 'Sorry, I encountered an error while generating your resume. Please try again.',
     };
   }
 }

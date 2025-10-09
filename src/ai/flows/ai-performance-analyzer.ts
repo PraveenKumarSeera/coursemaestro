@@ -21,22 +21,13 @@ import {
 export async function analyzePerformance(
   input: PerformanceAnalyzerInput
 ): Promise<PerformanceAnalyzerOutput> {
-  return performanceAnalyzerFlow(input);
-}
-
-/**
- * Defines the AI prompt for analyzing student performance.
- */
-const performanceAnalyzerPrompt = ai.definePrompt({
-  name: 'performanceAnalyzerPrompt',
-  input: { schema: PerformanceAnalyzerInputSchema },
-  output: { schema: PerformanceAnalyzerOutputSchema },
-  prompt: `
+  const { output } = await ai.generate({
+    prompt: `
 You are an expert academic advisor bot named **"Maestro"**.
 Your role is to analyze a student's academic performance based on their graded assignments and provide **encouraging, actionable feedback**.
 
 Here is the student's performance data:
-{{{studentPerformanceData}}}
+${input.studentPerformanceData}
 
 Analyze the provided list of graded assignments and identify patterns, strengths, and areas for improvement.
 
@@ -48,24 +39,15 @@ Structure your response in **Markdown** format with the following sections:
 
 Maintain a **positive and empathetic tone** throughout.
 `,
-});
+    model: 'googleai/gemini-1.5-flash-latest',
+    output: {
+      schema: PerformanceAnalyzerOutputSchema,
+    },
+  });
 
-/**
- * Defines the AI flow that executes the performance analysis prompt.
- */
-const performanceAnalyzerFlow = ai.defineFlow(
-  {
-    name: 'performanceAnalyzerFlow',
-    inputSchema: PerformanceAnalyzerInputSchema,
-    outputSchema: PerformanceAnalyzerOutputSchema,
-  },
-  async (input) => {
-    const { output } = await performanceAnalyzerPrompt(input);
-
-    if (!output) {
-      throw new Error('Failed to generate performance analysis.');
-    }
-
-    return output;
+  if (!output) {
+    throw new Error('Failed to generate performance analysis.');
   }
-);
+
+  return output;
+}

@@ -7,9 +7,10 @@ import { askAI } from '@/app/actions/ai';
 import type { Course } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, User, Bot } from 'lucide-react';
+import { Loader2, Sparkles, User, Bot, AlertTriangle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -33,12 +34,14 @@ export default function AiAssistant({ course }: { course: Course }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const courseMaterial = `${course.title}: ${course.description}`;
   
   const [state, dispatch] = useActionState(askAI, {
     answer: '',
     question: '',
+    error: undefined,
   });
 
   useEffect(() => {
@@ -49,8 +52,21 @@ export default function AiAssistant({ course }: { course: Course }) {
         { role: 'assistant', content: state.answer },
       ]);
       formRef.current?.reset();
+    } else if (state.error) {
+       toast({
+        variant: "destructive",
+        title: "AI Error",
+        description: state.error,
+       });
+       // Add the error as a message from the assistant
+       setMessages((prev) => [
+        ...prev,
+        { role: 'user', content: state.question },
+        { role: 'assistant', content: state.error },
+      ]);
+      formRef.current?.reset();
     }
-  }, [state]);
+  }, [state, toast]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -97,9 +113,12 @@ export default function AiAssistant({ course }: { course: Course }) {
                  ) : (
                     <>
                         <div className="p-2 bg-muted rounded-full">
-                            <Bot className="h-5 w-5 text-primary" />
+                           { message.content.includes("error") || message.content.includes("Sorry") 
+                           ? <AlertTriangle className="h-5 w-5 text-destructive" />
+                           : <Bot className="h-5 w-5 text-primary" />
+                           }
                         </div>
-                        <div className="bg-muted rounded-lg p-3 text-sm">
+                        <div className={message.content.includes("error") || message.content.includes("Sorry") ? "bg-destructive/10 rounded-lg p-3 text-sm" : "bg-muted rounded-lg p-3 text-sm"}>
                             <p>{message.content}</p>
                         </div>
                     </>

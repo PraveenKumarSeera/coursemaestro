@@ -9,22 +9,16 @@ import { ai } from '@/ai/genkit';
 import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/lib/ai-types';
 
 export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {
-  return resumeBuilderFlow(input);
-}
-
-const prompt = ai.definePrompt({
-    name: 'resumeBuilderPrompt',
-    input: { schema: ResumeBuilderInputSchema },
-    output: { schema: ResumeBuilderOutputSchema },
+  const { output } = await ai.generate({
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
 
-Student Name: {{studentName}}
-Student Email: {{studentEmail}}
+Student Name: ${input.studentName}
+Student Email: ${input.studentEmail}
 
 Academic Performance (High-performing assignments):
-{{{studentPerformanceData}}}
+${input.studentPerformanceData}
 
 The resume should include the following sections:
 1.  **Header:** Student's Name and Email.
@@ -33,20 +27,14 @@ The resume should include the following sections:
 4.  **Skills:** Infer a list of potential skills (technical and soft skills) from the course titles.
 5.  **Projects / Coursework:** Frame their best-performing assignments (provided in the performance data) as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title.
 `,
-});
+    model: 'googleai/gemini-1.5-flash-latest',
+    output: {
+      schema: ResumeBuilderOutputSchema,
+    },
+  });
 
-const resumeBuilderFlow = ai.defineFlow(
-  {
-    name: 'resumeBuilderFlow',
-    inputSchema: ResumeBuilderInputSchema,
-    outputSchema: ResumeBuilderOutputSchema,
-  },
-  async (input) => {
-    const { output } = await prompt(input);
-
-    if (!output) {
-      throw new Error('Failed to generate resume.');
-    }
-    return output;
+  if (!output) {
+    throw new Error('Failed to generate resume.');
   }
-);
+  return output;
+}

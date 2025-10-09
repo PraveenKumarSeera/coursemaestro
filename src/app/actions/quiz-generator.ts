@@ -39,12 +39,12 @@ export async function generateQuizAndFlashcardsAction(
       flashcards: result.flashcards,
       message: 'Successfully generated quiz and flashcards.',
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Quiz generation error:', error);
     return {
       quiz: null,
       flashcards: null,
-      message: 'Sorry, I encountered an error. Please try again.',
+      message: error.message || 'Sorry, I encountered an error. Please try again.',
     };
   }
 }

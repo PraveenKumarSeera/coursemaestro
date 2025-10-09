@@ -33,11 +33,11 @@ export async function suggestCareersAction(
       suggestions: result.suggestions,
       message: 'Analysis successful.',
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Career advisor error:', error);
     return {
       suggestions: null,
-      message: 'Sorry, I encountered an error while generating career advice. Please try again.',
+      message: error.message || 'Sorry, I encountered an error while generating career advice. Please try again.',
     };
   }
 }

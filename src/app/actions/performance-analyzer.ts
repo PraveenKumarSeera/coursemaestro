@@ -32,11 +32,11 @@ export async function analyzePerformanceAction(
       analysis: result.analysis,
       message: 'Analysis successful.',
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Performance analysis error:', error);
     return {
       analysis: null,
-      message: 'Sorry, I encountered an error while analyzing your performance. Please try again.',
+      message: error.message || 'Sorry, I encountered an error while analyzing your performance. Please try again.',
     };
   }
 }
