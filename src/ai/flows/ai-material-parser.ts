@@ -28,7 +28,7 @@ const prompt = ai.definePrompt({
   `,
 });
 
-export const materialParserFlow = ai.defineFlow(
+const materialParserFlow = ai.defineFlow(
   {
     name: 'materialParserFlow',
     inputSchema: MaterialParserInputSchema,
