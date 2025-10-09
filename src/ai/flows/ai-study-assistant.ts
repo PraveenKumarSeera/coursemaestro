@@ -33,7 +33,7 @@ const studyAssistantFlow = ai.defineFlow(
 
     Answer:
     `,
-      model: googleAI.model('gemini-1.5-flash'),
+      model: googleAI.model('gemini-1.5-pro-latest'),
       output: {
         schema: AiStudyAssistantOutputSchema,
       },
