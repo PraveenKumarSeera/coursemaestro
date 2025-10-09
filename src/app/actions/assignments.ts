@@ -91,7 +91,7 @@ export async function submitAssignmentAction(prevState: FormState, formData: For
         // Create notification for the teacher
         const course = await getCourseById(submission.courseId);
         const assignment = await getAssignmentById(submission.assignmentId);
-        if (course && assignment) {
+        if (course && assignment && course.teacher.id !== '0') {
             await createNotification({
                 userId: course.teacherId,
                 message: `${user.name} submitted "${assignment.title}"`,
@@ -146,7 +146,7 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
                 const assignment = await getAssignmentById(assignmentId);
                 const course = assignment ? await getCourseById(assignment.courseId) : null;
                 
-                if (student && course) {
+                if (student && student.id !== '0' && course && course.teacher.id !== '0') {
                     try {
                         const result: MotivationBotOutput = await generateMotivationalMessage({
                             studentName: student.name.split(' ')[0],
@@ -177,7 +177,7 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
         const assignmentForNotification = await getAssignmentById(assignmentId);
         if (submission && assignmentForNotification) {
             const student = await findUserById(submission.studentId);
-            if (student) {
+            if (student && student.id !== '0') {
                 await createNotification({
                     userId: submission.studentId,
                     message: `Your submission for "${assignmentForNotification.title}" has been graded.`,

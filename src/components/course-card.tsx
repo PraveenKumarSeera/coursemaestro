@@ -39,7 +39,7 @@ export default async function CourseCard({ course, user, isEnrolled }: CourseCar
         <div className="mt-4 flex items-center space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
                 <UserIcon className="h-4 w-4" />
-                <span>{teacher?.name || 'N/A'}</span>
+                <span>{teacher?.name}</span>
             </div>
             <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
