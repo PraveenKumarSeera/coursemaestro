@@ -23,18 +23,24 @@ export async function generateResumeAction(
     };
   }
 
-    // Map GradedSubmission to the format expected by the AI
-    const aiSubmissions = gradedSubmissions.map(sub => ({
-        course: { title: sub.course.title },
-        assignment: { title: sub.assignment.title },
-        grade: sub.grade,
-    }));
+    // Pre-process the data into a simple string, focusing on high-performing assignments
+    const studentPerformanceData = gradedSubmissions
+      .filter(sub => sub.grade && sub.grade >= 85)
+      .map(sub => `Course: "${sub.course.title}", Assignment: "${sub.assignment.title}", Grade: ${sub.grade}%`)
+      .join('\n');
+
+  if (!studentPerformanceData) {
+    return {
+      resumeMarkdown: null,
+      message: 'You need at least one assignment with a grade of 85% or higher to build a resume.',
+    };
+  }
 
   try {
     const result = await generateResume({ 
         studentName: user.name,
         studentEmail: user.email,
-        gradedSubmissions: aiSubmissions,
+        studentPerformanceData,
     });
     return {
       resumeMarkdown: result.resumeMarkdown,

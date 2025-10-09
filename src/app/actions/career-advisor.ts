@@ -23,15 +23,14 @@ export async function suggestCareersAction(
     };
   }
 
-  // Map GradedSubmission to the format expected by the AI
-  const aiSubmissions = gradedSubmissions.map(sub => ({
-    course: { title: sub.course.title },
-    assignment: { title: sub.assignment.title },
-    grade: sub.grade,
-  }));
+  // Pre-process the data into a simple string
+  const studentPerformanceData = gradedSubmissions
+    .map(sub => `Course: "${sub.course.title}", Grade: ${sub.grade}%`)
+    .join('\n');
+
 
   try {
-    const result = await suggestCareers({ gradedSubmissions: aiSubmissions });
+    const result = await suggestCareers({ studentPerformanceData });
     return {
       suggestions: result.suggestions,
       message: 'Analysis successful.',

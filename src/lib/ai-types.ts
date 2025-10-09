@@ -5,7 +5,7 @@
 import { z } from 'zod';
 
 // Graded Submission Schema (used by multiple AI features)
-const GradedSubmissionSchema = z.object({
+export const GradedSubmissionSchema = z.object({
   course: z.object({
     title: z.string(),
   }),
@@ -32,7 +32,7 @@ export type AiStudyAssistantOutput = z.infer<typeof AiStudyAssistantOutputSchema
 
 // Career Advisor
 export const CareerAdvisorInputSchema = z.object({
-  gradedSubmissions: z.array(GradedSubmissionSchema).describe("An array of the student's graded assignments."),
+  studentPerformanceData: z.string().describe("A string summarizing the student's graded assignments."),
 });
 export type CareerAdvisorInput = z.infer<typeof CareerAdvisorInputSchema>;
 
@@ -50,7 +50,7 @@ export type CareerAdvisorOutput = z.infer<typeof CareerAdvisorOutputSchema>;
 
 // Performance Analyzer
 export const PerformanceAnalyzerInputSchema = z.object({
-  gradedSubmissions: z.array(GradedSubmissionSchema).describe("An array of the student's graded assignments."),
+  studentPerformanceData: z.string().describe("A string summarizing the student's graded assignments."),
 });
 export type PerformanceAnalyzerInput = z.infer<typeof PerformanceAnalyzerInputSchema>;
 
@@ -97,7 +97,7 @@ export type QuizGeneratorOutput = z.infer<typeof QuizGeneratorOutputSchema>;
 export const ResumeBuilderInputSchema = z.object({
   studentName: z.string(),
   studentEmail: z.string(),
-  gradedSubmissions: z.array(GradedSubmissionSchema).describe("An array of the student's graded assignments."),
+  studentPerformanceData: z.string().describe("A string summarizing the student's graded assignments, especially high-performing ones."),
 });
 export type ResumeBuilderInput = z.infer<typeof ResumeBuilderInputSchema>;
 

@@ -15,7 +15,7 @@ import {
 
 /**
  * Public function to trigger the AI performance analysis flow.
- * @param input - Student's graded assignment data.
+ * @param input - Student's graded assignment data as a pre-formatted string.
  * @returns A detailed analysis with strengths, weaknesses, and improvement suggestions.
  */
 export async function analyzePerformance(
@@ -34,12 +34,9 @@ const performanceAnalyzerPrompt = ai.definePrompt({
   prompt: `
 You are an expert academic advisor bot named **"Maestro"**.
 Your role is to analyze a student's academic performance based on their graded assignments and provide **encouraging, actionable feedback**.
-Attendance data is not available.
 
 Here is the student's performance data:
-{{#each gradedSubmissions}}
-- Course: "{{course.title}}", Assignment: "{{assignment.title}}", Grade: {{grade}}%
-{{/each}}
+{{{studentPerformanceData}}}
 
 Analyze the provided list of graded assignments and identify patterns, strengths, and areas for improvement.
 
@@ -64,8 +61,8 @@ const performanceAnalyzerFlow = ai.defineFlow(
   },
   async (input) => {
     // ✅ Validate input
-    if (!input.gradedSubmissions || input.gradedSubmissions.length === 0) {
-      throw new Error('No graded submissions found. Please provide valid input.');
+    if (!input.studentPerformanceData) {
+      throw new Error('No performance data found. Please provide valid input.');
     }
 
     // 🧠 Call the AI prompt

@@ -23,17 +23,15 @@ Generate a resume in Markdown format based on the student's information and acad
 Student Name: {{studentName}}
 Student Email: {{studentEmail}}
 
-Academic Performance:
-{{#each gradedSubmissions}}
-- Course: "{{course.title}}", Assignment: "{{assignment.title}}", Grade: {{grade}}%
-{{/each}}
+Academic Performance (High-performing assignments):
+{{{studentPerformanceData}}}
 
 The resume should include the following sections:
 1.  **Header:** Student's Name and Email.
-2.  **Summary:** A brief, 2-3 sentence professional summary highlighting their strengths as a motivated and capable student.
-3.  **Education:** List the courses they have taken.
+2.  **Summary:** A brief, 2-3 sentence professional summary highlighting their strengths as a motivated and capable student, inferred from the course topics.
+3.  **Education:** List the courses they have taken (infer from the performance data).
 4.  **Skills:** Infer a list of potential skills (technical and soft skills) from the course titles.
-5.  **Projects / Coursework:** Frame their best-performing assignments as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title. Only highlight assignments where the grade was 85% or higher.
+5.  **Projects / Coursework:** Frame their best-performing assignments (provided in the performance data) as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title.
 `,
 });
 

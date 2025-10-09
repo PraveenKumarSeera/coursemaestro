@@ -22,9 +22,7 @@ Analyze the student's performance based on their grades in different courses.
 Based on their strengths, suggest 3-5 potential career paths.
 
 Here is the student's performance data:
-{{#each gradedSubmissions}}
-- Course: "{{course.title}}", Assignment: "{{assignment.title}}", Grade: {{grade}}%
-{{/each}}
+{{{studentPerformanceData}}}
 
 For each career path, provide:
 1.  A title for the career.
