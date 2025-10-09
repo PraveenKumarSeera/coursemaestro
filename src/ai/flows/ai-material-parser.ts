@@ -31,7 +31,7 @@ const materialParserFlow = ai.defineFlow(
   Document:
   {{media url=${input.fileDataUri}}}
   `,
-      model: googleAI.model('gemini-1.5-pro-latest'),
+      model: googleAI.model('gemini-pro'),
       output: {
         schema: MaterialParserOutputSchema,
       },
