@@ -38,6 +38,7 @@ const quizGeneratorFlow = ai.defineFlow(
       `,
             model: googleAI.model('gemini-1.0-pro'),
             output: {
+                format: 'json',
                 schema: QuizGeneratorOutputSchema,
             },
         });

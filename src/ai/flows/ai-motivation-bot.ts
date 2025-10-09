@@ -39,6 +39,7 @@ Generate the message in the specified JSON format.
 `,
       model: googleAI.model('gemini-1.0-pro'),
       output: {
+        format: 'json',
         schema: MotivationBotOutputSchema,
       },
     });

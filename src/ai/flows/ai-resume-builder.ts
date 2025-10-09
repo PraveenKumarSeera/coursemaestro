@@ -41,6 +41,7 @@ The resume should include the following sections:
 `,
       model: googleAI.model('gemini-1.0-pro'),
       output: {
+        format: 'json',
         schema: ResumeBuilderOutputSchema,
       },
     });

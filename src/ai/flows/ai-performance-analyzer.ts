@@ -49,6 +49,7 @@ Maintain a **positive and empathetic tone** throughout.
 `,
       model: googleAI.model('gemini-1.0-pro'),
       output: {
+        format: 'json',
         schema: PerformanceAnalyzerOutputSchema,
       },
     });
