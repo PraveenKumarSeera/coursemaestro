@@ -162,5 +162,13 @@
       "isPresent": true
     }
   ],
-  "certificates": []
+  "certificates": [
+    {
+      "id": "1759986291602",
+      "studentId": "1759816290832",
+      "courseId": "1759821872336",
+      "issuedAt": "2025-10-09T05:04:51.602Z",
+      "verificationId": "b65ec167-e4f7-4533-b076-4fb059bf9138"
+    }
+  ]
 }

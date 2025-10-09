@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { getDashboardStats } from '@/lib/data';
+import { getDashboardData } from '@/lib/data';
 import type { LucideIcon } from 'lucide-react';
+import TeacherPerformanceChart from '@/components/dashboard/teacher-performance-chart';
 
 const iconMap: { [key: string]: LucideIcon } = {
     BookOpen,
@@ -21,7 +22,7 @@ export default async function DashboardPage() {
         return null; // Or redirect, though layout should handle this
     }
 
-    const stats = await getDashboardStats(user.id, user.role);
+    const { stats, gradeDistribution } = await getDashboardData(user.id, user.role);
 
     return (
         <div>
@@ -52,6 +53,12 @@ export default async function DashboardPage() {
                     )
                 })}
             </div>
+            
+            {user.role === 'teacher' && gradeDistribution && (
+                <div className="mt-6">
+                    <TeacherPerformanceChart data={gradeDistribution} />
+                </div>
+            )}
         </div>
     );
 }

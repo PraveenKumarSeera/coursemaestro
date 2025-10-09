@@ -1,5 +1,4 @@
 
-
 import { placeholderImages } from './placeholder-images.json';
 import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate } from './types';
 import { promises as fs } from 'fs';
@@ -577,7 +576,18 @@ export async function generateCertificate(studentId: string, courseId: string): 
 }
 
 // --- Dashboard Functions ---
-export async function getDashboardStats(userId: string, role: 'teacher' | 'student') {
+export type DashboardStats = {
+  stats: {
+    title: string;
+    value: string | number;
+    subtitle: string;
+    icon: string;
+    link?: { href: string; text: string; };
+  }[];
+  gradeDistribution?: { name: string; students: number; }[];
+};
+
+export async function getDashboardData(userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> {
     const db = await getDb();
 
     if (role === 'teacher') {
@@ -593,11 +603,35 @@ export async function getDashboardStats(userId: string, role: 'teacher' | 'stude
         const submissions = db.submissions.filter(s => assignmentIds.includes(s.assignmentId));
         const pendingSubmissions = submissions.filter(s => s.grade === null).length;
 
-        return [
-            { title: 'Courses Taught', value: courses.length, subtitle: 'Total active courses', icon: 'BookOpen', link: { href: "/courses", text: "Manage Courses"} },
-            { title: 'Total Students', value: studentIds.size, subtitle: 'Across all courses', icon: 'Users', link: { href: "/students", text: "View Students"} },
-            { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
+        // Calculate grade distribution
+        const gradedSubmissions = submissions.filter(s => s.grade !== null);
+        const gradeDistribution = [
+            { name: 'A (90-100)', students: 0 },
+            { name: 'B (80-89)', students: 0 },
+            { name: 'C (70-79)', students: 0 },
+            { name: 'D (60-69)', students: 0 },
+            { name: 'F (<60)', students: 0 },
         ];
+
+        // This is a simplified calculation. It counts submissions, not unique students per grade bucket.
+        // A more complex implementation would average grades per student first.
+        gradedSubmissions.forEach(sub => {
+            if (sub.grade === null) return;
+            if (sub.grade >= 90) gradeDistribution[0].students++;
+            else if (sub.grade >= 80) gradeDistribution[1].students++;
+            else if (sub.grade >= 70) gradeDistribution[2].students++;
+            else if (sub.grade >= 60) gradeDistribution[3].students++;
+            else gradeDistribution[4].students++;
+        });
+
+        return {
+            stats: [
+                { title: 'Courses Taught', value: courses.length, subtitle: 'Total active courses', icon: 'BookOpen', link: { href: "/courses", text: "Manage Courses"} },
+                { title: 'Total Students', value: studentIds.size, subtitle: 'Across all courses', icon: 'Users', link: { href: "/students", text: "View Students"} },
+                { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
+            ],
+            gradeDistribution: gradeDistribution,
+        };
     } else { // role is 'student'
         const enrollments = db.enrollments.filter(e => e.studentId === userId);
         const enrolledCourseIds = enrollments.map(e => e.courseId);
@@ -627,10 +661,12 @@ export async function getDashboardStats(userId: string, role: 'teacher' | 'stude
             return 'N/A';
         }
 
-        return [
-            { title: 'Enrolled Courses', value: enrollments.length, subtitle: 'Ready to learn', icon: 'BookOpen', link: { href: "/courses", text: "View Courses"} },
-            { title: 'Assignments Due', value: assignmentsDueSoon, subtitle: 'In the next 7 days', icon: 'ClipboardList' },
-            { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Keep it up!', icon: 'GraduationCap' },
-        ];
+        return {
+            stats: [
+                { title: 'Enrolled Courses', value: enrollments.length, subtitle: 'Ready to learn', icon: 'BookOpen', link: { href: "/courses", text: "View Courses"} },
+                { title: 'Assignments Due', value: assignmentsDueSoon, subtitle: 'In the next 7 days', icon: 'ClipboardList' },
+                { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Keep it up!', icon: 'GraduationCap' },
+            ]
+        };
     }
 }
