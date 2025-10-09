@@ -8,19 +8,12 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialParserInput, type MaterialParserOutput } from '@/lib/ai-types';
 
-const MaterialParserInputSchema = z.object({
-  fileDataUri: z.string().describe("A document file (PDF, DOCX, PPTX) as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
-});
-
-const MaterialParserOutputSchema = z.object({
-  textContent: z.string(),
-});
 
 export async function parseMaterial(
-  input: z.infer<typeof MaterialParserInputSchema>
-): Promise<z.infer<typeof MaterialParserOutputSchema>> {
+  input: MaterialParserInput
+): Promise<MaterialParserOutput> {
   return materialParserFlow(input);
 }
 

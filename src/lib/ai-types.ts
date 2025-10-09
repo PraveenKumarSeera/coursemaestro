@@ -118,3 +118,15 @@ export const MotivationBotOutputSchema = z.object({
   message: z.string().describe("A short, positive, and encouraging message for the student."),
 });
 export type MotivationBotOutput = z.infer<typeof MotivationBotOutputSchema>;
+
+// Material Parser
+export const MaterialParserInputSchema = z.object({
+  fileDataUri: z.string().describe("A document file (PDF, DOCX, PPTX) as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+});
+export type MaterialParserInput = z.infer<typeof MaterialParserInputSchema>;
+
+
+export const MaterialParserOutputSchema = z.object({
+  textContent: z.string(),
+});
+export type MaterialParserOutput = z.infer<typeof MaterialParserOutputSchema>;
