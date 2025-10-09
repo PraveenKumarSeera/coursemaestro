@@ -11,7 +11,15 @@ import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type Teach
 
 
 export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
-  return await teachingAssistantFlow(input);
+  const result = await teachingAssistantFlow(input);
+  if (typeof result === 'string') {
+    try {
+        return JSON.parse(result);
+    } catch (e) {
+        throw new Error('Failed to parse analysis from AI.');
+    }
+  }
+  return result;
 }
 
 const teachingAssistantFlow = ai.defineFlow(
@@ -30,27 +38,24 @@ Keep the feedback constructive and encouraging.
 Student Submission:
 '''
 ${input.submissionText}
-'''`
+'''
+
+Generate the response in the specified JSON format.`
     : `You are an expert summarizer for a teaching assistant.
 Provide a concise, 2-3 sentence summary of the key points in the following student submission.
 
 Student Submission:
 '''
 ${input.submissionText}
-'''`;
+'''
+
+Generate the response in the specified JSON format.`;
     
-    const { output } = await ai.generate({
+    const { text } = await ai.generate({
       prompt: promptText,
       model: googleAI.model('gemini-1.0-pro'),
-      output: {
-        format: 'json',
-        schema: TeachingAssistantOutputSchema,
-      },
     });
     
-    if (!output) {
-      throw new Error('Failed to generate analysis.');
-    }
-    return output;
+    return text;
   }
 );

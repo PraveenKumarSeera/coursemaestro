@@ -10,7 +10,15 @@ import { googleAI } from '@genkit-ai/google-genai';
 import { MotivationBotInputSchema, MotivationBotOutputSchema, type MotivationBotInput, type MotivationBotOutput } from '@/lib/ai-types';
 
 export async function generateMotivationalMessage(input: MotivationBotInput): Promise<MotivationBotOutput> {
-  return await motivationalMessageFlow(input);
+  const result = await motivationalMessageFlow(input);
+  if (typeof result === 'string') {
+    try {
+      return JSON.parse(result);
+    } catch (e) {
+      throw new Error('Failed to parse motivational message from AI.');
+    }
+  }
+  return result;
 }
 
 const motivationalMessageFlow = ai.defineFlow(
@@ -20,7 +28,7 @@ const motivationalMessageFlow = ai.defineFlow(
     outputSchema: MotivationBotOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
+    const { text } = await ai.generate({
       prompt: `You are an encouraging and positive AI academic advisor named "Maestro".
     
 A student, ${input.studentName}, just received a grade in their course, "${input.courseTitle}", that was lower than their average.
@@ -38,15 +46,8 @@ Example: "Hey ${input.studentName}, just a friendly check-in. Remember that ever
 Generate the message in the specified JSON format.
 `,
       model: googleAI.model('gemini-1.0-pro'),
-      output: {
-        format: 'json',
-        schema: MotivationBotOutputSchema,
-      },
     });
     
-    if (!output) {
-      throw new Error('Failed to generate motivational message.');
-    }
-    return output;
+    return text;
   }
 );

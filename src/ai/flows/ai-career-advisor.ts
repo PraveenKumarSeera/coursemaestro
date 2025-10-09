@@ -10,7 +10,16 @@ import { googleAI } from '@genkit-ai/google-genai';
 import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema, type CareerAdvisorInput, type CareerAdvisorOutput } from '@/lib/ai-types';
 
 export async function suggestCareers(input: CareerAdvisorInput): Promise<CareerAdvisorOutput> {
-  return await suggestCareersFlow(input);
+  const result = await suggestCareersFlow(input);
+  // The model sometimes returns a string, so we need to parse it.
+  if (typeof result === 'string') {
+    try {
+      return JSON.parse(result);
+    } catch (e) {
+      throw new Error('Failed to parse career suggestions from AI.');
+    }
+  }
+  return result;
 }
 
 const suggestCareersFlow = ai.defineFlow(
@@ -20,7 +29,7 @@ const suggestCareersFlow = ai.defineFlow(
     outputSchema: CareerAdvisorOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
+    const { text } = await ai.generate({
       prompt: `You are an expert career advisor for students.
 
 Analyze the student's performance based on their grades in different courses.
@@ -33,17 +42,12 @@ For each career path, provide:
 1.  A title for the career.
 2.  A brief description explaining why it's a good fit based on their academic performance.
 3.  A list of key skills associated with that career.
+
+Generate the response in the specified JSON format.
 `,
       model: googleAI.model('gemini-1.0-pro'),
-      output: {
-        format: 'json',
-        schema: CareerAdvisorOutputSchema,
-      },
     });
 
-    if (!output) {
-      throw new Error('Failed to generate career suggestions.');
-    }
-    return output;
+    return text;
   }
 );

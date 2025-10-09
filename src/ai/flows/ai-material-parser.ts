@@ -14,7 +14,16 @@ import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialPar
 export async function parseMaterial(
   input: MaterialParserInput
 ): Promise<MaterialParserOutput> {
-  return await materialParserFlow(input);
+  const result = await materialParserFlow(input);
+  if (typeof result === 'string') {
+    try {
+      const parsed = JSON.parse(result);
+      return { textContent: parsed.textContent };
+    } catch (e) {
+      throw new Error('Failed to parse document content from AI.');
+    }
+  }
+  return result;
 }
 
 
@@ -25,22 +34,17 @@ const materialParserFlow = ai.defineFlow(
     outputSchema: MaterialParserOutputSchema,
   },
   async (input) => {
-    const { output } = await ai.generate({
+    const { text } = await ai.generate({
       prompt: `Extract the text content from the following document.
   
   Document:
   {{media url=${input.fileDataUri}}}
+
+  Generate the response in the specified JSON format.
   `,
       model: googleAI.model('gemini-1.0-pro'),
-      output: {
-        format: 'json',
-        schema: MaterialParserOutputSchema,
-      },
     });
     
-    if (!output) {
-      throw new Error("Failed to parse document content.");
-    }
-    return { textContent: output.textContent };
+    return text;
   }
 );
