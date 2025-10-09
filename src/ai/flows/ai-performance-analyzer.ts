@@ -10,18 +10,15 @@ import { googleAI } from '@genkit-ai/google-genai';
 import {
   PerformanceAnalyzerInputSchema,
   PerformanceAnalyzerOutputSchema,
+  type PerformanceAnalyzerInput,
+  type PerformanceAnalyzerOutput,
 } from '@/lib/ai-types';
 
-
-export const analyzePerformanceFlow = ai.defineFlow(
-  {
-    name: 'analyzePerformanceFlow',
-    inputSchema: PerformanceAnalyzerInputSchema,
-    outputSchema: PerformanceAnalyzerOutputSchema,
-  },
-  async (input) => {
-    const { text } = await ai.generate({
-      prompt: `
+export async function analyzePerformance(
+  input: PerformanceAnalyzerInput
+): Promise<PerformanceAnalyzerOutput> {
+  const { text } = await ai.generate({
+    prompt: `
 You are an expert academic advisor bot named **"Maestro"**.
 Your role is to analyze a student's academic performance based on their graded assignments and provide **encouraging, actionable feedback**.
 
@@ -40,9 +37,13 @@ Maintain a **positive and empathetic tone** throughout.
 
 Generate the response in the specified JSON format.
 `,
-      model: googleAI.model('gemini-1.0-pro'),
-    });
+    model: googleAI.model('gemini-1.5-flash-latest'),
+  });
 
+  try {
     return JSON.parse(text);
+  } catch (e) {
+    console.error('Failed to parse AI response:', text);
+    throw new Error('The AI returned an invalid response. Please try again.');
   }
-);
+}

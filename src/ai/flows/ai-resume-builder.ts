@@ -7,18 +7,18 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema } from '@/lib/ai-types';
+import {
+  ResumeBuilderInputSchema,
+  ResumeBuilderOutputSchema,
+  type ResumeBuilderInput,
+  type ResumeBuilderOutput,
+} from '@/lib/ai-types';
 
-
-export const resumeBuilderFlow = ai.defineFlow(
-  {
-    name: 'resumeBuilderFlow',
-    inputSchema: ResumeBuilderInputSchema,
-    outputSchema: ResumeBuilderOutputSchema,
-  },
-  async (input) => {
-    const { text } = await ai.generate({
-      prompt: `You are an expert resume writer helping a student create a professional resume.
+export async function generateResume(
+  input: ResumeBuilderInput
+): Promise<ResumeBuilderOutput> {
+  const { text } = await ai.generate({
+    prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
 
@@ -37,9 +37,13 @@ The resume should include the following sections:
 
 Generate the response in the specified JSON format.
 `,
-      model: googleAI.model('gemini-1.0-pro'),
-    });
+    model: googleAI.model('gemini-1.5-flash-latest'),
+  });
 
+  try {
     return JSON.parse(text);
+  } catch (e) {
+    console.error('Failed to parse AI response:', text);
+    throw new Error('The AI returned an invalid response. Please try again.');
   }
-);
+}

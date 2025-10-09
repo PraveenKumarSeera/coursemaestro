@@ -7,17 +7,18 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema } from '@/lib/ai-types';
+import {
+  QuizGeneratorInputSchema,
+  QuizGeneratorOutputSchema,
+  type QuizGeneratorInput,
+  type QuizGeneratorOutput,
+} from '@/lib/ai-types';
 
-export const quizGeneratorFlow = ai.defineFlow(
-    {
-        name: 'quizGeneratorFlow',
-        inputSchema: QuizGeneratorInputSchema,
-        outputSchema: QuizGeneratorOutputSchema,
-    },
-    async (input) => {
-        const { text } = await ai.generate({
-            prompt: `You are an AI assistant that creates educational materials for teachers.
+export async function generateQuizAndFlashcards(
+  input: QuizGeneratorInput
+): Promise<QuizGeneratorOutput> {
+  const { text } = await ai.generate({
+    prompt: `You are an AI assistant that creates educational materials for teachers.
       Based on the provided course material, generate a quiz and a set of flashcards.
     
       The quiz should contain 5-7 multiple-choice questions that test the key concepts from the material.
@@ -32,9 +33,13 @@ export const quizGeneratorFlow = ai.defineFlow(
     
       Generate the quiz and flashcards in the specified JSON format.
       `,
-            model: googleAI.model('gemini-1.0-pro'),
-        });
+    model: googleAI.model('gemini-1.5-flash-latest'),
+  });
 
-        return JSON.parse(text);
-    }
-);
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('Failed to parse AI response:', text);
+    throw new Error('The AI returned an invalid response. Please try again.');
+  }
+}

@@ -7,17 +7,18 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema } from '@/lib/ai-types';
+import {
+  CareerAdvisorInputSchema,
+  CareerAdvisorOutputSchema,
+  type CareerAdvisorInput,
+  type CareerAdvisorOutput,
+} from '@/lib/ai-types';
 
-export const suggestCareersFlow = ai.defineFlow(
-  {
-    name: 'suggestCareersFlow',
-    inputSchema: CareerAdvisorInputSchema,
-    outputSchema: CareerAdvisorOutputSchema,
-  },
-  async (input) => {
-    const { text } = await ai.generate({
-      prompt: `You are an expert career advisor for students.
+export async function suggestCareers(
+  input: CareerAdvisorInput
+): Promise<CareerAdvisorOutput> {
+  const { text } = await ai.generate({
+    prompt: `You are an expert career advisor for students.
 
 Analyze the student's performance based on their grades in different courses.
 Based on their strengths, suggest 3-5 potential career paths.
@@ -32,9 +33,13 @@ For each career path, provide:
 
 Generate the response in the specified JSON format.
 `,
-      model: googleAI.model('gemini-1.0-pro'),
-    });
+    model: googleAI.model('gemini-1.5-flash-latest'),
+  });
 
+  try {
     return JSON.parse(text);
+  } catch (e) {
+    console.error('Failed to parse AI response:', text);
+    throw new Error('The AI returned an invalid response. Please try again.');
   }
-);
+}

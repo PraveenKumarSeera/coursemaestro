@@ -7,18 +7,19 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema } from '@/lib/ai-types';
+import {
+  TeachingAssistantInputSchema,
+  TeachingAssistantOutputSchema,
+  type TeachingAssistantInput,
+  type TeachingAssistantOutput,
+} from '@/lib/ai-types';
 
-
-export const teachingAssistantFlow = ai.defineFlow(
-  {
-    name: 'teachingAssistantFlow',
-    inputSchema: TeachingAssistantInputSchema,
-    outputSchema: TeachingAssistantOutputSchema,
-  },
-  async (input) => {
-    const promptText = input.task === 'grammarCheck' 
-    ? `You are an expert grammar and style checker for a teaching assistant.
+export async function analyzeSubmission(
+  input: TeachingAssistantInput
+): Promise<TeachingAssistantOutput> {
+  const promptText =
+    input.task === 'grammarCheck'
+      ? `You are an expert grammar and style checker for a teaching assistant.
 Analyze the following student submission for grammatical errors, spelling mistakes, and clarity.
 Provide a bulleted list of suggested improvements. If there are no errors, state that the submission is well-written.
 Keep the feedback constructive and encouraging.
@@ -29,7 +30,7 @@ ${input.submissionText}
 '''
 
 Generate the response in the specified JSON format.`
-    : `You are an expert summarizer for a teaching assistant.
+      : `You are an expert summarizer for a teaching assistant.
 Provide a concise, 2-3 sentence summary of the key points in the following student submission.
 
 Student Submission:
@@ -38,12 +39,16 @@ ${input.submissionText}
 '''
 
 Generate the response in the specified JSON format.`;
-    
-    const { text } = await ai.generate({
-      prompt: promptText,
-      model: googleAI.model('gemini-1.0-pro'),
-    });
-    
+
+  const { text } = await ai.generate({
+    prompt: promptText,
+    model: googleAI.model('gemini-1.5-flash-latest'),
+  });
+
+  try {
     return JSON.parse(text);
+  } catch (e) {
+    console.error('Failed to parse AI response:', text);
+    throw new Error('The AI returned an invalid response. Please try again.');
   }
-);
+}
