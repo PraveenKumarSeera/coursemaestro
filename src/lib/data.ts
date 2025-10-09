@@ -151,7 +151,11 @@ export async function deleteCourse(id: string): Promise<boolean> {
 
 export async function getTeacherById(id: string): Promise<User | undefined> {
     const db = await getDb();
-    return db.users.find(user => user.id === id && user.role === 'teacher');
+    const user = db.users.find(user => user.id === id && user.role === 'teacher');
+    if (user) return user;
+
+    // Return a placeholder if the teacher is not found to avoid crashes
+    return { id: 'deleted-user', name: 'Unknown Teacher', email: '', role: 'teacher', password: '' };
 }
 
 export async function getTeacherCourses(teacherId: string): Promise<(Course & { enrollments: Enrollment[] })[]> {
