@@ -3,10 +3,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Wand2, Briefcase, CheckCircle } from 'lucide-react';
+import { Loader2, Wand2, Briefcase } from 'lucide-react';
 import { suggestCareersAction } from '@/app/actions/career-advisor';
 import type { GradedSubmission } from '@/lib/types';
-import type { CareerAdvisorOutput } from '@/app/actions/career-advisor';
+import type { CareerAdvisorOutput } from '@/lib/ai-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';

@@ -35,7 +35,6 @@ const materialParserFlow = ai.defineFlow(
     outputSchema: MaterialParserOutputSchema,
   },
   async (input) => {
-    // The Gemini model can handle text extraction from various formats directly.
     const { output } = await prompt(input);
     if (!output) {
       throw new Error("Failed to parse document content.");
