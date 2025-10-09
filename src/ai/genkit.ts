@@ -5,9 +5,7 @@ import next from '@genkit-ai/next';
 
 export const ai = genkit({
   plugins: [
-    next({
-      plugins: [googleAI()],
-    }),
+    googleAI(),
   ],
   logLevel: 'debug',
   enableTracingAndMetrics: true,
