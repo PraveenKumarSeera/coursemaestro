@@ -13,11 +13,13 @@ import {
   type AiStudyAssistantOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
     name: 'studyAssistantPrompt',
     input: { schema: AiStudyAssistantInputSchema },
     output: { schema: AiStudyAssistantOutputSchema },
+    model: googleAI('gemini-1.5-flash'),
     prompt: `You are an AI study assistant helping students understand course material.
     Use the provided course material to answer the student's question.
     If the answer is not found within the context, respond that you cannot answer the question with the given context.
