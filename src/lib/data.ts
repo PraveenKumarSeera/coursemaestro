@@ -147,7 +147,7 @@ export async function deleteCourse(id: string): Promise<boolean> {
 
 export async function getTeacherById(id: string): Promise<User> {
     const db = await getDb();
-    const user = db.users.find(user => user.id === id && user.role === 'teacher');
+    const user = await findUserById(id);
     if (user) return user;
 
     // Return a placeholder if the teacher is not found to avoid crashes
@@ -174,7 +174,12 @@ export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     const db = await getDb();
     const courseEnrollments = db.enrollments.filter(e => e.courseId === courseId);
     const studentIds = courseEnrollments.map(e => e.studentId);
-    return db.users.filter(user => studentIds.includes(user.id));
+    
+    const students = await Promise.all(studentIds.map(async id => {
+        const user = await findUserById(id);
+        return user || { id, name: 'Unknown Student', email: '', role: 'student', password: '' };
+    }));
+    return students;
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
@@ -342,20 +347,18 @@ export async function getThreadsByCourse(courseId: string): Promise<(DiscussionT
     const db = await getDb();
     const threads = db.discussionThreads.filter(t => t.courseId === courseId);
     const threadsWithAuthors = await Promise.all(threads.map(async thread => {
-        const author = await findUserById(thread.authorId);
+        const author = await findUserById(thread.authorId) || { id: thread.authorId, name: 'Unknown User', email: '', role: 'student', password: '' };
         const postCount = db.discussionPosts.filter(p => p.threadId === thread.id).length;
-        if (!author) return null;
         return { ...thread, author, postCount };
     }));
-    return threadsWithAuthors.filter(Boolean) as (DiscussionThread & { author: User, postCount: number })[];
+    return threadsWithAuthors;
 }
 
 export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
     const db = await getDb();
     const thread = db.discussionThreads.find(t => t.id === threadId);
     if (!thread) return undefined;
-    const author = await findUserById(thread.authorId);
-    if (!author) return undefined;
+    const author = await findUserById(thread.authorId) || { id: thread.authorId, name: 'Unknown User', email: '', role: 'student', password: '' };
     return { ...thread, author };
 }
 
@@ -363,11 +366,10 @@ export async function getPostsByThread(threadId: string): Promise<(DiscussionPos
     const db = await getDb();
     const posts = db.discussionPosts.filter(p => p.threadId === threadId);
     const postsWithAuthors = await Promise.all(posts.map(async post => {
-        const author = await findUserById(post.authorId);
-        if (!author) return null;
+        const author = await findUserById(post.authorId) || { id: post.authorId, name: 'Unknown User', email: '', role: 'student', password: '' };
         return { ...post, author };
     }));
-    return postsWithAuthors.filter(Boolean) as (DiscussionPost & { author: User })[];
+    return postsWithAuthors;
 }
 
 export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
