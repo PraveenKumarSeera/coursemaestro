@@ -118,3 +118,15 @@ export const TeachingAssistantOutputSchema = z.object({
   analysis: z.string().describe('The result of the AI analysis, formatted as a markdown string.'),
 });
 export type TeachingAssistantOutput = z.infer<typeof TeachingAssistantOutputSchema>;
+
+// Motivation Bot
+export const MotivationBotInputSchema = z.object({
+  studentName: z.string().describe("The first name of the student."),
+  courseTitle: z.string().describe("The title of the course."),
+});
+export type MotivationBotInput = z.infer<typeof MotivationBotInputSchema>;
+
+export const MotivationBotOutputSchema = z.object({
+  message: z.string().describe("A short, positive, and encouraging message for the student."),
+});
+export type MotivationBotOutput = z.infer<typeof MotivationBotOutputSchema>;

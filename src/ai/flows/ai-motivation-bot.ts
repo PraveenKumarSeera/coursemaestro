@@ -6,18 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-export const MotivationBotInputSchema = z.object({
-  studentName: z.string().describe("The first name of the student."),
-  courseTitle: z.string().describe("The title of the course."),
-});
-export type MotivationBotInput = z.infer<typeof MotivationBotInputSchema>;
-
-export const MotivationBotOutputSchema = z.object({
-  message: z.string().describe("A short, positive, and encouraging message for the student."),
-});
-export type MotivationBotOutput = z.infer<typeof MotivationBotOutputSchema>;
+import { MotivationBotInputSchema, MotivationBotOutputSchema, type MotivationBotInput, type MotivationBotOutput } from '@/lib/ai-types';
 
 
 export async function generateMotivationalMessage(input: MotivationBotInput): Promise<MotivationBotOutput> {
