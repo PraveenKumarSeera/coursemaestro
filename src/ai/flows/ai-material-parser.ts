@@ -10,25 +10,35 @@
 import { ai } from '@/ai/genkit';
 import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialParserInput, type MaterialParserOutput } from '@/lib/ai-types';
 
-
 export async function parseMaterial(
   input: MaterialParserInput
 ): Promise<MaterialParserOutput> {
-  
-  const { output } = await ai.generate({
-    prompt: `Extract the text content from the following document.
+  return await ai.run('materialParserFlow', input);
+}
+
+
+ai.defineFlow(
+  {
+    name: 'materialParserFlow',
+    inputSchema: MaterialParserInputSchema,
+    outputSchema: MaterialParserOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      prompt: `Extract the text content from the following document.
   
   Document:
   {{media url=${input.fileDataUri}}}
   `,
-    model: 'googleai/gemini-1.5-flash-latest',
-    output: {
-      schema: MaterialParserOutputSchema,
-    },
-  });
-  
-  if (!output) {
-    throw new Error("Failed to parse document content.");
+      model: 'gemini-1.5-flash-latest',
+      output: {
+        schema: MaterialParserOutputSchema,
+      },
+    });
+    
+    if (!output) {
+      throw new Error("Failed to parse document content.");
+    }
+    return { textContent: output.textContent };
   }
-  return { textContent: output.textContent };
-}
+);

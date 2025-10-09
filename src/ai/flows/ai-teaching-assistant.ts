@@ -10,9 +10,18 @@ import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type Teach
 
 
 export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
-  
-  const promptText = input.task === 'grammarCheck' 
-  ? `You are an expert grammar and style checker for a teaching assistant.
+  return await ai.run('teachingAssistantFlow', input);
+}
+
+ai.defineFlow(
+  {
+    name: 'teachingAssistantFlow',
+    inputSchema: TeachingAssistantInputSchema,
+    outputSchema: TeachingAssistantOutputSchema,
+  },
+  async (input) => {
+    const promptText = input.task === 'grammarCheck' 
+    ? `You are an expert grammar and style checker for a teaching assistant.
 Analyze the following student submission for grammatical errors, spelling mistakes, and clarity.
 Provide a bulleted list of suggested improvements. If there are no errors, state that the submission is well-written.
 Keep the feedback constructive and encouraging.
@@ -21,24 +30,25 @@ Student Submission:
 '''
 ${input.submissionText}
 '''`
-  : `You are an expert summarizer for a teaching assistant.
+    : `You are an expert summarizer for a teaching assistant.
 Provide a concise, 2-3 sentence summary of the key points in the following student submission.
 
 Student Submission:
 '''
 ${input.submissionText}
 '''`;
-  
-  const { output } = await ai.generate({
-    prompt: promptText,
-    model: 'googleai/gemini-1.5-flash-latest',
-    output: {
-      schema: TeachingAssistantOutputSchema,
-    },
-  });
-  
-  if (!output) {
-    throw new Error('Failed to generate analysis.');
+    
+    const { output } = await ai.generate({
+      prompt: promptText,
+      model: 'gemini-1.5-flash-latest',
+      output: {
+        schema: TeachingAssistantOutputSchema,
+      },
+    });
+    
+    if (!output) {
+      throw new Error('Failed to generate analysis.');
+    }
+    return output;
   }
-  return output;
-}
+);

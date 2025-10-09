@@ -8,11 +8,20 @@
 import { ai } from '@/ai/genkit';
 import { MotivationBotInputSchema, MotivationBotOutputSchema, type MotivationBotInput, type MotivationBotOutput } from '@/lib/ai-types';
 
-
 export async function generateMotivationalMessage(input: MotivationBotInput): Promise<MotivationBotOutput> {
-  const { output } = await ai.generate({
-    prompt: `You are an encouraging and positive AI academic advisor named "Maestro".
-  
+  return await ai.run('motivationalMessageFlow', input);
+}
+
+ai.defineFlow(
+  {
+    name: 'motivationalMessageFlow',
+    inputSchema: MotivationBotInputSchema,
+    outputSchema: MotivationBotOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      prompt: `You are an encouraging and positive AI academic advisor named "Maestro".
+    
 A student, ${input.studentName}, just received a grade in their course, "${input.courseTitle}", that was lower than their average.
 Generate a short, kind, and motivational message (2-3 sentences) to send to them.
 
@@ -27,14 +36,15 @@ Example: "Hey ${input.studentName}, just a friendly check-in. Remember that ever
 
 Generate the message in the specified JSON format.
 `,
-    model: 'googleai/gemini-1.5-flash-latest',
-    output: {
-      schema: MotivationBotOutputSchema,
-    },
-  });
-  
-  if (!output) {
-    throw new Error('Failed to generate motivational message.');
+      model: 'gemini-1.5-flash-latest',
+      output: {
+        schema: MotivationBotOutputSchema,
+      },
+    });
+    
+    if (!output) {
+      throw new Error('Failed to generate motivational message.');
+    }
+    return output;
   }
-  return output;
-}
+);

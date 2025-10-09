@@ -9,8 +9,19 @@ import { ai } from '@/ai/genkit';
 import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/lib/ai-types';
 
 export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {
-  const { output } = await ai.generate({
-    prompt: `You are an expert resume writer helping a student create a professional resume.
+  return await ai.run('resumeBuilderFlow', input);
+}
+
+
+ai.defineFlow(
+  {
+    name: 'resumeBuilderFlow',
+    inputSchema: ResumeBuilderInputSchema,
+    outputSchema: ResumeBuilderOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
 
@@ -27,14 +38,15 @@ The resume should include the following sections:
 4.  **Skills:** Infer a list of potential skills (technical and soft skills) from the course titles.
 5.  **Projects / Coursework:** Frame their best-performing assignments (provided in the performance data) as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title.
 `,
-    model: 'googleai/gemini-1.5-flash-latest',
-    output: {
-      schema: ResumeBuilderOutputSchema,
-    },
-  });
+      model: 'gemini-1.5-flash-latest',
+      output: {
+        schema: ResumeBuilderOutputSchema,
+      },
+    });
 
-  if (!output) {
-    throw new Error('Failed to generate resume.');
+    if (!output) {
+      throw new Error('Failed to generate resume.');
+    }
+    return output;
   }
-  return output;
-}
+);

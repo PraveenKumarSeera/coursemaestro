@@ -9,8 +9,18 @@ import { ai } from '@/ai/genkit';
 import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema, type QuizGeneratorInput, type QuizGeneratorOutput } from '@/lib/ai-types';
 
 export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Promise<QuizGeneratorOutput> {
-    const { output } = await ai.generate({
-        prompt: `You are an AI assistant that creates educational materials for teachers.
+    return await ai.run('quizGeneratorFlow', input);
+}
+
+ai.defineFlow(
+    {
+        name: 'quizGeneratorFlow',
+        inputSchema: QuizGeneratorInputSchema,
+        outputSchema: QuizGeneratorOutputSchema,
+    },
+    async (input) => {
+        const { output } = await ai.generate({
+            prompt: `You are an AI assistant that creates educational materials for teachers.
       Based on the provided course material, generate a quiz and a set of flashcards.
     
       The quiz should contain 5-7 multiple-choice questions that test the key concepts from the material.
@@ -25,14 +35,15 @@ export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Prom
     
       Generate the quiz and flashcards in the specified JSON format.
       `,
-        model: 'googleai/gemini-1.5-flash-latest',
-        output: {
-            schema: QuizGeneratorOutputSchema,
-        },
-    });
+            model: 'gemini-1.5-flash-latest',
+            output: {
+                schema: QuizGeneratorOutputSchema,
+            },
+        });
 
-    if (!output) {
-        throw new Error("Failed to generate quiz content.");
+        if (!output) {
+            throw new Error("Failed to generate quiz content.");
+        }
+        return output;
     }
-    return output;
-}
+);

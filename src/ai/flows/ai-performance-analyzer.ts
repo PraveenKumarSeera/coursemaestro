@@ -13,16 +13,23 @@ import {
   type PerformanceAnalyzerOutput,
 } from '@/lib/ai-types';
 
-/**
- * Public function to trigger the AI performance analysis flow.
- * @param input - Student's graded assignment data as a pre-formatted string.
- * @returns A detailed analysis with strengths, weaknesses, and improvement suggestions.
- */
+
 export async function analyzePerformance(
   input: PerformanceAnalyzerInput
 ): Promise<PerformanceAnalyzerOutput> {
-  const { output } = await ai.generate({
-    prompt: `
+  return await ai.run('analyzePerformanceFlow', input);
+}
+
+
+ai.defineFlow(
+  {
+    name: 'analyzePerformanceFlow',
+    inputSchema: PerformanceAnalyzerInputSchema,
+    outputSchema: PerformanceAnalyzerOutputSchema,
+  },
+  async (input) => {
+    const { output } = await ai.generate({
+      prompt: `
 You are an expert academic advisor bot named **"Maestro"**.
 Your role is to analyze a student's academic performance based on their graded assignments and provide **encouraging, actionable feedback**.
 
@@ -39,15 +46,16 @@ Structure your response in **Markdown** format with the following sections:
 
 Maintain a **positive and empathetic tone** throughout.
 `,
-    model: 'googleai/gemini-1.5-flash-latest',
-    output: {
-      schema: PerformanceAnalyzerOutputSchema,
-    },
-  });
+      model: 'gemini-1.5-flash-latest',
+      output: {
+        schema: PerformanceAnalyzerOutputSchema,
+      },
+    });
 
-  if (!output) {
-    throw new Error('Failed to generate performance analysis.');
+    if (!output) {
+      throw new Error('Failed to generate performance analysis.');
+    }
+
+    return output;
   }
-
-  return output;
-}
+);
