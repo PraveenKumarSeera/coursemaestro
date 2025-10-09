@@ -1,7 +1,7 @@
 
 'use server';
 
-import { quizGeneratorFlow } from "@/ai/flows/ai-quiz-generator";
+import { generateQuizAndFlashcards } from "@/ai/flows/ai-quiz-generator";
 import type { Quiz, Flashcard, QuizGeneratorOutput } from '@/lib/ai-types';
 
 type FormState = {
@@ -33,7 +33,7 @@ export async function generateQuizAndFlashcardsAction(
   }
 
   try {
-    const result: QuizGeneratorOutput = await quizGeneratorFlow({ courseMaterial });
+    const result: QuizGeneratorOutput = await generateQuizAndFlashcards({ courseMaterial });
     return {
       quiz: result.quiz,
       flashcards: result.flashcards,

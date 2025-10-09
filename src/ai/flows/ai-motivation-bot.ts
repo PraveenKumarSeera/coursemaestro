@@ -32,7 +32,7 @@ Your message should:
 Do not mention the specific grade or assignment. Focus on encouragement.
 Example: "Hey ${input.studentName}, just a friendly check-in. Remember that every learning journey has its ups and downs. Keep your head up and keep moving forward. You've got this!"
 
-Generate the message in the specified JSON format.
+Generate the response in the specified JSON format.
 `,
     model: googleAI.model('gemini-1.5-flash-latest'),
   });
