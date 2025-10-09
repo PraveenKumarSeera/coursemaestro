@@ -34,7 +34,7 @@ For each career path, provide:
 2.  A brief description explaining why it's a good fit based on their academic performance.
 3.  A list of key skills associated with that career.
 `,
-      model: googleAI.model('gemini-pro'),
+      model: 'googleai/gemini-pro',
       output: {
         schema: CareerAdvisorOutputSchema,
       },
