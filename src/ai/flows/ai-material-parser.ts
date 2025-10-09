@@ -9,31 +9,15 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialParserInput, type MaterialParserOutput } from '@/lib/ai-types';
+import { MaterialParserInputSchema, MaterialParserOutputSchema, type MaterialParserInput } from '@/lib/ai-types';
 
-export async function parseMaterial(
-  input: MaterialParserInput
-): Promise<MaterialParserOutput> {
-  const result = await materialParserFlow(input);
-  if (typeof result === 'string') {
-    try {
-      const parsed = JSON.parse(result);
-      return { textContent: parsed.textContent };
-    } catch (e) {
-      throw new Error('Failed to parse document content from AI.');
-    }
-  }
-  return result;
-}
-
-
-const materialParserFlow = ai.defineFlow(
+export const materialParserFlow = ai.defineFlow(
   {
     name: 'materialParserFlow',
     inputSchema: MaterialParserInputSchema,
     outputSchema: MaterialParserOutputSchema,
   },
-  async (input) => {
+  async (input: MaterialParserInput) => {
     const { text } = await ai.generate({
       prompt: `Extract the text content from the following document.
   
@@ -45,6 +29,6 @@ const materialParserFlow = ai.defineFlow(
       model: googleAI.model('gemini-1.0-pro'),
     });
     
-    return text;
+    return JSON.parse(text);
   }
 );

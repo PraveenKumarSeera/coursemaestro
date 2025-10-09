@@ -7,21 +7,9 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { MotivationBotInputSchema, MotivationBotOutputSchema, type MotivationBotInput, type MotivationBotOutput } from '@/lib/ai-types';
+import { MotivationBotInputSchema, MotivationBotOutputSchema } from '@/lib/ai-types';
 
-export async function generateMotivationalMessage(input: MotivationBotInput): Promise<MotivationBotOutput> {
-  const result = await motivationalMessageFlow(input);
-  if (typeof result === 'string') {
-    try {
-      return JSON.parse(result);
-    } catch (e) {
-      throw new Error('Failed to parse motivational message from AI.');
-    }
-  }
-  return result;
-}
-
-const motivationalMessageFlow = ai.defineFlow(
+export const motivationalMessageFlow = ai.defineFlow(
   {
     name: 'motivationalMessageFlow',
     inputSchema: MotivationBotInputSchema,
@@ -48,6 +36,6 @@ Generate the message in the specified JSON format.
       model: googleAI.model('gemini-1.0-pro'),
     });
     
-    return text;
+    return JSON.parse(text);
   }
 );

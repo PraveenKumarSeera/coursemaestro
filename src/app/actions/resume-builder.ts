@@ -1,7 +1,7 @@
 
 'use server';
 
-import { generateResume } from "@/ai/flows/ai-resume-builder";
+import { resumeBuilderFlow } from "@/ai/flows/ai-resume-builder";
 import type { GradedSubmission, User } from "@/lib/types";
 import type { ResumeBuilderOutput } from '@/lib/ai-types';
 
@@ -35,7 +35,7 @@ export async function generateResumeAction(
   }
 
   try {
-    const result = await generateResume({ 
+    const result: ResumeBuilderOutput = await resumeBuilderFlow({ 
         studentName: user.name,
         studentEmail: user.email,
         studentPerformanceData,

@@ -10,27 +10,10 @@ import { googleAI } from '@genkit-ai/google-genai';
 import {
   PerformanceAnalyzerInputSchema,
   PerformanceAnalyzerOutputSchema,
-  type PerformanceAnalyzerInput,
-  type PerformanceAnalyzerOutput,
 } from '@/lib/ai-types';
 
 
-export async function analyzePerformance(
-  input: PerformanceAnalyzerInput
-): Promise<PerformanceAnalyzerOutput> {
-    const result = await analyzePerformanceFlow(input);
-    if (typeof result === 'string') {
-        try {
-            return JSON.parse(result);
-        } catch (e) {
-            throw new Error('Failed to parse performance analysis from AI.');
-        }
-    }
-    return result;
-}
-
-
-const analyzePerformanceFlow = ai.defineFlow(
+export const analyzePerformanceFlow = ai.defineFlow(
   {
     name: 'analyzePerformanceFlow',
     inputSchema: PerformanceAnalyzerInputSchema,
@@ -60,6 +43,6 @@ Generate the response in the specified JSON format.
       model: googleAI.model('gemini-1.0-pro'),
     });
 
-    return text;
+    return JSON.parse(text);
   }
 );

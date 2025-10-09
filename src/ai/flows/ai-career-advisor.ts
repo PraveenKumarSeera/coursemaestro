@@ -7,22 +7,9 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema, type CareerAdvisorInput, type CareerAdvisorOutput } from '@/lib/ai-types';
+import { CareerAdvisorInputSchema, CareerAdvisorOutputSchema } from '@/lib/ai-types';
 
-export async function suggestCareers(input: CareerAdvisorInput): Promise<CareerAdvisorOutput> {
-  const result = await suggestCareersFlow(input);
-  // The model sometimes returns a string, so we need to parse it.
-  if (typeof result === 'string') {
-    try {
-      return JSON.parse(result);
-    } catch (e) {
-      throw new Error('Failed to parse career suggestions from AI.');
-    }
-  }
-  return result;
-}
-
-const suggestCareersFlow = ai.defineFlow(
+export const suggestCareersFlow = ai.defineFlow(
   {
     name: 'suggestCareersFlow',
     inputSchema: CareerAdvisorInputSchema,
@@ -48,6 +35,6 @@ Generate the response in the specified JSON format.
       model: googleAI.model('gemini-1.0-pro'),
     });
 
-    return text;
+    return JSON.parse(text);
   }
 );

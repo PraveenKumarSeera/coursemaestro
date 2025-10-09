@@ -7,22 +7,10 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema, type ResumeBuilderInput, type ResumeBuilderOutput } from '@/lib/ai-types';
-
-export async function generateResume(input: ResumeBuilderInput): Promise<ResumeBuilderOutput> {
-  const result = await resumeBuilderFlow(input);
-  if (typeof result === 'string') {
-    try {
-      return JSON.parse(result);
-    } catch (e) {
-      throw new Error('Failed to parse resume from AI.');
-    }
-  }
-  return result;
-}
+import { ResumeBuilderInputSchema, ResumeBuilderOutputSchema } from '@/lib/ai-types';
 
 
-const resumeBuilderFlow = ai.defineFlow(
+export const resumeBuilderFlow = ai.defineFlow(
   {
     name: 'resumeBuilderFlow',
     inputSchema: ResumeBuilderInputSchema,
@@ -52,6 +40,6 @@ Generate the response in the specified JSON format.
       model: googleAI.model('gemini-1.0-pro'),
     });
 
-    return text;
+    return JSON.parse(text);
   }
 );

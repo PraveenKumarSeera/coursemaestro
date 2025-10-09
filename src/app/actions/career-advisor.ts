@@ -1,7 +1,7 @@
 
 'use server';
 
-import { suggestCareers } from "@/ai/flows/ai-career-advisor";
+import { suggestCareersFlow } from "@/ai/flows/ai-career-advisor";
 import type { GradedSubmission } from "@/lib/types";
 import type { CareerAdvisorOutput } from '@/lib/ai-types';
 
@@ -28,7 +28,7 @@ export async function suggestCareersAction(
 
 
   try {
-    const result = await suggestCareers({ studentPerformanceData });
+    const result: CareerAdvisorOutput = await suggestCareersFlow({ studentPerformanceData });
     return {
       suggestions: result.suggestions,
       message: 'Analysis successful.',

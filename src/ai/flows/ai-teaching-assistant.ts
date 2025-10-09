@@ -7,22 +7,10 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema, type TeachingAssistantInput, type TeachingAssistantOutput } from '@/lib/ai-types';
+import { TeachingAssistantInputSchema, TeachingAssistantOutputSchema } from '@/lib/ai-types';
 
 
-export async function runTeachingAssistant(input: TeachingAssistantInput): Promise<TeachingAssistantOutput> {
-  const result = await teachingAssistantFlow(input);
-  if (typeof result === 'string') {
-    try {
-        return JSON.parse(result);
-    } catch (e) {
-        throw new Error('Failed to parse analysis from AI.');
-    }
-  }
-  return result;
-}
-
-const teachingAssistantFlow = ai.defineFlow(
+export const teachingAssistantFlow = ai.defineFlow(
   {
     name: 'teachingAssistantFlow',
     inputSchema: TeachingAssistantInputSchema,
@@ -56,6 +44,6 @@ Generate the response in the specified JSON format.`;
       model: googleAI.model('gemini-1.0-pro'),
     });
     
-    return text;
+    return JSON.parse(text);
   }
 );

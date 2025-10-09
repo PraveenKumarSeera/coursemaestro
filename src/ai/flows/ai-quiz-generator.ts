@@ -7,21 +7,9 @@
 
 import { ai } from '@/ai/genkit';
 import { googleAI } from '@genkit-ai/google-genai';
-import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema, type QuizGeneratorInput, type QuizGeneratorOutput } from '@/lib/ai-types';
+import { QuizGeneratorInputSchema, QuizGeneratorOutputSchema } from '@/lib/ai-types';
 
-export async function generateQuizAndFlashcards(input: QuizGeneratorInput): Promise<QuizGeneratorOutput> {
-    const result = await quizGeneratorFlow(input);
-    if (typeof result === 'string') {
-        try {
-            return JSON.parse(result);
-        } catch (e) {
-            throw new Error('Failed to parse quiz content from AI.');
-        }
-    }
-    return result;
-}
-
-const quizGeneratorFlow = ai.defineFlow(
+export const quizGeneratorFlow = ai.defineFlow(
     {
         name: 'quizGeneratorFlow',
         inputSchema: QuizGeneratorInputSchema,
@@ -47,6 +35,6 @@ const quizGeneratorFlow = ai.defineFlow(
             model: googleAI.model('gemini-1.0-pro'),
         });
 
-        return text;
+        return JSON.parse(text);
     }
 );

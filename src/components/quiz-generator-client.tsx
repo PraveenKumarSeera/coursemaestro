@@ -10,7 +10,7 @@ import { FileText, Loader2, Wand2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Badge } from './ui/badge';
-import type { Quiz, Flashcard } from '@/app/actions/quiz-generator';
+import type { Quiz, Flashcard } from '@/lib/ai-types';
 import { useState } from 'react';
 
 

@@ -1,7 +1,7 @@
 
 'use server';
 
-import { runTeachingAssistant } from "@/ai/flows/ai-teaching-assistant";
+import { teachingAssistantFlow } from "@/ai/flows/ai-teaching-assistant";
 import { TeachingAssistantInputSchema, type TeachingAssistantOutput } from "@/lib/ai-types";
 
 type ActionState = {
@@ -26,7 +26,7 @@ export async function analyzeSubmissionAction(
   }
 
   try {
-    const result = await runTeachingAssistant(validatedInput.data);
+    const result: TeachingAssistantOutput = await teachingAssistantFlow(validatedInput.data);
     return {
       analysis: result.analysis,
       message: 'Analysis successful.',
