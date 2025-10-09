@@ -2,8 +2,8 @@
 'use client';
 
 import {
-  Bar,
-  BarChart,
+  Line,
+  LineChart,
   CartesianGrid,
   XAxis,
   YAxis,
@@ -27,6 +27,7 @@ type ChartData = {
 const chartConfig = {
   students: {
     label: "Students",
+    color: "hsl(var(--primary))",
   },
 };
 
@@ -43,7 +44,7 @@ export default function TeacherPerformanceChart({ data, courseTitle }: { data: C
         <div className="h-[300px] w-full">
             <ChartContainer config={chartConfig}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data} accessibilityLayer>
+                <LineChart data={data} accessibilityLayer>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
@@ -51,8 +52,20 @@ export default function TeacherPerformanceChart({ data, courseTitle }: { data: C
                         cursor={{ fill: 'hsl(var(--muted))' }}
                         content={<ChartTooltipContent indicator="dot" />}
                     />
-                    <Bar dataKey="students" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                    <Line
+                      dataKey="students"
+                      type="monotone"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={{
+                        fill: "hsl(var(--primary))",
+                        r: 4,
+                      }}
+                      activeDot={{
+                        r: 6,
+                      }}
+                    />
+                </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
         </div>
