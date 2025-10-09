@@ -8,32 +8,47 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import {
   MaterialParserInputSchema,
   MaterialParserOutputSchema,
   type MaterialParserInput,
   type MaterialParserOutput,
 } from '@/lib/ai-types';
+import { z } from 'zod';
+
+const prompt = ai.definePrompt(
+    {
+        name: 'materialParserPrompt',
+        input: { schema: MaterialParserInputSchema },
+        output: { schema: MaterialParserOutputSchema },
+        prompt: `Extract the text content from the following document.
+  
+        Document:
+        {{media url=fileDataUri}}
+
+        Generate the response in the specified JSON format.
+        `,
+    },
+);
+
+const materialParserFlow = ai.defineFlow(
+  {
+    name: 'materialParserFlow',
+    inputSchema: MaterialParserInputSchema,
+    outputSchema: MaterialParserOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+        throw new Error("The AI returned an invalid response. Please try again.");
+    }
+    return output;
+  }
+);
+
 
 export async function parseMaterial(
   input: MaterialParserInput
 ): Promise<MaterialParserOutput> {
-  const { text } = await ai.generate({
-    prompt: `Extract the text content from the following document.
-  
-  Document:
-  {{media url=${input.fileDataUri}}}
-
-  Generate the response in the specified JSON format.
-  `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
-  });
-
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse AI response:', text);
-    throw new Error('The AI returned an invalid response. Please try again.');
-  }
+  return materialParserFlow(input);
 }

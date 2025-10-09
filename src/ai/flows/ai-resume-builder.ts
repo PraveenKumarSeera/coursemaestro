@@ -6,27 +6,28 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import {
   ResumeBuilderInputSchema,
   ResumeBuilderOutputSchema,
   type ResumeBuilderInput,
   type ResumeBuilderOutput,
 } from '@/lib/ai-types';
+import { z } from 'zod';
 
-export async function generateResume(
-  input: ResumeBuilderInput
-): Promise<ResumeBuilderOutput> {
-  const { text } = await ai.generate({
+
+const prompt = ai.definePrompt({
+    name: 'resumeBuilderPrompt',
+    input: { schema: ResumeBuilderInputSchema },
+    output: { schema: ResumeBuilderOutputSchema },
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
 
-Student Name: ${input.studentName}
-Student Email: ${input.studentEmail}
+Student Name: {{{studentName}}}
+Student Email: {{{studentEmail}}}
 
 Academic Performance (High-performing assignments):
-${input.studentPerformanceData}
+{{{studentPerformanceData}}}
 
 The resume should include the following sections:
 1.  **Header:** Student's Name and Email.
@@ -37,13 +38,23 @@ The resume should include the following sections:
 
 Generate the response in the specified JSON format.
 `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
-  });
+});
 
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse AI response:', text);
-    throw new Error('The AI returned an invalid response. Please try again.');
-  }
+const resumeBuilderFlow = ai.defineFlow({
+    name: 'resumeBuilderFlow',
+    inputSchema: ResumeBuilderInputSchema,
+    outputSchema: ResumeBuilderOutputSchema,
+}, async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+        throw new Error("The AI returned an invalid response. Please try again.");
+    }
+    return output;
+});
+
+
+export async function generateResume(
+  input: ResumeBuilderInput
+): Promise<ResumeBuilderOutput> {
+  return resumeBuilderFlow(input);
 }

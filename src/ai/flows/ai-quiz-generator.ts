@@ -6,18 +6,18 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import {
   QuizGeneratorInputSchema,
   QuizGeneratorOutputSchema,
   type QuizGeneratorInput,
   type QuizGeneratorOutput,
 } from '@/lib/ai-types';
+import { z } from 'zod';
 
-export async function generateQuizAndFlashcards(
-  input: QuizGeneratorInput
-): Promise<QuizGeneratorOutput> {
-  const { text } = await ai.generate({
+const prompt = ai.definePrompt({
+    name: 'quizGeneratorPrompt',
+    input: { schema: QuizGeneratorInputSchema },
+    output: { schema: QuizGeneratorOutputSchema },
     prompt: `You are an AI assistant that creates educational materials for teachers.
       Based on the provided course material, generate a quiz and a set of flashcards.
     
@@ -28,18 +28,28 @@ export async function generateQuizAndFlashcards(
     
       Course Material:
       '''
-      ${input.courseMaterial}
+      {{{courseMaterial}}}
       '''
     
       Generate the quiz and flashcards in the specified JSON format.
       `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
-  });
+});
 
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse AI response:', text);
-    throw new Error('The AI returned an invalid response. Please try again.');
-  }
+const quizGeneratorFlow = ai.defineFlow({
+    name: 'quizGeneratorFlow',
+    inputSchema: QuizGeneratorInputSchema,
+    outputSchema: QuizGeneratorOutputSchema,
+}, async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+        throw new Error("The AI returned an invalid response. Please try again.");
+    }
+    return output;
+});
+
+
+export async function generateQuizAndFlashcards(
+  input: QuizGeneratorInput
+): Promise<QuizGeneratorOutput> {
+  return quizGeneratorFlow(input);
 }

@@ -6,21 +6,21 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import {
   MotivationBotInputSchema,
   MotivationBotOutputSchema,
   type MotivationBotInput,
   type MotivationBotOutput,
 } from '@/lib/ai-types';
+import { z } from 'zod';
 
-export async function generateMotivationalMessage(
-  input: MotivationBotInput
-): Promise<MotivationBotOutput> {
-  const { text } = await ai.generate({
+const prompt = ai.definePrompt({
+    name: 'motivationBotPrompt',
+    input: { schema: MotivationBotInputSchema },
+    output: { schema: MotivationBotOutputSchema },
     prompt: `You are an encouraging and positive AI academic advisor named "Maestro".
     
-A student, ${input.studentName}, just received a grade in their course, "${input.courseTitle}", that was lower than their average.
+A student, {{{studentName}}}, just received a grade in their course, "{{{courseTitle}}}", that was lower than their average.
 Generate a short, kind, and motivational message (2-3 sentences) to send to them.
 
 Your message should:
@@ -30,17 +30,29 @@ Your message should:
 - Maintain a warm and uplifting tone.
 
 Do not mention the specific grade or assignment. Focus on encouragement.
-Example: "Hey ${input.studentName}, just a friendly check-in. Remember that every learning journey has its ups and downs. Keep your head up and keep moving forward. You've got this!"
+Example: "Hey {{{studentName}}}, just a friendly check-in. Remember that every learning journey has its ups and downs. Keep your head up and keep moving forward. You've got this!"
 
 Generate the response in the specified JSON format.
 `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
-  });
+});
 
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse AI response:', text);
-    throw new Error('The AI returned an invalid response. Please try again.');
+const motivationBotFlow = ai.defineFlow(
+  {
+    name: 'motivationBotFlow',
+    inputSchema: MotivationBotInputSchema,
+    outputSchema: MotivationBotOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+        throw new Error("The AI returned an invalid response. Please try again.");
+    }
+    return output;
   }
+);
+
+export async function generateMotivationalMessage(
+  input: MotivationBotInput
+): Promise<MotivationBotOutput> {
+  return motivationBotFlow(input);
 }

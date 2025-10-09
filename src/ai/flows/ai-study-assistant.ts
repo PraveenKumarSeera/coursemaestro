@@ -6,37 +6,47 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/google-genai';
 import {
   AiStudyAssistantInputSchema,
   AiStudyAssistantOutputSchema,
   type AiStudyAssistantInput,
   type AiStudyAssistantOutput,
 } from '@/lib/ai-types';
+import { z } from 'zod';
 
-export async function askStudyAssistant(
-  input: AiStudyAssistantInput
-): Promise<AiStudyAssistantOutput> {
-  const { text } = await ai.generate({
+const prompt = ai.definePrompt({
+    name: 'studyAssistantPrompt',
+    input: { schema: AiStudyAssistantInputSchema },
+    output: { schema: AiStudyAssistantOutputSchema },
     prompt: `You are an AI study assistant helping students understand course material.
     Use the provided course material to answer the student's question.
     If the answer is not found within the context, respond that you cannot answer the question with the given context.
 
     Course Material:
-    ${input.courseMaterial}
+    {{{courseMaterial}}}
 
     Student Question:
-    ${input.studentQuestion}
+    {{{studentQuestion}}}
 
     Answer in JSON format with a single key "answer".
     `,
-    model: googleAI.model('gemini-1.5-flash-latest'),
-  });
+});
 
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse AI response:', text);
-    throw new Error('The AI returned an invalid response. Please try again.');
-  }
+const studyAssistantFlow = ai.defineFlow({
+    name: 'studyAssistantFlow',
+    inputSchema: AiStudyAssistantInputSchema,
+    outputSchema: AiStudyAssistantOutputSchema,
+}, async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+        throw new Error("The AI returned an invalid response. Please try again.");
+    }
+    return output;
+});
+
+
+export async function askStudyAssistant(
+  input: AiStudyAssistantInput
+): Promise<AiStudyAssistantOutput> {
+  return studyAssistantFlow(input);
 }
