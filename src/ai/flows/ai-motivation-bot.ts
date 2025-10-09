@@ -37,7 +37,7 @@ Example: "Hey ${input.studentName}, just a friendly check-in. Remember that ever
 
 Generate the message in the specified JSON format.
 `,
-      model: 'googleai/gemini-pro',
+      model: 'gemini-pro',
       output: {
         schema: MotivationBotOutputSchema,
       },
