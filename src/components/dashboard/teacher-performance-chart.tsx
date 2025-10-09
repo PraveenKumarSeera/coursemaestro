@@ -30,13 +30,13 @@ const chartConfig = {
   },
 };
 
-export default function TeacherPerformanceChart({ data }: { data: ChartData[] }) {
+export default function TeacherPerformanceChart({ data, courseTitle }: { data: ChartData[], courseTitle: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Overall Student Performance</CardTitle>
+        <CardTitle>{courseTitle}</CardTitle>
         <CardDescription>
-          Distribution of grades across all your courses.
+          Grade distribution for this course.
         </CardDescription>
       </CardHeader>
       <CardContent>

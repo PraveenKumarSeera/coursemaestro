@@ -1,3 +1,4 @@
+
 import { getSession } from '@/lib/session';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList } from 'lucide-react';
@@ -22,7 +23,7 @@ export default async function DashboardPage() {
         return null; // Or redirect, though layout should handle this
     }
 
-    const { stats, gradeDistribution } = await getDashboardData(user.id, user.role);
+    const { stats, coursePerformances } = await getDashboardData(user.id, user.role);
 
     return (
         <div>
@@ -54,9 +55,15 @@ export default async function DashboardPage() {
                 })}
             </div>
             
-            {user.role === 'teacher' && gradeDistribution && (
-                <div className="mt-6">
-                    <TeacherPerformanceChart data={gradeDistribution} />
+            {user.role === 'teacher' && coursePerformances && coursePerformances.length > 0 && (
+                <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                    {coursePerformances.map((performance) => (
+                        <TeacherPerformanceChart 
+                            key={performance.courseId} 
+                            data={performance.gradeDistribution} 
+                            courseTitle={performance.courseTitle}
+                        />
+                    ))}
                 </div>
             )}
         </div>

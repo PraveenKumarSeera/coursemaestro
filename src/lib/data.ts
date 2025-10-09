@@ -576,6 +576,12 @@ export async function generateCertificate(studentId: string, courseId: string): 
 }
 
 // --- Dashboard Functions ---
+export type CoursePerformance = {
+    courseId: string;
+    courseTitle: string;
+    gradeDistribution: { name: string; students: number }[];
+};
+
 export type DashboardStats = {
   stats: {
     title: string;
@@ -584,7 +590,7 @@ export type DashboardStats = {
     icon: string;
     link?: { href: string; text: string; };
   }[];
-  gradeDistribution?: { name: string; students: number; }[];
+  coursePerformances?: CoursePerformance[];
 };
 
 export async function getDashboardData(userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> {
@@ -603,25 +609,35 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         const submissions = db.submissions.filter(s => assignmentIds.includes(s.assignmentId));
         const pendingSubmissions = submissions.filter(s => s.grade === null).length;
 
-        // Calculate grade distribution
-        const gradedSubmissions = submissions.filter(s => s.grade !== null);
-        const gradeDistribution = [
-            { name: 'A (90-100)', students: 0 },
-            { name: 'B (80-89)', students: 0 },
-            { name: 'C (70-79)', students: 0 },
-            { name: 'D (60-69)', students: 0 },
-            { name: 'F (<60)', students: 0 },
-        ];
+        const coursePerformances: CoursePerformance[] = courses.map(course => {
+            const courseAssignments = db.assignments.filter(a => a.courseId === course.id);
+            const courseAssignmentIds = courseAssignments.map(a => a.id);
+            const courseSubmissions = db.submissions.filter(s => courseAssignmentIds.includes(s.assignmentId));
+            
+            const gradeDistribution = [
+                { name: 'A (90+)', students: 0 },
+                { name: 'B (80-89)', students: 0 },
+                { name: 'C (70-79)', students: 0 },
+                { name: 'D (60-69)', students: 0 },
+                { name: 'F (<60)', students: 0 },
+            ];
 
-        // This is a simplified calculation. It counts submissions, not unique students per grade bucket.
-        // A more complex implementation would average grades per student first.
-        gradedSubmissions.forEach(sub => {
-            if (sub.grade === null) return;
-            if (sub.grade >= 90) gradeDistribution[0].students++;
-            else if (sub.grade >= 80) gradeDistribution[1].students++;
-            else if (sub.grade >= 70) gradeDistribution[2].students++;
-            else if (sub.grade >= 60) gradeDistribution[3].students++;
-            else gradeDistribution[4].students++;
+            const gradedSubmissions = courseSubmissions.filter(s => s.grade !== null);
+            
+            gradedSubmissions.forEach(sub => {
+                if (sub.grade === null) return;
+                if (sub.grade >= 90) gradeDistribution[0].students++;
+                else if (sub.grade >= 80) gradeDistribution[1].students++;
+                else if (sub.grade >= 70) gradeDistribution[2].students++;
+                else if (sub.grade >= 60) gradeDistribution[3].students++;
+                else gradeDistribution[4].students++;
+            });
+
+            return {
+                courseId: course.id,
+                courseTitle: course.title,
+                gradeDistribution,
+            };
         });
 
         return {
@@ -630,7 +646,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
                 { title: 'Total Students', value: studentIds.size, subtitle: 'Across all courses', icon: 'Users', link: { href: "/students", text: "View Students"} },
                 { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
             ],
-            gradeDistribution: gradeDistribution,
+            coursePerformances,
         };
     } else { // role is 'student'
         const enrollments = db.enrollments.filter(e => e.studentId === userId);
