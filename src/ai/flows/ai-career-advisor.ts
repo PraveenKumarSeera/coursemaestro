@@ -21,12 +21,15 @@ const prompt = ai.definePrompt({
 Analyze the student's performance based on their grades in different courses.
 Based on their strengths, suggest 3-5 potential career paths.
 
+Here is the student's performance data:
+{{#each gradedSubmissions}}
+- Course: "{{course.title}}", Assignment: "{{assignment.title}}", Grade: {{grade}}%
+{{/each}}
+
 For each career path, provide:
 1.  A title for the career.
 2.  A brief description explaining why it's a good fit based on their academic performance.
 3.  A list of key skills associated with that career.
-
-The student's performance data is provided in the input.
 `,
 });
 

@@ -20,6 +20,14 @@ const prompt = ai.definePrompt({
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
 
+Student Name: {{studentName}}
+Student Email: {{studentEmail}}
+
+Academic Performance:
+{{#each gradedSubmissions}}
+- Course: "{{course.title}}", Assignment: "{{assignment.title}}", Grade: {{grade}}%
+{{/each}}
+
 The resume should include the following sections:
 1.  **Header:** Student's Name and Email.
 2.  **Summary:** A brief, 2-3 sentence professional summary highlighting their strengths as a motivated and capable student.
