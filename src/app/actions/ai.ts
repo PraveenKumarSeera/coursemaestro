@@ -1,7 +1,7 @@
 
 'use server';
 
-import { studyAssistantFlow } from '@/ai/flows/ai-study-assistant';
+import { askStudyAssistant } from '@/ai/flows/ai-study-assistant';
 import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/lib/ai-types';
 
 type AiState = {
@@ -32,7 +32,7 @@ export async function askAI(
   }
 
   try {
-    const result: AiStudyAssistantOutput = await studyAssistantFlow({
+    const result: AiStudyAssistantOutput = await askStudyAssistant({
       courseMaterial,
       studentQuestion,
     });

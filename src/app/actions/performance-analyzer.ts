@@ -1,7 +1,7 @@
 
 'use server';
 
-import { analyzePerformanceFlow } from "@/ai/flows/ai-performance-analyzer";
+import { analyzePerformance } from "@/ai/flows/ai-performance-analyzer";
 import type { GradedSubmission } from "@/lib/types";
 import type { PerformanceAnalyzerOutput } from "@/lib/ai-types";
 
@@ -27,7 +27,7 @@ export async function analyzePerformanceAction(
     .join('\n');
 
   try {
-    const result: PerformanceAnalyzerOutput = await analyzePerformanceFlow({ studentPerformanceData });
+    const result: PerformanceAnalyzerOutput = await analyzePerformance({ studentPerformanceData });
     return {
       analysis: result.analysis,
       message: 'Analysis successful.',
