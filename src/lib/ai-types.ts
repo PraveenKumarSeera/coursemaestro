@@ -155,3 +155,34 @@ export const TimetableGeneratorOutputSchema = z.object({
   weeklySchedule: z.array(DailyScheduleSchema).describe("An array representing the student's personalized weekly study schedule."),
 });
 export type TimetableGeneratorOutput = z.infer<typeof TimetableGeneratorOutputSchema>;
+
+// Internship Simulator - Task Generator
+export const InternshipTaskGeneratorInputSchema = z.object({
+  domainName: z.string().describe('The name of the company domain, e.g., "Google".'),
+  domainDescription: z.string().describe('A brief description of the company domain.'),
+});
+export type InternshipTaskGeneratorInput = z.infer<typeof InternshipTaskGeneratorInputSchema>;
+
+export const InternshipTaskGeneratorOutputSchema = z.object({
+    title: z.string().describe('A concise title for the simulated task.'),
+    scenario: z.string().describe('A paragraph setting up the context and scenario for the task.'),
+    task: z.string().describe('A clear and specific description of what the student needs to do.'),
+    deliverables: z.array(z.string()).describe('A list of 2-3 specific items the student needs to produce.')
+});
+export type InternshipTaskGeneratorOutput = z.infer<typeof InternshipTaskGeneratorOutputSchema>;
+
+// Internship Simulator - Grader
+export const InternshipGraderInputSchema = z.object({
+  taskTitle: z.string().describe('The title of the task being graded.'),
+  taskDescription: z.string().describe('The description of the task being graded.'),
+  submissionText: z.string().describe('The student\'s submission text.'),
+});
+export type InternshipGraderInput = z.infer<typeof InternshipGraderInputSchema>;
+
+export const InternshipGraderOutputSchema = z.object({
+    problemSolving: z.number().min(0).max(100).describe('A score from 0-100 for problem-solving skills.'),
+    creativity: z.number().min(0).max(100).describe('A score from 0-100 for creativity.'),
+    overall: z.number().min(0).max(100).describe('An overall weighted score for the submission.'),
+    feedback: z.string().describe('Constructive, paragraph-form feedback on the submission, highlighting strengths and areas for improvement.'),
+});
+export type InternshipGraderOutput = z.infer<typeof InternshipGraderOutputSchema>;

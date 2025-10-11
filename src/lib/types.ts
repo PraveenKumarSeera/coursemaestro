@@ -1,6 +1,7 @@
 
 
 
+
 export type User = {
   id: string;
   name: string;
@@ -115,3 +116,25 @@ export type ChallengeVote = {
   submissionId: string;
   voterId: string;
 };
+
+// Internship Simulator Types
+export type InternshipDomain = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+};
+
+export type InternshipTask = {
+  title: string;
+  scenario: string;
+  task: string;
+  deliverables: string[];
+};
+
+export type InternshipGrade = {
+    problemSolving: number;
+    creativity: number;
+    overall: number;
+    feedback: string;
+}

@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -20,6 +19,7 @@ import {
   CalendarClock,
   Library,
   Lightbulb,
+  Building,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -48,6 +48,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const studentRoutes = [
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },
+    { href: '/internship', label: 'Internship Sim', icon: Building },
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
     { href: '/my-certificates', label: 'My Certificates', icon: Award },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
@@ -84,7 +85,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
