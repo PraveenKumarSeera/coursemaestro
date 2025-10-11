@@ -1,5 +1,7 @@
 // In a real app, use a library like `jose` for proper JWT handling.
 // For this demo, we'll use a simple approach.
+'use server';
+
 import { cookies } from 'next/headers';
 import type { User } from './types';
 import { findUserById } from './data';
@@ -49,7 +51,7 @@ export async function getSession(): Promise<{ user: User | null }> {
 
   const user = await findUserById(session.userId);
 
-  if (!user) {
+  if (!user || user.id === '0') {
     return { user: null };
   }
   

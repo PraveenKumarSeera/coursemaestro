@@ -1,4 +1,6 @@
 
+'use server';
+
 import { placeholderImages } from './placeholder-images.json';
 import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate } from './types';
 import { promises as fs } from 'fs';
