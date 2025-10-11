@@ -21,8 +21,7 @@ export async function generateResumeAction(
     };
   }
 
-    // Pre-process the data into a simple string, focusing on high-performing assignments
-    const studentPerformanceData = gradedSubmissions
+  const studentPerformanceData = gradedSubmissions
       .filter(sub => sub.grade && sub.grade >= 85)
       .map(sub => `Course: "${sub.course.title}", Assignment: "${sub.assignment.title}", Grade: ${sub.grade}%`)
       .join('\n');
@@ -34,21 +33,59 @@ export async function generateResumeAction(
     };
   }
 
-  try {
-    const result: ResumeBuilderOutput = await generateResume({ 
-        studentName: user.name,
-        studentEmail: user.email,
-        studentPerformanceData,
-    });
-    return {
-      resumeMarkdown: result.resumeMarkdown,
-      message: 'Resume generated successfully.',
-    };
-  } catch (error: any) {
-    console.error('Resume builder error:', error);
-    return {
-      resumeMarkdown: null,
-      message: error.message || 'Sorry, I encountered an error while generating your resume. Please try again.',
-    };
-  }
+  const demoResume = `
+# ${user.name}
+**${user.email}**
+
+---
+
+### Summary
+A highly motivated and detail-oriented student with a proven track record of excellence in technical courses, including Web Development and Data Structures. Eager to apply strong foundational knowledge in software engineering and problem-solving to a challenging internship or entry-level role.
+
+---
+
+### Education
+*Coursework at CourseMaestro*
+- Introduction to Web Development
+- Advanced React Patterns
+- Data Structures & Algorithms
+
+---
+
+### Skills
+- **Programming Languages:** JavaScript, HTML, CSS, Python
+- **Frameworks & Libraries:** React.js, Next.js, Tailwind CSS
+- **Developer Tools:** Git, VS Code, npm
+- **Soft Skills:** Problem-Solving, Team Collaboration, Communication, Time Management
+
+---
+
+### Projects / Coursework
+
+**Project: Responsive Portfolio Website**
+*Course: Introduction to Web Development*
+- Developed a fully responsive, multi-page portfolio website using HTML, CSS, and vanilla JavaScript.
+- Implemented a mobile-first design approach and utilized Flexbox and Grid for complex layouts.
+
+**Project: E-commerce State Management**
+*Course: Advanced React Patterns*
+- Built a shopping cart feature for a mock e-commerce site using React's Context API for global state management.
+- Optimized component rendering to prevent unnecessary re-renders and improve performance.
+
+**Project: Algorithm Efficiency Analysis**
+*Course: Data Structures & Algorithms*
+- Implemented and analyzed the time and space complexity of various sorting algorithms (e.g., Merge Sort, Quick Sort).
+- Wrote a report comparing the performance of different algorithms on various data sets.
+  `;
+
+
+  // Return demo data instead of calling AI
+  return new Promise(resolve => {
+    setTimeout(() => {
+        resolve({
+            resumeMarkdown: demoResume,
+            message: 'Resume generated successfully.',
+        });
+    }, 1500);
+  });
 }

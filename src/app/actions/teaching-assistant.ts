@@ -10,6 +10,16 @@ type ActionState = {
   task: 'summarize' | 'grammarCheck' | null;
 };
 
+const demoSummary = "The student argues that responsive design is crucial for modern web development, improves user experience, and boosts SEO. They suggest a mobile-first approach is the most effective strategy.";
+
+const demoGrammarCheck = `
+- **Well-written overall!** The submission is clear and well-structured.
+- Consider rephrasing the sentence "It is a thing that is very important" in the second paragraph for better clarity. Perhaps "This principle is critical because..."
+- There's a minor typo in the third paragraph: "delevopment" should be "development".
+- The conclusion is strong but could be even more impactful by restating the main thesis.
+`;
+
+
 export async function analyzeSubmissionAction(
   submissionText: string,
   task: 'summarize' | 'grammarCheck'
@@ -25,19 +35,14 @@ export async function analyzeSubmissionAction(
     };
   }
 
-  try {
-    const result: TeachingAssistantOutput = await analyzeSubmission(validatedInput.data);
-    return {
-      analysis: result.analysis,
-      message: 'Analysis successful.',
-      task: task,
-    };
-  } catch (error: any) {
-    console.error('Teaching assistant error:', error);
-    return {
-      analysis: null,
-      message: error.message || 'Sorry, I encountered an error while analyzing the submission. Please try again.',
-      task: task,
-    };
-  }
+  // Return demo data based on the task
+  return new Promise(resolve => {
+    setTimeout(() => {
+        resolve({
+            analysis: task === 'summarize' ? demoSummary : demoGrammarCheck,
+            message: 'Analysis successful.',
+            task: task,
+        });
+    }, 1500);
+  });
 }
