@@ -33,19 +33,15 @@ export async function askAI(
     }
   }
 
-  try {
-    const result = await askStudyAssistant({ studentQuestion, courseMaterial });
-    return {
-        answer: result.answer,
-        question: studentQuestion,
-    };
-  } catch (e: any) {
-    console.error("AI Error in askAI:", e);
-    const errorMessage = e.message || "Sorry, I had trouble processing that request. Please try again.";
-    return {
-        answer: errorMessage, // Display error in chat
-        question: studentQuestion,
-        error: errorMessage,
-    };
-  }
+  // Bypass AI call and return demo data
+  const demoAnswer = `This is a demo response based on the course material for "${courseMaterial.split(':')[0]}". For a real answer, this would use an AI model to analyze the course description and your question: "${studentQuestion}". The fundamental concepts of web development include HTML for structure, CSS for styling, and JavaScript for interactivity.`;
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+        resolve({
+            answer: demoAnswer,
+            question: studentQuestion,
+        });
+    }, 1000);
+  });
 }
