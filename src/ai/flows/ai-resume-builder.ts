@@ -19,7 +19,6 @@ import { googleAI } from '@genkit-ai/google-genai';
 const prompt = ai.definePrompt({
     name: 'resumeBuilderPrompt',
     input: { schema: ResumeBuilderInputSchema },
-    output: { schema: ResumeBuilderOutputSchema },
     model: googleAI('gemini-1.5-flash'),
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
@@ -47,11 +46,11 @@ const resumeBuilderFlow = ai.defineFlow({
     inputSchema: ResumeBuilderInputSchema,
     outputSchema: ResumeBuilderOutputSchema,
 }, async (input) => {
-    const { output } = await prompt(input);
-    if (!output) {
+    const { text } = await prompt(input);
+    if (!text) {
         throw new Error("The AI returned an invalid response. Please try again.");
     }
-    return output;
+    return { resumeMarkdown: text };
 });
 
 
