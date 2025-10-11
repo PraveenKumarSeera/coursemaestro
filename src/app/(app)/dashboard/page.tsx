@@ -1,12 +1,14 @@
 
+
 import { getSession } from '@/lib/session';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { getDashboardData } from '@/lib/data';
+import { getDashboardData, type StudentDashboardStats, type TeacherDashboardStats } from '@/lib/data';
 import type { LucideIcon } from 'lucide-react';
 import TeacherPerformanceChart from '@/components/dashboard/teacher-performance-chart';
+import LearningEfficiencyMeter from '@/components/dashboard/learning-efficiency-meter';
 
 const iconMap: { [key: string]: LucideIcon } = {
     BookOpen,
@@ -23,7 +25,7 @@ export default async function DashboardPage() {
         return null; // Or redirect, though layout should handle this
     }
 
-    const { stats, coursePerformances } = await getDashboardData(user.id, user.role);
+    const dashboardData = await getDashboardData(user.id, user.role);
 
     return (
         <div>
@@ -31,7 +33,7 @@ export default async function DashboardPage() {
                 Welcome back, {user.name.split(' ')[0]}!
             </h1>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {stats.map((stat, index) => {
+                {dashboardData.stats.map((stat, index) => {
                     const Icon = iconMap[stat.icon];
                     return (
                         <Card key={index}>
@@ -53,11 +55,17 @@ export default async function DashboardPage() {
                         </Card>
                     )
                 })}
+
+                 {user.role === 'student' && 'learningEfficiency' in dashboardData && (
+                    <LearningEfficiencyMeter 
+                        efficiencyData={(dashboardData as StudentDashboardStats).learningEfficiency} 
+                    />
+                )}
             </div>
             
-            {user.role === 'teacher' && coursePerformances && coursePerformances.length > 0 && (
+            {user.role === 'teacher' && 'coursePerformances' in dashboardData && dashboardData.coursePerformances && dashboardData.coursePerformances.length > 0 && (
                 <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                    {coursePerformances.map((performance) => (
+                    {(dashboardData as TeacherDashboardStats).coursePerformances.map((performance) => (
                         <TeacherPerformanceChart 
                             key={performance.courseId} 
                             data={performance.gradeDistribution} 

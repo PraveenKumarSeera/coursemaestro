@@ -7,6 +7,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
+import { differenceInDays, parseISO } from 'date-fns';
 
 // In-memory "database" has been replaced with a file-based one.
 // The data is now persisted in `src/lib/db.json`
@@ -618,16 +619,37 @@ export type CoursePerformance = {
     gradeDistribution: { name: string; students: number }[];
 };
 
-export type DashboardStats = {
-  stats: {
-    title: string;
-    value: string | number;
-    subtitle: string;
-    icon: string;
-    link?: { href: string; text: string; };
-  }[];
-  coursePerformances?: CoursePerformance[];
+export type StudentDashboardStats = {
+    stats: {
+        title: string;
+        value: string | number;
+        subtitle: string;
+        icon: string;
+        link?: { href: string; text: string; };
+    }[];
+    learningEfficiency: {
+        score: number;
+        components: {
+            attention: number;
+            completion: number;
+            accuracy: number;
+        }
+    }
 };
+
+export type TeacherDashboardStats = {
+    stats: {
+        title: string;
+        value: string | number;
+        subtitle: string;
+        icon: string;
+        link?: { href: string; text: string; };
+    }[];
+    coursePerformances: CoursePerformance[];
+}
+
+export type DashboardStats = StudentDashboardStats | TeacherDashboardStats;
+
 
 export async function getDashboardData(userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> {
     const db = await getDb();
@@ -685,21 +707,22 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             coursePerformances,
         };
     } else { // role is 'student'
-        const enrollments = db.enrollments.filter(e => e.studentId === userId);
+        const enrollments = await getStudentEnrollments(userId);
         const enrolledCourseIds = enrollments.map(e => e.courseId);
 
         const allAssignments = db.assignments.filter(a => enrolledCourseIds.includes(a.courseId));
+        
+        // --- Due Soon Calculation ---
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-
         const studentSubmissions = db.submissions.filter(s => s.studentId === userId);
         const submittedAssignmentIds = new Set(studentSubmissions.map(s => s.assignmentId));
-
         const assignmentsDueSoon = allAssignments.filter(a => {
             const dueDate = new Date(a.dueDate);
             return dueDate > new Date() && dueDate <= sevenDaysFromNow && !submittedAssignmentIds.has(a.id);
         }).length;
         
+        // --- Average Grade Calculation ---
         const gradedSubmissions = studentSubmissions.filter(s => s.grade !== null);
         const totalGrade = gradedSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
         const averageGrade = gradedSubmissions.length > 0 ? Math.round(totalGrade / gradedSubmissions.length) : 0;
@@ -713,12 +736,46 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             return 'N/A';
         }
 
+        // --- Learning Efficiency Score Calculation ---
+        let totalAttention = 0;
+        let totalCompletion = 0;
+
+        for (const enrollment of enrollments) {
+            const firstAttendance = db.attendance.find(a => a.studentId === userId && a.courseId === enrollment.courseId);
+            if (!firstAttendance) continue;
+
+            const daysSinceEnrollment = differenceInDays(new Date(), parseISO(firstAttendance.date)) + 1;
+            const attendanceDays = db.attendance.filter(a => a.studentId === userId && a.courseId === enrollment.courseId).length;
+            totalAttention += (attendanceDays / daysSinceEnrollment);
+
+            const courseAssignments = allAssignments.filter(a => a.courseId === enrollment.courseId);
+            if (courseAssignments.length > 0) {
+                 const courseSubmissions = studentSubmissions.filter(s => courseAssignments.some(a => a.id === s.assignmentId));
+                 totalCompletion += (courseSubmissions.length / courseAssignments.length);
+            }
+        }
+        
+        const attentionScore = enrollments.length > 0 ? (totalAttention / enrollments.length) * 100 : 0;
+        const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 0;
+        const accuracyScore = averageGrade;
+
+        const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (accuracyScore * 0.35);
+
+
         return {
             stats: [
                 { title: 'Enrolled Courses', value: enrollments.length, subtitle: 'Ready to learn', icon: 'BookOpen', link: { href: "/courses", text: "View Courses"} },
                 { title: 'Assignments Due', value: assignmentsDueSoon, subtitle: 'In the next 7 days', icon: 'ClipboardList' },
                 { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Keep it up!', icon: 'GraduationCap' },
-            ]
+            ],
+            learningEfficiency: {
+                score: Math.round(efficiencyScore),
+                components: {
+                    attention: Math.round(attentionScore),
+                    completion: Math.round(completionScore),
+                    accuracy: Math.round(accuracyScore),
+                }
+            }
         };
     }
 }
