@@ -148,7 +148,10 @@ export async function gradeSubmissionAction(prevState: FormState, formData: Form
                 
                 if (student && student.id !== '0' && course && course.teacher) {
                     try {
-                        const result: MotivationBotOutput = { message: `Hey ${student.name.split(' ')[0]}, just a friendly check-in. Remember that every learning journey has its ups and downs. Keep your head up and keep moving forward. You've got this!` };
+                        const result = await generateMotivationalMessage({
+                            studentName: student.name.split(' ')[0],
+                            courseTitle: course.title,
+                        });
 
                         await createNotification({
                             userId: student.id,
