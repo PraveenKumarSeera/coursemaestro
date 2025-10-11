@@ -26,13 +26,16 @@ export default async function StudentsPage({ searchParams }: { searchParams?: { 
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold font-headline">My Students</h1>
+      <div className="space-y-1">
+          <h1 className="text-3xl font-bold font-headline">Student Performance</h1>
+          <p className="text-muted-foreground">An overview of all students enrolled in your courses.</p>
+      </div>
       
       <Card>
         <CardHeader>
-          <CardTitle>Enrolled Students</CardTitle>
+          <CardTitle>Performance Heatmap</CardTitle>
           <CardDescription>
-            A list of all students enrolled in your courses, with performance metrics.
+            A color-coded list of your students based on their average grade.
           </CardDescription>
         </CardHeader>
         <CardContent>

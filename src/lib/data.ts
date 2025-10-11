@@ -222,9 +222,23 @@ export async function getTeacherStudents(teacherId: string) {
     const studentList = Array.from(studentMap.values());
 
     const studentsWithStats = studentList.map(item => {
-        const studentSubmissions = db.submissions.filter(s => s.studentId === item.user.id && s.grade !== null);
+        const studentSubmissions = db.submissions
+            .filter(s => s.studentId === item.user.id && s.grade !== null)
+            .sort((a,b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime());
+        
         const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
         const averageGrade = studentSubmissions.length > 0 ? Math.round(totalGrade / studentSubmissions.length) : 0;
+
+        let trend: 'improving' | 'declining' | 'stable' = 'stable';
+        if (studentSubmissions.length >= 3) {
+            const lastThreeGrades = studentSubmissions.slice(-3).map(s => s.grade || 0);
+            const lastThreeAverage = lastThreeGrades.reduce((acc, grade) => acc + grade, 0) / 3;
+            if (lastThreeAverage > averageGrade + 5) {
+                trend = 'improving';
+            } else if (lastThreeAverage < averageGrade - 5) {
+                trend = 'declining';
+            }
+        }
         
         return {
             id: item.user.id,
@@ -232,7 +246,8 @@ export async function getTeacherStudents(teacherId: string) {
             email: item.user.email,
             courses: item.courses,
             averageGrade,
-            assignmentsCompleted: studentSubmissions.length
+            assignmentsCompleted: studentSubmissions.length,
+            trend,
         };
     });
 
