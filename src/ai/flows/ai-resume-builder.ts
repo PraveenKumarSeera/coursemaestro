@@ -38,7 +38,7 @@ The resume should include the following sections:
 4.  **Skills:** Infer a list of potential skills (technical and soft skills) from the course titles.
 5.  **Projects / Coursework:** Frame their best-performing assignments (provided in the performance data) as "projects". For each project, include the course it was for and a brief, professional description of what the assignment likely entailed based on its title.
 
-Generate the response in the specified JSON format.
+Generate ONLY the markdown for the resume and nothing else. Your entire output should be the markdown content.
 `,
 });
 
