@@ -11,6 +11,7 @@ const courseSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   duration: z.string().min(1, 'Duration is required'),
+  videoUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
 });
 
 type FormState = {

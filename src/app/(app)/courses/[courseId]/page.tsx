@@ -1,6 +1,4 @@
 
-
-
 import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse, getThreadsByCourse, isEnrolled, getMaterialsByCourse } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { notFound, redirect } from 'next/navigation';
@@ -18,6 +16,7 @@ import DiscussionList from '@/components/discussions/discussion-list';
 import MaterialList from '@/components/materials/material-list';
 import AttendanceTracker from '@/components/attendance/attendance-tracker';
 import EnrollButton from '@/components/courses/enroll-button';
+import EmbeddedVideoPlayer from '@/components/courses/embedded-video-player';
 
 export const revalidate = 0;
 
@@ -100,30 +99,35 @@ export default async function CourseDetailPage({
   return (
     <div className="space-y-6">
       {user.role === 'student' && <AttendanceTracker courseId={course.id} />}
-      <div className="relative h-64 w-full rounded-lg overflow-hidden">
-        <Image
-          src={course.imageUrl}
-          alt={course.title}
-          fill
-          className="object-cover"
-          data-ai-hint="course"
-        />
-        <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-6">
-          <h1 className="text-4xl font-bold text-white font-headline">
-            {course.title}
-          </h1>
-          <div className="flex items-center space-x-4 text-sm text-gray-300 mt-2">
-            <div className="flex items-center gap-1">
-                <UserIcon className="h-4 w-4" />
-                <span>{course.teacher.name}</span>
+      
+      {course.videoUrl ? (
+          <EmbeddedVideoPlayer videoUrl={course.videoUrl} />
+      ) : (
+        <div className="relative h-64 w-full rounded-lg overflow-hidden">
+            <Image
+            src={course.imageUrl}
+            alt={course.title}
+            fill
+            className="object-cover"
+            data-ai-hint="course"
+            />
+            <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-6">
+            <h1 className="text-4xl font-bold text-white font-headline">
+                {course.title}
+            </h1>
+            <div className="flex items-center space-x-4 text-sm text-gray-300 mt-2">
+                <div className="flex items-center gap-1">
+                    <UserIcon className="h-4 w-4" />
+                    <span>{course.teacher.name}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Clock className="h-4 w-4" />
+                    <span>{course.duration}</span>
+                </div>
             </div>
-            <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                <span>{course.duration}</span>
             </div>
-          </div>
         </div>
-      </div>
+      )}
       
       {isTeacher && (
         <div className="flex gap-2 justify-end">
@@ -164,7 +168,7 @@ export default async function CourseDetailPage({
         <TabsContent value="overview">
           <Card>
             <CardHeader>
-              <CardTitle>Course Description</CardTitle>
+              <CardTitle>{course.title}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">{course.description}</p>

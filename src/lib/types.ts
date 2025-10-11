@@ -1,7 +1,4 @@
 
-
-
-
 export type User = {
   id: string;
   name: string;
@@ -17,6 +14,7 @@ export type Course = {
   duration: string; // e.g., "8 weeks"
   teacherId: string;
   imageUrl: string;
+  videoUrl?: string;
 };
 
 export type Enrollment = {

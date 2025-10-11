@@ -68,6 +68,10 @@ export default function CourseForm({ course }: CourseFormProps) {
         <Label htmlFor="duration">Duration (e.g., 8 Weeks)</Label>
         <Input id="duration" name="duration" defaultValue={course?.duration} required />
       </div>
+      <div className="space-y-2">
+        <Label htmlFor="videoUrl">Video URL (Optional)</Label>
+        <Input id="videoUrl" name="videoUrl" type="url" defaultValue={course?.videoUrl} placeholder="e.g., https://www.youtube.com/watch?v=..." />
+      </div>
       <SubmitButton isEditing={isEditing} />
     </form>
   );
