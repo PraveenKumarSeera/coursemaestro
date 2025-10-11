@@ -72,9 +72,9 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
   return db.users.find(user => user.email === email);
 }
 
-export async function findUserById(id: string): Promise<User | undefined> {
+export async function findUserById(id: string): Promise<User> {
   const db = await getDb();
-  return db.users.find(user => user.id === id);
+  return db.users.find(user => user.id === id) || unknownUser;
 }
 
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
@@ -100,7 +100,7 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   const course = db.courses.find(c => c.id === id);
   if (!course) return undefined;
   const teacher = await findUserById(course.teacherId);
-  return { ...course, teacher: teacher || unknownUser };
+  return { ...course, teacher };
 }
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
@@ -147,7 +147,7 @@ export async function deleteCourse(id: string): Promise<boolean> {
 }
 
 
-export async function getTeacherById(id: string): Promise<User | undefined> {
+export async function getTeacherById(id: string): Promise<User> {
     return findUserById(id);
 }
 
@@ -173,7 +173,7 @@ export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     const studentIds = courseEnrollments.map(e => e.studentId);
     
     const students = await Promise.all(studentIds.map(id => findUserById(id)));
-    return students.filter((s): s is User => s !== undefined);
+    return students.filter(s => s.id !== '0');
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
@@ -205,7 +205,7 @@ export async function getTeacherStudents(teacherId: string) {
     for (const course of courses) {
         const students = await getStudentsByCourse(course.id);
         for (const student of students) {
-             if (!student) continue;
+             if (student.id === '0') continue;
             if (!studentMap.has(student.id)) {
                 studentMap.set(student.id, { user: student, courses: [] });
             }
@@ -275,7 +275,7 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
     const submissionsWithStudents = (await Promise.all(
         assignmentSubmissions.map(async sub => {
             const student = await findUserById(sub.studentId);
-            if (!student) return null; 
+            if (student.id === '0') return null; // Filter out submissions from deleted students
             return { ...sub, student };
         })
     )).filter((sub): sub is (Submission & { student: User }) => sub !== null);
@@ -346,7 +346,7 @@ export async function getThreadsByCourse(courseId: string): Promise<(DiscussionT
     
     const threadsWithAuthors = (await Promise.all(threads.map(async thread => {
         const author = await findUserById(thread.authorId);
-        if (!author) return null; 
+        if (author.id === '0') return null; 
         const postCount = db.discussionPosts.filter(p => p.threadId === thread.id).length;
         return { ...thread, author, postCount };
     }))).filter((thread): thread is (DiscussionThread & { author: User, postCount: number }) => thread !== null);
@@ -360,7 +360,7 @@ export async function getThreadById(threadId: string): Promise<(DiscussionThread
     if (!thread) return undefined;
 
     const author = await findUserById(thread.authorId);
-    if (!author) return undefined; 
+    if (author.id === '0') return undefined; 
     
     return { ...thread, author };
 }
@@ -371,7 +371,7 @@ export async function getPostsByThread(threadId: string): Promise<(DiscussionPos
 
     const postsWithAuthors = (await Promise.all(posts.map(async post => {
         const author = await findUserById(post.authorId);
-        if (!author) return null; 
+        if (author.id === '0') return null; 
         return { ...post, author };
     }))).filter((post): post is (DiscussionPost & { author: User }) => post !== null);
 
@@ -500,7 +500,7 @@ export async function getAllAttendance(): Promise<(Attendance & { student: User,
         const student = await findUserById(record.studentId);
         const course = db.courses.find(c => c.id === record.courseId);
 
-        if (student && course) {
+        if (student.id !== '0' && course) {
             return { ...record, student, course };
         }
         return null;
@@ -558,10 +558,13 @@ export async function getCertificateById(id: string): Promise<(Certificate & { s
     if (!certificate) return undefined;
 
     const student = await findUserById(certificate.studentId);
-    if (!student) return undefined;
+    if (student.id === '0') return undefined;
 
     const course = await getCourseById(certificate.courseId);
     if (!course) return undefined;
+    
+    // The teacher is already fetched inside getCourseById
+    if (course.teacher.id === '0') return undefined;
 
     return { ...certificate, student, course };
 }
