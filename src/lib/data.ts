@@ -100,6 +100,7 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   const course = db.courses.find(c => c.id === id);
   if (!course) return undefined;
   const teacher = await findUserById(course.teacherId);
+  // Return the course with the found teacher, or the placeholder "Unknown User".
   return { ...course, teacher };
 }
 
@@ -173,6 +174,7 @@ export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     const studentIds = courseEnrollments.map(e => e.studentId);
     
     const students = await Promise.all(studentIds.map(id => findUserById(id)));
+    // Filter out any "Unknown User" placeholders, as they represent deleted students.
     return students.filter(s => s.id !== '0');
 }
 
@@ -188,7 +190,7 @@ export async function enrollInCourse(studentId: string, courseId: string): Promi
         courseId,
     };
     db.enrollments.push(newEnrollment);
-    await writeDb(db);
+await writeDb(db);
     return newEnrollment;
 }
 
@@ -260,7 +262,7 @@ export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<As
     const db = await getDb();
     const newAssignment: Assignment = { ...data, id: String(Date.now()) };
     db.assignments.push(newAssignment);
-    await writeDb(db);
+await writeDb(db);
     return newAssignment;
 }
 
@@ -274,9 +276,11 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
     const submissionsWithStudents = (await Promise.all(
         assignmentSubmissions.map(async sub => {
             const student = await findUserById(sub.studentId);
-            if (student.id === '0') return null; // Filter out submissions from deleted students
+            // Filter out submissions from deleted students.
+            if (student.id === '0') return null; 
             return { ...sub, student };
         })
+    // Filter out the null values from the array.
     )).filter(Boolean) as (Submission & { student: User })[];
 
     return { ...assignment, submissions: submissionsWithStudents };
@@ -304,7 +308,7 @@ export async function createSubmission(data: Omit<Submission, 'id' | 'submittedA
         feedback: null
     };
     db.submissions.push(newSubmission);
-    await writeDb(db);
+await writeDb(db);
     return newSubmission;
 }
 
@@ -318,7 +322,7 @@ export async function gradeSubmission(submissionId: string, grade: number, feedb
         grade,
         feedback,
     };
-    await writeDb(db);
+await writeDb(db);
     return db.submissions[submissionIndex];
 }
 
@@ -342,12 +346,16 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
 export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
     const db = await getDb();
     const threads = db.discussionThreads.filter(t => t.courseId === courseId);
+    
     const threadsWithAuthors = (await Promise.all(threads.map(async thread => {
         const author = await findUserById(thread.authorId);
-        if (author.id === '0') return null; // Filter out threads from deleted users
+        // Do not include threads from deleted users.
+        if (author.id === '0') return null; 
         const postCount = db.discussionPosts.filter(p => p.threadId === thread.id).length;
         return { ...thread, author, postCount };
+    // Filter out the null values from the array.
     }))).filter(Boolean) as (DiscussionThread & { author: User, postCount: number })[];
+    
     return threadsWithAuthors;
 }
 
@@ -355,19 +363,26 @@ export async function getThreadById(threadId: string): Promise<(DiscussionThread
     const db = await getDb();
     const thread = db.discussionThreads.find(t => t.id === threadId);
     if (!thread) return undefined;
+
     const author = await findUserById(thread.authorId);
-    if (author.id === '0') return undefined; // Do not return thread if author is deleted
+    // Do not return a thread if its author has been deleted.
+    if (author.id === '0') return undefined; 
+    
     return { ...thread, author };
 }
 
 export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
     const db = await getDb();
     const posts = db.discussionPosts.filter(p => p.threadId === threadId);
+
     const postsWithAuthors = (await Promise.all(posts.map(async post => {
         const author = await findUserById(post.authorId);
-        if (author.id === '0') return null; // Filter out posts from deleted users
+        // Do not include posts from deleted users.
+        if (author.id === '0') return null; 
         return { ...post, author };
+    // Filter out the null values from the array.
     }))).filter(Boolean) as (DiscussionPost & { author: User })[];
+
     return postsWithAuthors;
 }
 
@@ -375,7 +390,7 @@ export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdA
     const db = await getDb();
     const newThread: DiscussionThread = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
     db.discussionThreads.push(newThread);
-    await writeDb(db);
+await writeDb(db);
     return newThread;
 }
 
@@ -383,7 +398,7 @@ export async function createPost(data: Omit<DiscussionPost, 'id' | 'createdAt'>)
     const db = await getDb();
     const newPost: DiscussionPost = { ...data, id: String(Date.now()), createdAt: new Date().toISOString() };
     db.discussionPosts.push(newPost);
-    await writeDb(db);
+await writeDb(db);
     return newPost;
 }
 
@@ -396,7 +411,7 @@ export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Pro
     createdAt: new Date().toISOString(),
   };
   db.materials.push(newMaterial);
-  await writeDb(db);
+await writeDb(db);
   return newMaterial;
 }
 
@@ -415,7 +430,7 @@ export async function createNotification(data: Omit<Notification, 'id' | 'isRead
         createdAt: new Date().toISOString(),
     };
     db.notifications.unshift(newNotification); // Add to the beginning of the array
-    await writeDb(db);
+await writeDb(db);
     return newNotification;
 }
 
@@ -429,7 +444,7 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
     const notificationIndex = db.notifications.findIndex(n => n.id === notificationId);
     if (notificationIndex > -1) {
         db.notifications[notificationIndex].isRead = true;
-        await writeDb(db);
+await writeDb(db);
         return true;
     }
     return false;
@@ -482,7 +497,7 @@ export async function markAttendance(studentId: string, courseId: string): Promi
         isPresent: true,
     };
     db.attendance.push(newAttendanceRecord);
-    await writeDb(db);
+await writeDb(db);
     return newAttendanceRecord;
 }
 
@@ -493,10 +508,12 @@ export async function getAllAttendance(): Promise<(Attendance & { student: User,
         const student = await findUserById(record.studentId);
         const course = db.courses.find(c => c.id === record.courseId);
 
+        // Do not include records for deleted students or courses.
         if (student && course && student.id !== '0') {
             return { ...record, student, course };
         }
         return null;
+    // Filter out the null values from the array.
     }))).filter(Boolean);
 
     return attendanceWithDetails.sort((a,b) => new Date(b!.date).getTime() - new Date(a!.date).getTime()) as (Attendance & { student: User, course: Course })[];
@@ -576,7 +593,7 @@ export async function generateCertificate(studentId: string, courseId: string): 
     };
 
     db.certificates.push(newCertificate);
-    await writeDb(db);
+await writeDb(db);
     return newCertificate;
 }
 
