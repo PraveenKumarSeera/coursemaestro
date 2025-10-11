@@ -16,3 +16,4 @@ import './flows/ai-teaching-assistant';
 import './flows/ai-timetable-generator';
 import './flows/ai-internship-task-generator';
 import './flows/ai-internship-grader';
+import './flows/ai-brain-stretch-generator';

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import {
   Library,
   Lightbulb,
   Building,
+  BrainCircuit,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -49,6 +51,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },
     { href: '/internship', label: 'Internship Sim', icon: Building },
+    { href: '/brain-stretches', label: 'Brain Stretches', icon: BrainCircuit },
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
     { href: '/my-certificates', label: 'My Certificates', icon: Award },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
@@ -85,7 +88,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>

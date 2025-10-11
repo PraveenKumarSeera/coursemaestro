@@ -186,3 +186,24 @@ export const InternshipGraderOutputSchema = z.object({
     feedback: z.string().describe('Constructive, paragraph-form feedback on the submission, highlighting strengths and areas for improvement.'),
 });
 export type InternshipGraderOutput = z.infer<typeof InternshipGraderOutputSchema>;
+
+
+// Brain Stretch Generator
+export const BrainStretchGeneratorInputSchema = z.object({
+    courseMaterial: z.string().describe('The course material to generate puzzles from.'),
+});
+export type BrainStretchGeneratorInput = z.infer<typeof BrainStretchGeneratorInputSchema>;
+
+const BrainStretchPuzzleSchema = z.object({
+    type: z.enum(['analogy', 'odd-one-out', 'anagram']).describe('The type of puzzle.'),
+    question: z.string().describe('The puzzle question.'),
+    options: z.array(z.string()).describe('An array of 4 possible answers.'),
+    answer: z.string().describe('The correct answer from the options.'),
+    explanation: z.string().describe('A brief explanation for the correct answer.'),
+});
+export type BrainStretchPuzzle = z.infer<typeof BrainStretchPuzzleSchema>;
+
+export const BrainStretchGeneratorOutputSchema = z.object({
+  puzzles: z.array(BrainStretchPuzzleSchema).describe('An array of 3-5 brain stretch puzzles.'),
+});
+export type BrainStretchGeneratorOutput = z.infer<typeof BrainStretchGeneratorOutputSchema>;
