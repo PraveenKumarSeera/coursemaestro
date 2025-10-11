@@ -151,13 +151,17 @@ export async function getTeacherById(id: string): Promise<User> {
     return findUserById(id);
 }
 
-export async function getTeacherCourses(teacherId: string): Promise<(Course & { enrollments: Enrollment[] })[]> {
+export async function getTeacherCourses(teacherId: string, query?: string): Promise<Course[]> {
     const db = await getDb();
-    const teacherCourses = db.courses.filter(c => c.teacherId === teacherId);
-    return teacherCourses.map(course => ({
-        ...course,
-        enrollments: db.enrollments.filter(e => e.courseId === course.id)
-    }));
+    let teacherCourses = db.courses.filter(c => c.teacherId === teacherId);
+
+    if (query) {
+        teacherCourses = teacherCourses.filter(course =>
+            course.title.toLowerCase().includes(query.toLowerCase()) ||
+            course.description.toLowerCase().includes(query.toLowerCase())
+        );
+    }
+    return teacherCourses;
 }
 
 

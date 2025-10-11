@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -11,6 +12,7 @@ import ReactFlow, {
   OnNodesChange,
   OnEdgesChange,
   NodeTypes,
+  useReactFlow,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useRouter } from 'next/navigation';
@@ -36,24 +38,8 @@ const initialEdges: Edge[] = [];
 export default function CourseMindMap({ courses, user, enrolledCourseIds }: CourseMindMapProps) {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
-  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const courseNodes: Node[] = courses.map((course, index) => ({
-      id: course.id,
-      type: 'course',
-      position: { x: (index % 4) * 300, y: Math.floor(index / 4) * 200 },
-      data: {
-        course,
-        isEnrolled: enrolledCourseIds.has(course.id),
-        isTeacher: user.role === 'teacher',
-      },
-    }));
-    setNodes(courseNodes);
-    setEdges([]);
-    setExpandedCourse(null);
-  }, [courses, enrolledCourseIds, user.role]);
+  const { fitView } = useReactFlow();
 
   const onNodesChange: OnNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -63,45 +49,85 @@ export default function CourseMindMap({ courses, user, enrolledCourseIds }: Cour
     (changes) => setEdges((eds) => applyEdgeChanges(changes, eds)),
     [setEdges]
   );
+  
+  const generateLayout = (courseNodes: Node[]) => {
+    const nodesPerRow = Math.max(1, Math.floor(window.innerWidth / 350));
+    return courseNodes.map((node, index) => ({
+        ...node,
+        position: { x: (index % nodesPerRow) * 350, y: Math.floor(index / nodesPerRow) * 250 },
+    }));
+  }
+
+  useEffect(() => {
+    const courseNodes: Node[] = courses.map((course) => ({
+      id: course.id,
+      type: 'course',
+      position: { x: 0, y: 0 }, // Position will be set by layout
+      data: {
+        course,
+        isEnrolled: enrolledCourseIds.has(course.id),
+        isTeacher: user.role === 'teacher' && user.id === course.teacherId,
+      },
+    }));
+    setNodes(generateLayout(courseNodes));
+    setEdges([]);
+    
+    // Fit view after a short delay to ensure layout is calculated
+    setTimeout(() => fitView({ padding: 0.1, duration: 300 }), 100);
+
+  }, [courses, enrolledCourseIds, user.role, user.id, fitView]);
+  
 
   const handleNodeClick = (event: React.MouseEvent, node: Node) => {
     if (node.type === 'course') {
-      if (expandedCourse === node.id) {
-        // Collapse
-        const courseNodes = nodes.filter(n => n.type === 'course');
-        setNodes(courseNodes);
-        setEdges([]);
-        setExpandedCourse(null);
-      } else {
-        // Expand
-        const courseNode = nodes.find(n => n.id === node.id);
-        if (!courseNode) return;
+        const isEnrolled = enrolledCourseIds.has(node.id);
+        const isTeacher = user.role === 'teacher' && user.id === node.data.course.teacherId;
         
+        // If student is not enrolled, route them to the course page to enroll
+        if(user.role === 'student' && !isEnrolled){
+            router.push(`/courses/${node.id}`);
+            return;
+        }
+
         const subNodes: Node[] = [
-          { id: `${node.id}-assignments`, type: 'subNode', position: { x: courseNode.position.x - 120, y: courseNode.position.y + 100 }, data: { label: 'Assignments', icon: 'ClipboardList', courseId: node.id, tab: 'assignments' } },
-          { id: `${node.id}-materials`, type: 'subNode', position: { x: courseNode.position.x, y: courseNode.position.y + 150 }, data: { label: 'Materials', icon: 'FileText', courseId: node.id, tab: 'materials' } },
-          { id: `${node.id}-discussions`, type: 'subNode', position: { x: courseNode.position.x + 120, y: courseNode.position.y + 100 }, data: { label: 'Discussions', icon: 'MessageSquare', courseId: node.id, tab: 'discussions' } },
+          { id: `${node.id}-assignments`, type: 'subNode', position: { x: node.position.x - 150, y: node.position.y + 150 }, data: { label: 'Assignments', icon: 'ClipboardList', courseId: node.id, tab: 'assignments' } },
+          { id: `${node.id}-materials`, type: 'subNode', position: { x: node.position.x, y: node.position.y + 180 }, data: { label: 'Materials', icon: 'FileText', courseId: node.id, tab: 'materials' } },
+          { id: `${node.id}-discussions`, type: 'subNode', position: { x: node.position.x + 150, y: node.position.y + 150 }, data: { label: 'Discussions', icon: 'MessageSquare', courseId: node.id, tab: 'discussions' } },
         ];
         
         const newEdges: Edge[] = subNodes.map(subNode => ({
           id: `e-${node.id}-${subNode.id}`,
           source: node.id,
           target: subNode.id,
+          type: 'smoothstep',
           animated: true,
-          style: { stroke: 'hsl(var(--primary))' },
+          style: { strokeWidth: 2, stroke: 'hsl(var(--primary))' },
         }));
 
-        const otherCourseNodes = nodes.filter(n => n.type === 'course' && n.id !== node.id);
-        
-        setNodes([courseNode, ...subNodes, ...otherCourseNodes]);
+        setNodes(currentNodes => {
+            const otherNodes = currentNodes.filter(n => n.type !== 'subNode' && n.id !== node.id);
+            return [node, ...otherNodes, ...subNodes];
+        });
         setEdges(newEdges);
-        setExpandedCourse(node.id);
-      }
+
+        setTimeout(() => fitView({
+            nodes: [node, ...subNodes],
+            duration: 500,
+            padding: 0.2
+        }), 100);
     } else if (node.type === 'subNode') {
         const { courseId, tab } = node.data;
         router.push(`/courses/${courseId}?tab=${tab}`);
     }
   };
+
+  const handlePaneClick = () => {
+    // Reset to the main course view
+    const courseNodes = nodes.filter(n => n.type === 'course');
+    setNodes(generateLayout(courseNodes));
+    setEdges([]);
+    setTimeout(() => fitView({ padding: 0.1, duration: 300 }), 100);
+  }
 
   return (
     <div className="w-full h-full rounded-lg border bg-card text-card-foreground shadow-sm">
@@ -111,8 +137,10 @@ export default function CourseMindMap({ courses, user, enrolledCourseIds }: Cour
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
+        onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         fitView
+        proOptions={{ hideAttribution: true }}
       >
         <Controls />
         <Background />

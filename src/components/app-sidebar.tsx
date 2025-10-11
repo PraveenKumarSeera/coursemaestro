@@ -18,6 +18,7 @@ import {
   CalendarCheck,
   Award,
   CalendarClock,
+  Library,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -32,8 +33,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
 
   const commonRoutes = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/courses', label: 'Courses', icon: BookOpen },
-    { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { href: '/courses', label: user.role === 'student' ? 'My Courses' : 'My Courses', icon: BookOpen },
   ];
 
   const teacherRoutes = [
@@ -45,8 +45,10 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   ];
 
   const studentRoutes = [
+    { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
     { href: '/my-certificates', label: 'My Certificates', icon: Award },
+    { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase },
     { href: '/resume-builder', label: 'Resume Builder', icon: FileDown },
@@ -74,13 +76,13 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                 href={href}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                  pathname.startsWith(href) && href !== '/dashboard' && 'bg-muted text-primary',
-                  pathname === href && href === '/dashboard' && 'bg-muted text-primary'
+                  (pathname.startsWith(href) && href !== '/dashboard' && href !== '/courses') && 'bg-muted text-primary',
+                  (pathname === href && (href === '/dashboard' || href === '/courses')) && 'bg-muted text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>

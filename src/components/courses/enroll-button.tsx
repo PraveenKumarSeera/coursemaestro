@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" className="w-full" disabled={pending}>
+    <Button type="submit" className="w-full" disabled={pending} size="lg">
       {pending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -39,10 +39,10 @@ export default function EnrollButton({ courseId }: { courseId: string }) {
         variant: state.success ? 'default' : 'destructive',
       });
       if (state.success) {
-        router.push('/courses');
+        router.push(`/courses/${courseId}`);
       }
     }
-  }, [state, toast, router]);
+  }, [state, toast, router, courseId]);
 
   return (
     <form action={formAction}>

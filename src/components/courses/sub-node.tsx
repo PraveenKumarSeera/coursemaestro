@@ -1,3 +1,4 @@
+
 'use client';
 import { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
@@ -16,9 +17,9 @@ const SubNode = memo(({ data, selected }: NodeProps<SubNodeData>) => {
   const Icon = LucideIcons[data.icon] as React.ElementType;
   return (
     <>
-      <Handle type="target" position={Position.Top} className="!bg-primary" />
-      <Button variant="outline" className={cn("shadow-lg", selected && "ring-2 ring-ring")}>
-        {Icon && <Icon className="mr-2 h-4 w-4" />}
+      <Handle type="target" position={Position.Top} className="!bg-primary opacity-0" />
+      <Button variant="outline" className={cn("shadow-lg bg-background hover:bg-muted", selected && "ring-2 ring-ring")}>
+        {Icon && <Icon className="mr-2 h-4 w-4 text-primary" />}
         {data.label}
       </Button>
     </>

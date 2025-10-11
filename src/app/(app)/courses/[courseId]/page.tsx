@@ -1,5 +1,6 @@
 
 
+
 import { getCourseById, getAssignmentsByCourse, getStudentSubmission, getStudentsByCourse, getThreadsByCourse, isEnrolled, getMaterialsByCourse } from '@/lib/data';
 import { getSession } from '@/lib/session';
 import { notFound, redirect } from 'next/navigation';
@@ -16,6 +17,7 @@ import DeleteCourseButton from '@/components/courses/delete-course-button';
 import DiscussionList from '@/components/discussions/discussion-list';
 import MaterialList from '@/components/materials/material-list';
 import AttendanceTracker from '@/components/attendance/attendance-tracker';
+import EnrollButton from '@/components/courses/enroll-button';
 
 export const revalidate = 0;
 
@@ -38,8 +40,46 @@ export default async function CourseDetailPage({
 
   // For teachers or enrolled students, fetch course data
   if (!isTeacher && !isUserEnrolled) {
-    // If a student is not enrolled, redirect them to the main courses page
-    redirect('/courses');
+    // If a student is not enrolled, show them an enroll option instead of redirecting
+    return (
+       <div className="space-y-6 flex flex-col items-center justify-center h-full text-center">
+            <div className="relative h-64 w-full max-w-4xl rounded-lg overflow-hidden">
+                <Image
+                src={course.imageUrl}
+                alt={course.title}
+                fill
+                className="object-cover"
+                data-ai-hint="course"
+                />
+                <div className="absolute inset-0 bg-black/50 flex flex-col justify-end p-6">
+                <h1 className="text-4xl font-bold text-white font-headline">
+                    {course.title}
+                </h1>
+                </div>
+            </div>
+            <Card className="max-w-4xl w-full">
+                <CardHeader>
+                    <CardTitle>About this Course</CardTitle>
+                </CardHeader>
+                <CardContent className='text-left space-y-4'>
+                    <p className="text-muted-foreground">{course.description}</p>
+                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                            <UserIcon className="h-4 w-4" />
+                            <span>{course.teacher.name}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{course.duration}</span>
+                        </div>
+                    </div>
+                </CardContent>
+                <CardContent>
+                    <EnrollButton courseId={course.id} />
+                </CardContent>
+            </Card>
+        </div>
+    );
   }
 
   const materials = await getMaterialsByCourse(params.courseId);
