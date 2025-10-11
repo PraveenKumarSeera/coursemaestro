@@ -47,7 +47,7 @@ export async function generateResumeAction(
     console.error('AI Resume Builder Error:', error);
     return {
         resumeMarkdown: null,
-        message: 'There was an error generating your resume. Please try again.',
+        message: 'There was an error generating your resume. Please try again later.',
     };
   }
 }
