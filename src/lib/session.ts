@@ -56,7 +56,7 @@ export async function getSession(): Promise<{ user: User | null }> {
   // Omit password before returning
   const { password, ...userWithoutPassword } = user;
 
-  return { user: userWithoutPassword };
+  return { user: userWithoutPassword as User };
 }
 
 export async function deleteSession() {
