@@ -2,7 +2,7 @@
 'use server';
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote } from './types';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -26,6 +26,9 @@ type Db = {
     notifications: Notification[];
     attendance: Attendance[];
     certificates: Certificate[];
+    challenges: Challenge[];
+    challengeSubmissions: ChallengeSubmission[];
+    challengeVotes: ChallengeVote[];
 }
 
 const defaultDb: Db = {
@@ -43,7 +46,14 @@ const defaultDb: Db = {
     materials: [],
     notifications: [],
     attendance: [],
-    certificates: []
+    certificates: [],
+    challenges: [
+      { id: 'ch1', title: 'E-commerce Search Component', description: 'Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.', company: 'Shopify', points: 150, imageUrl: 'https://picsum.photos/seed/ch1/600/400' },
+      { id: 'ch2', title: 'Social Media Dashboard UI', description: 'Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.', company: 'Meta', points: 200, imageUrl: 'https://picsum.photos/seed/ch2/600/400' },
+      { id: 'ch3', title: 'API for a Simple To-Do App', description: 'Develop a RESTful API for a to-do list application. The API should support creating, reading, updating, and deleting tasks, and include user authentication.', company: 'Google', points: 250, imageUrl: 'https://picsum.photos/seed/ch3/600/400' }
+    ],
+    challengeSubmissions: [],
+    challengeVotes: []
 };
 
 // --- Caching Layer for DB Reads ---
@@ -465,19 +475,31 @@ await writeDb(db);
 }
 
 // --- Leaderboard Functions ---
-export async function getStudentRankings(): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number }[]> {
+export async function getStudentRankings(): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number, credibilityPoints: number }[]> {
     const db = await getDb();
     const students = db.users.filter(u => u.role === 'student');
-    const studentStats = students.map(student => {
+    const studentStats = await Promise.all(students.map(async student => {
         const studentSubmissions = db.submissions.filter(s => s.studentId === student.id && s.grade !== null);
         const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
         const averageGrade = studentSubmissions.length > 0 ? totalGrade / studentSubmissions.length : 0;
+        
+        const challengeSubmissions = db.challengeSubmissions.filter(cs => cs.studentId === student.id);
+        let credibilityPoints = 0;
+        for (const cs of challengeSubmissions) {
+            const votes = await getVotesForSubmission(cs.id);
+            const challenge = db.challenges.find(c => c.id === cs.challengeId);
+            if (challenge) {
+                credibilityPoints += (votes * 10) + challenge.points; // 10 points per vote + base points
+            }
+        }
+        
         return {
             user: student,
             averageGrade: Math.round(averageGrade),
-            assignmentsCompleted: studentSubmissions.length
+            assignmentsCompleted: studentSubmissions.length,
+            credibilityPoints
         };
-    });
+    }));
 
     // Sort by average grade descending, then by assignments completed descending
     return studentStats.sort((a, b) => {
@@ -611,6 +633,73 @@ export async function generateCertificate(studentId: string, courseId: string): 
 await writeDb(db);
     return newCertificate;
 }
+
+// --- Challenge Functions ---
+export async function getAllChallenges(): Promise<Challenge[]> {
+    const db = await getDb();
+    return db.challenges;
+}
+
+export async function getChallengeById(id: string): Promise<Challenge | undefined> {
+    const db = await getDb();
+    return db.challenges.find(c => c.id === id);
+}
+
+export async function getSubmissionsForChallenge(challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> {
+    const db = await getDb();
+    const submissions = db.challengeSubmissions.filter(s => s.challengeId === challengeId);
+    
+    const submissionsWithDetails = await Promise.all(submissions.map(async sub => {
+        const student = await findUserById(sub.studentId);
+        const votes = await getVotesForSubmission(sub.id);
+        return { ...sub, student, votes };
+    }));
+    
+    return submissionsWithDetails.filter(s => s.student.id !== '0');
+}
+
+export async function createChallengeSubmission(data: Omit<ChallengeSubmission, 'id' | 'submittedAt'>): Promise<ChallengeSubmission> {
+    const db = await getDb();
+    const newSubmission: ChallengeSubmission = { 
+        ...data, 
+        id: String(Date.now()), 
+        submittedAt: new Date().toISOString(),
+    };
+    db.challengeSubmissions.push(newSubmission);
+    await writeDb(db);
+    return newSubmission;
+}
+
+export async function voteOnSubmission(submissionId: string, voterId: string): Promise<ChallengeVote | null> {
+    const db = await getDb();
+    const submission = db.challengeSubmissions.find(s => s.id === submissionId);
+    if (!submission) return null;
+
+    // Prevent user from voting on their own submission
+    if (submission.studentId === voterId) {
+        return null;
+    }
+
+    const existingVote = db.challengeVotes.find(v => v.submissionId === submissionId && v.voterId === voterId);
+    if (existingVote) {
+        return null; // Already voted
+    }
+
+    const newVote: ChallengeVote = {
+        id: String(Date.now()),
+        submissionId,
+        voterId,
+    };
+    db.challengeVotes.push(newVote);
+    await writeDb(db);
+    return newVote;
+}
+
+export async function getVotesForSubmission(submissionId: string): Promise<number> {
+    const db = await getDb();
+    return db.challengeVotes.filter(v => v.submissionId === submissionId).length;
+}
+
 
 // --- Dashboard Functions ---
 export type CoursePerformance = {

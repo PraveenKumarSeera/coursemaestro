@@ -177,5 +177,33 @@
       "issuedAt": "2025-10-09T05:04:51.602Z",
       "verificationId": "b65ec167-e4f7-4533-b076-4fb059bf9138"
     }
-  ]
+  ],
+  "challenges": [
+    {
+      "id": "ch1",
+      "title": "E-commerce Search Component",
+      "description": "Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.",
+      "company": "Shopify",
+      "points": 150,
+      "imageUrl": "https://picsum.photos/seed/ch1/600/400"
+    },
+    {
+      "id": "ch2",
+      "title": "Social Media Dashboard UI",
+      "description": "Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.",
+      "company": "Meta",
+      "points": 200,
+      "imageUrl": "https://picsum.photos/seed/ch2/600/400"
+    },
+    {
+      "id": "ch3",
+      "title": "API for a Simple To-Do App",
+      "description": "Develop a RESTful API for a to-do list application. The API should support creating, reading, updating, and deleting tasks, and include user authentication.",
+      "company": "Google",
+      "points": 250,
+      "imageUrl": "https://picsum.photos/seed/ch3/600/400"
+    }
+  ],
+  "challengeSubmissions": [],
+  "challengeVotes": []
 }

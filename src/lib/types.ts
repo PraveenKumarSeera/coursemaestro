@@ -1,5 +1,6 @@
 
 
+
 export type User = {
   id: string;
   name: string;
@@ -90,4 +91,27 @@ export type Certificate = {
     courseId: string;
     issuedAt: string;
     verificationId: string;
+};
+
+export type Challenge = {
+  id: string;
+  title: string;
+  description: string;
+  company: string;
+  points: number;
+  imageUrl: string;
+};
+
+export type ChallengeSubmission = {
+  id: string;
+  challengeId: string;
+  studentId: string;
+  content: string;
+  submittedAt: string;
+};
+
+export type ChallengeVote = {
+  id: string;
+  submissionId: string;
+  voterId: string;
 };
