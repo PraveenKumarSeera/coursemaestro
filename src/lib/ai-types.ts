@@ -130,3 +130,28 @@ export const MaterialParserOutputSchema = z.object({
   textContent: z.string(),
 });
 export type MaterialParserOutput = z.infer<typeof MaterialParserOutputSchema>;
+
+
+// Timetable Generator
+export const TimetableGeneratorInputSchema = z.object({
+  enrolledCourses: z.string().describe('A summary of the student\'s enrolled courses.'),
+  upcomingAssignments: z.string().describe('A summary of upcoming assignments with due dates.'),
+  freeHours: z.string().describe('A description of the student\'s available free time for the week.'),
+});
+export type TimetableGeneratorInput = z.infer<typeof TimetableGeneratorInputSchema>;
+
+const TimetableBlockSchema = z.object({
+    time: z.string().describe('The time for the study block (e.g., "9:00 AM - 11:00 AM").'),
+    task: z.string().describe('The specific task or subject to focus on.'),
+    description: z.string().describe('A brief description of the goal for the study block.'),
+});
+
+const DailyScheduleSchema = z.object({
+    day: z.string().describe('The day of the week (e.g., "Monday").'),
+    schedule: z.array(TimetableBlockSchema).describe('An array of study blocks for the day.'),
+});
+
+export const TimetableGeneratorOutputSchema = z.object({
+  weeklySchedule: z.array(DailyScheduleSchema).describe("An array representing the student's personalized weekly study schedule."),
+});
+export type TimetableGeneratorOutput = z.infer<typeof TimetableGeneratorOutputSchema>;

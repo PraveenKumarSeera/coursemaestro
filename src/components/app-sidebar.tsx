@@ -17,6 +17,7 @@ import {
   Trophy,
   CalendarCheck,
   Award,
+  CalendarClock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -49,6 +50,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase },
     { href: '/resume-builder', label: 'Resume Builder', icon: FileDown },
+    { href: '/timetable', label: 'Smart Timetable', icon: CalendarClock },
   ];
   
   const navItems = user.role === 'teacher' 
@@ -78,7 +80,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates') && (
+                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
