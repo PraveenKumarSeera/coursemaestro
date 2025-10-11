@@ -29,7 +29,7 @@ Here is the student's performance data:
 
 Analyze the provided list of graded assignments and identify patterns, strengths, and areas for improvement.
 
-Structure your response in **Markdown** format with the following sections:
+Your response should be a markdown-formatted string with the following sections:
 - **Overall Summary:** A brief, motivating overview of the student's overall performance.
 - **Strengths:** Highlight subjects or topics where the student shows consistent excellence.
 - **Areas for Improvement:** Identify subjects or assignments that require more focus.
@@ -37,7 +37,7 @@ Structure your response in **Markdown** format with the following sections:
 
 Maintain a **positive and empathetic tone** throughout.
 
-Generate the response in the specified JSON format.
+Generate the response in the specified JSON format with a single key "analysis" containing the markdown string.
 `,
 });
 
