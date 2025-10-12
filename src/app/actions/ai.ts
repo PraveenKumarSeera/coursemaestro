@@ -39,10 +39,11 @@ export async function askAI(
       question: studentQuestion,
     };
   } catch (error: any) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return {
       answer: '',
       question: studentQuestion,
-      error: `Sorry, I encountered an error: ${error.message || 'Please try again.'}`,
+      error: `Sorry, I encountered an error: ${errorMessage}`,
     };
   }
 }
