@@ -112,7 +112,11 @@ export async function getCourseById(id: string): Promise<(Course & { teacher: Us
   const db = await getDb();
   const course = db.courses.find(c => c.id === id);
   if (!course) return undefined;
+  
   const teacher = await findUserById(course.teacherId);
+  // If teacher is not found, we should not return a course object as it's incomplete.
+  if (teacher.id === '0') return undefined;
+
   return { ...course, teacher };
 }
 
@@ -868,3 +872,5 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         };
     }
 }
+
+    
