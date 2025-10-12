@@ -82,11 +82,11 @@ export type QuizGeneratorOutput = z.infer<typeof QuizGeneratorOutputSchema>;
 
 // Resume Builder
 export const ResumeBuilderInputSchema = z.object({
-  studentName: z.string(),
-  studentEmail: z.string(),
+  studentName: z.string().describe("The full name of the student."),
+  studentEmail: z.string().email().describe("The email address of the student."),
   studentPerformanceData: z.string().describe("A string summarizing the student's graded assignments, especially high-performing ones."),
 });
-export type ResumeBuilderInput = z.infer<typeof ResumeBuilderInputSchema>;
+export type ResumeBuilderInput = zinfer<typeof ResumeBuilderInputSchema>;
 
 export const ResumeBuilderOutputSchema = z.object({
   resumeMarkdown: z.string().describe("The full resume formatted as a Markdown string."),
