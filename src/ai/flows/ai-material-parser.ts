@@ -22,7 +22,7 @@ const prompt = ai.definePrompt(
         name: 'materialParserPrompt',
         input: { schema: MaterialParserInputSchema },
         output: { schema: MaterialParserOutputSchema },
-        model: googleAI('gemini-1.5-flash'),
+        model: googleAI('gemini-1.5-flash-latest'),
         prompt: `Extract the text content from the following document.
   
         Document:

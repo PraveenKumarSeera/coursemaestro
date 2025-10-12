@@ -20,7 +20,7 @@ const prompt = ai.definePrompt(
     name: 'careerAdvisorPrompt',
     input: { schema: CareerAdvisorInputSchema },
     output: { schema: CareerAdvisorOutputSchema },
-    model: googleAI('gemini-1.5-flash'),
+    model: googleAI('gemini-1.5-flash-latest'),
     prompt: `You are an expert career advisor for students.
 
 Analyze the student's performance based on their grades in different courses.
