@@ -19,7 +19,7 @@ import { googleAI } from '@genkit-ai/google-genai';
 const prompt = ai.definePrompt({
     name: 'resumeBuilderPrompt',
     input: { schema: ResumeBuilderInputSchema },
-    model: googleAI('gemini-1.5-flash-latest'),
+    model: googleAI('gemini-1.5-pro-latest'),
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.
