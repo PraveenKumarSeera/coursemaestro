@@ -50,5 +50,5 @@ const studyAssistantFlow = ai.defineFlow({
 export async function askStudyAssistant(
   input: AiStudyAssistantInput
 ): Promise<AiStudyAssistantOutput> {
-  return studyAssistantFlow(input);
+  return await studyAssistantFlow(input);
 }
