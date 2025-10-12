@@ -2,7 +2,6 @@
 'use server';
 
 import { askStudyAssistant } from '@/ai/flows/ai-study-assistant';
-import type { AiStudyAssistantInput, AiStudyAssistantOutput } from '@/lib/ai-types';
 
 type AiState = {
   answer: string;
@@ -33,15 +32,17 @@ export async function askAI(
     }
   }
 
-  // Bypass AI call and return demo data
-  const demoAnswer = `This is a demo response based on the course material for "${courseMaterial.split(':')[0]}". For a real answer, this would use an AI model to analyze the course description and your question: "${studentQuestion}". The fundamental concepts of web development include HTML for structure, CSS for styling, and JavaScript for interactivity.`;
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-        resolve({
-            answer: demoAnswer,
-            question: studentQuestion,
-        });
-    }, 1000);
-  });
+  try {
+    const result = await askStudyAssistant({ courseMaterial, studentQuestion });
+    return {
+      answer: result.answer,
+      question: studentQuestion,
+    };
+  } catch (error: any) {
+    return {
+      answer: '',
+      question: studentQuestion,
+      error: `Sorry, I encountered an error: ${error.message || 'Please try again.'}`,
+    };
+  }
 }

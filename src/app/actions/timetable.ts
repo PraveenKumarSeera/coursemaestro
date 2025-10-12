@@ -33,55 +33,25 @@ export async function generateTimetableAction({
     };
   }
 
-  // Bypass AI and return demo data
-  const demoSchedule: TimetableGeneratorOutput['weeklySchedule'] = [
-    {
-      day: "Monday",
-      schedule: [
-        { time: "7:00 PM - 9:00 PM", task: "Work on 'Advanced React Patterns' essay", description: "Complete the outline and research phase for the upcoming essay." }
-      ]
-    },
-    {
-      day: "Tuesday",
-      schedule: [
-        { time: "6:30 PM - 8:30 PM", task: "Study for 'Data Structures & Algorithms' quiz", description: "Review lecture notes on Big O notation and sorting algorithms." }
-      ]
-    },
-    {
-      day: "Wednesday",
-      schedule: [
-        { time: "10:00 AM - 1:00 PM", task: "Project work for 'Intro to Web Dev'", description: "Build the navigation and hero section for the final project." },
-        { time: "7:00 PM - 9:00 PM", task: "Continue 'Advanced React Patterns' essay", description: "Write the first draft of the essay body." }
-      ]
-    },
-    {
-        day: "Thursday",
-        schedule: []
-    },
-    {
-        day: "Friday",
-        schedule: [
-            { time: "6:00 PM - 8:00 PM", task: "Final review for 'Data Structures' quiz", description: "Do practice problems and review key concepts." }
-        ]
-    },
-    {
-        day: "Saturday",
-        schedule: [
-             { time: "11:00 AM - 2:00 PM", task: "Finalize and submit 'Advanced React Patterns' essay", description: "Proofread, format, and submit the final version of the essay." }
-        ]
-    },
-    {
-        day: "Sunday",
-        schedule: []
-    }
-  ];
+  const enrolledCoursesText = enrolledCourses.map(c => c.title).join(', ');
+  const assignmentsText = upcomingAssignments
+    .map(a => `"${a.title}" for course "${a.courseTitle}" is due on ${a.dueDate}`)
+    .join('\n');
 
-  return new Promise((resolve) => {
-      setTimeout(() => {
-          resolve({
-              schedule: demoSchedule,
-              message: 'Timetable generated successfully.',
-          });
-      }, 1500)
-  });
+  try {
+    const result = await generateTimetable({
+      enrolledCourses: enrolledCoursesText,
+      upcomingAssignments: assignmentsText,
+      freeHours: freeHours,
+    });
+    return {
+      schedule: result.weeklySchedule,
+      message: 'Timetable generated successfully.',
+    };
+  } catch (error: any) {
+    return {
+      schedule: null,
+      message: `Failed to generate timetable: ${error.message || 'Please try again.'}`,
+    };
+  }
 }
