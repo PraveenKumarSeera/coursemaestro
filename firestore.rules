@@ -1,0 +1,135 @@
+/**
+ * @fileoverview Firestore Security Rules for the LMS application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for user data and teacher-ownership for course-related data.
+ * It leverages path-based authorization for user profiles and explicit ownership fields (e.g., teacherId on courses) for other resources.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores individual user profiles, accessible only by the user themselves.
+ * - /courses/{courseId}: Stores course information, manageable by the teacher who created the course.
+ * - /courses/{courseId}/enrollments/{enrollmentId}: Stores enrollment records for a course.
+ * - /courses/{courseId}/assignments/{assignmentId}: Stores assignments for a specific course, managed by the course teacher.
+ * - /courses/{courseId}/assignments/{assignmentId}/submissions/{submissionId}: Stores student submissions for a specific assignment.
+ *
+ * Key Security Decisions:
+ * - Users can only read and write their own profile data.
+ * - Teachers can create, update, and delete courses they own.
+ * - Only teachers can manage enrollments, assignments, and submissions within their courses.
+ * - No user listing is allowed to protect user privacy.
+ *
+ * Denormalization for Authorization:
+ * - The `Course` entity includes `teacherId` to directly associate a course with its creator, enabling ownership-based security rules without additional reads.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Controls access to user profiles.
+     * @path /users/{userId}
+     * @allow (create) Signed-in user creates their profile with matching userId.
+     * @allow (get, update, delete) Signed-in user accesses their own profile.
+     * @deny (create) Signed-in user tries to create a profile for another user.
+     * @deny (get, update, delete) Signed-in user tries to access another user's profile.
+     * @principle Enforces document ownership for user profiles.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow get, update, delete: if isExistingOwner(userId);
+      allow list: if false;
+    }
+
+    /**
+     * @description Controls access to courses.
+     * @path /courses/{courseId}
+     * @allow (create) Signed-in user creates a new course with teacherId set to their own UID.
+     * @allow (get, list) Anyone can view the list of courses and individual course details.
+     * @allow (update, delete) Only the teacher who created the course can modify or delete it.
+     * @deny (create) Signed-in user creates a course with teacherId not set to their own UID.
+     * @deny (update, delete) Non-teacher attempts to modify or delete a course.
+     * @principle Public read, owner-only write access with teacherId for ownership.
+     */
+    match /courses/{courseId} {
+      function isOwner(teacherId) {
+        return request.auth != null && request.auth.uid == teacherId;
+      }
+      function isExistingOwner(teacherId) {
+        return isOwner(teacherId) && resource != null;
+      }
+      allow create: if request.auth != null && request.resource.data.teacherId == request.auth.uid;
+      allow get, list: if true;
+      allow update, delete: if isExistingOwner(resource.data.teacherId);
+    }
+
+    /**
+     * @description Controls access to course enrollments.
+     * @path /courses/{courseId}/enrollments/{enrollmentId}
+     * @allow (create) Anyone can enroll in a course.
+     * @allow (get, list) Course teacher can view enrollments.
+     * @allow (update, delete) Course teacher can modify or delete enrollments.
+     * @deny (update, delete) Non-teacher attempts to modify or delete enrollments.
+     * @principle Teacher-only write access to enrollments.
+     */
+    match /courses/{courseId}/enrollments/{enrollmentId} {
+      function isCourseTeacher(courseId) {
+        return get(/databases/$(database)/documents/courses/$(courseId)).data.teacherId == request.auth.uid;
+      }
+      function isExistingCourseTeacher(courseId) {
+        return isCourseTeacher(courseId) && resource != null;
+      }
+      allow create: if request.auth != null;
+      allow get, list: if request.auth != null && isCourseTeacher(courseId);
+      allow update, delete: if request.auth != null && isExistingCourseTeacher(courseId);
+    }
+
+    /**
+     * @description Controls access to course assignments.
+     * @path /courses/{courseId}/assignments/{assignmentId}
+     * @allow (create, get, list, update, delete) Course teacher can manage assignments.
+     * @deny (create, get, list, update, delete) Non-teacher attempts to manage assignments.
+     * @principle Teacher-only access to assignments.
+     */
+    match /courses/{courseId}/assignments/{assignmentId} {
+      function isCourseTeacher(courseId) {
+        return get(/databases/$(database)/documents/courses/$(courseId)).data.teacherId == request.auth.uid;
+      }
+      function isExistingCourseTeacher(courseId) {
+        return isCourseTeacher(courseId) && resource != null;
+      }
+      allow create: if request.auth != null && isCourseTeacher(courseId);
+      allow get, list: if request.auth != null && isCourseTeacher(courseId);
+      allow update, delete: if request.auth != null && isExistingCourseTeacher(courseId);
+    }
+
+    /**
+     * @description Controls access to assignment submissions.
+     * @path /courses/{courseId}/assignments/{assignmentId}/submissions/{submissionId}
+     * @allow (create) Student can create submissions for their assignments.
+     * @allow (get) Student and Course teacher can view submission.
+     * @allow (list) Course teacher can list submissions.
+     * @allow (update, delete) Course teacher can manage submissions. Student cannot modify or delete a submission.
+     * @deny (create) Non-student attempts to create submissions.
+     * @deny (update, delete) Non-teacher attempts to update or delete submissions.
+     * @principle Student creates, Teacher manages submissions.
+     */
+    match /courses/{courseId}/assignments/{assignmentId}/submissions/{submissionId} {
+        function isCourseTeacher(courseId) {
+            return get(/databases/$(database)/documents/courses/$(courseId)).data.teacherId == request.auth.uid;
+        }
+        function isExistingCourseTeacher(courseId) {
+          return isCourseTeacher(courseId) && resource != null;
+        }
+        allow create: if request.auth != null && request.resource.data.studentId == request.auth.uid;
+        allow get: if request.auth != null && (isCourseTeacher(courseId) || request.auth.uid == resource.data.studentId);
+        allow list: if request.auth != null && isCourseTeacher(courseId);
+        allow update, delete: if request.auth != null && isExistingCourseTeacher(courseId);
+    }
+  }
+}
