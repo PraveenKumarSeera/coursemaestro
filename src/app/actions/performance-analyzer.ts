@@ -11,7 +11,7 @@ type ActionState = {
 };
 
 export async function analyzePerformanceAction(
-  { studentName, gradedSubmissions }: { studentName: string, gradedSubmissions: GradedSubmission[] }
+  { user, gradedSubmissions }: { user: User, gradedSubmissions: GradedSubmission[] }
 ): Promise<ActionState> {
   
   if (!gradedSubmissions || gradedSubmissions.length === 0) {
@@ -27,7 +27,7 @@ export async function analyzePerformanceAction(
 
   try {
     const result = await analyzePerformance({ 
-        studentName,
+        studentName: user.name,
         studentPerformanceData 
     });
     return {

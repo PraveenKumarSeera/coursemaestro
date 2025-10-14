@@ -27,7 +27,7 @@ export default function PerformanceAnalyzer({ user, gradedSubmissions }: { user:
     setError(null);
     setAnalysis(null);
 
-    const result = await analyzePerformanceAction({ studentName: user.name, gradedSubmissions });
+    const result = await analyzePerformanceAction({ user, gradedSubmissions });
     
     if (result.analysis) {
         setAnalysis(result.analysis);
