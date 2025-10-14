@@ -17,7 +17,6 @@ const prompt = ai.definePrompt({
     name: 'studyAssistantPrompt',
     input: { schema: AiStudyAssistantInputSchema },
     output: { schema: AiStudyAssistantOutputSchema },
-    model: 'gemini-pro',
     prompt: `You are an AI study assistant helping students understand course material.
     Use the provided course material to answer the student's question.
     Your answer should be concise and accurate. Also provide a few related keywords.
