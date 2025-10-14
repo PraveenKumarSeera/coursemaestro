@@ -9,8 +9,8 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
 import { differenceInDays, parseISO } from 'date-fns';
-import { getAuth } from 'firebase/auth';
-import { initializeFirebase } from '@/firebase';
+import { getSession } from './session';
+
 
 // In-memory "database" has been replaced with a file-based one.
 // The data is now persisted in `src/lib/db.json`
@@ -93,21 +93,17 @@ export async function findUserById(id: string): Promise<User> {
   return db.users.find(user => user.id === id) || unknownUser;
 }
 
-export async function createUser(data: Omit<User, 'password'>): Promise<User> {
+export async function createUser(data: Omit<User, 'id'>): Promise<User> {
   const db = await getDb();
-  const newUser: User = { ...data };
+  const newUser: User = { id: String(Date.now()), ...data };
   db.users.push(newUser);
   await writeDb(db);
   return newUser;
 }
 
 export async function getAuthenticatedUser(): Promise<User | null> {
-    const { auth } = initializeFirebase();
-    const firebaseUser = auth.currentUser;
-    if (!firebaseUser) {
-        return null;
-    }
-    return findUserById(firebaseUser.uid);
+    const { user } = await getSession();
+    return user;
 }
 
 // --- Course Functions ---
