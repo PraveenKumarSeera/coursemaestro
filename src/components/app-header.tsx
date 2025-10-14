@@ -16,6 +16,7 @@ import { logout } from '@/app/actions/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AppSidebar from './app-sidebar';
 import NotificationBell from './notifications/notification-bell';
+import { ThemeToggle } from './theme-toggle';
 
 type AppHeaderProps = {
   user: User;
@@ -54,6 +55,7 @@ export default function AppHeader({ user }: AppHeaderProps) {
         </div>
 
       <NotificationBell notifications={notifications} />
+      <ThemeToggle />
         
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

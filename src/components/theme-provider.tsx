@@ -1,22 +1,71 @@
 'use client';
 
-import { useEffect } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const hour = new Date().getHours();
-    // Dark mode between 6 PM (18) and 6 AM (6)
-    const isNight = hour >= 18 || hour < 6;
+type Theme = 'dark' | 'light';
 
-    if (isNight) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+type ThemeProviderProps = {
+  children: ReactNode;
+  defaultTheme?: Theme;
+  storageKey?: string;
+};
+
+type ThemeProviderState = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+};
+
+const initialState: ThemeProviderState = {
+  theme: 'light',
+  setTheme: () => null,
+};
+
+const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+
+export function ThemeProvider({
+  children,
+  defaultTheme = 'light',
+  storageKey = 'vite-ui-theme',
+  ...props
+}: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') {
+      return defaultTheme;
     }
-    
-    // Optional: Set up an interval to check the time periodically,
-    // though a simple check on load is often sufficient for this use case.
-  }, []);
+    return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+  });
 
-  return <>{children}</>;
+  useEffect(() => {
+    if(typeof window !== 'undefined') {
+        const root = window.document.documentElement;
+
+        root.classList.remove('light', 'dark');
+        root.classList.add(theme);
+    }
+  }, [theme]);
+
+  const value = {
+    theme,
+    setTheme: (theme: Theme) => {
+      if(typeof window !== 'undefined') {
+        localStorage.setItem(storageKey, theme);
+      }
+      setTheme(theme);
+    },
+  };
+
+  return (
+    <ThemeProviderContext.Provider {...props} value={value}>
+      {children}
+    </ThemeProviderContext.Provider>
+  );
 }
+
+export const useTheme = () => {
+  const context = useContext(ThemeProviderContext);
+
+  if (context === undefined)
+    throw new Error('useTheme must be used within a ThemeProvider');
+
+  return context;
+};
