@@ -11,13 +11,12 @@ import {
   type InternshipGraderInput,
   type InternshipGraderOutput,
 } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
   name: 'internshipGraderPrompt',
   input: { schema: InternshipGraderInputSchema },
   output: { schema: InternshipGraderOutputSchema },
-  model: googleAI.model('gemini-pro'),
+  model: 'googleai/gemini-pro',
   prompt: `You are an expert AI teaching assistant, specializing in grading complex, open-ended technical and strategic submissions from a simulated internship program.
 
 Your task is to provide a fair and constructive assessment of a student's submission.

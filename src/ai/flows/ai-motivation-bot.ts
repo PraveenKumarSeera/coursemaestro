@@ -12,14 +12,13 @@ import {
   type MotivationBotInput,
   type MotivationBotOutput,
 } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const prompt = ai.definePrompt({
     name: 'motivationBotPrompt',
     input: { schema: MotivationBotInputSchema },
     output: { schema: MotivationBotOutputSchema },
-    model: googleAI.model('gemini-pro'),
+    model: 'googleai/gemini-pro',
     prompt: `You are an encouraging and positive AI academic advisor named "Maestro".
     
 A student, {{{studentName}}}, just received a grade in their course, "{{{courseTitle}}}", that was lower than their average.

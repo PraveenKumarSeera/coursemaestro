@@ -12,14 +12,13 @@ import {
   type TimetableGeneratorInput,
   type TimetableGeneratorOutput,
 } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'zod';
 
 const prompt = ai.definePrompt({
   name: 'timetableGeneratorPrompt',
   input: { schema: TimetableGeneratorInputSchema },
   output: { schema: TimetableGeneratorOutputSchema },
-  model: googleAI.model('gemini-pro'),
+  model: 'googleai/gemini-pro',
   prompt: `You are an expert academic planner AI. Your task is to create a personalized weekly study timetable for a student.
 
 Analyze the student's enrolled courses, upcoming assignment deadlines, and their stated free hours.

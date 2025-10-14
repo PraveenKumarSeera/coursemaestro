@@ -12,13 +12,12 @@ import {
   type AiStudyAssistantInput,
   type AiStudyAssistantOutput,
 } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
     name: 'studyAssistantPrompt',
     input: { schema: AiStudyAssistantInputSchema },
     output: { schema: AiStudyAssistantOutputSchema },
-    model: googleAI.model('gemini-pro'),
+    model: 'googleai/gemini-pro',
     prompt: `You are an AI study assistant helping students understand course material.
     Use the provided course material to answer the student's question.
     Your answer should be concise and accurate. Also provide a few related keywords.
