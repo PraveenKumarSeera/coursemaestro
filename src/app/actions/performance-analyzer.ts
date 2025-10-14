@@ -3,9 +3,10 @@
 
 import { analyzePerformance } from "@/ai/flows/ai-performance-analyzer";
 import type { GradedSubmission } from "@/lib/types";
+import type { PerformanceAnalyzerOutput } from "@/lib/ai-types";
 
 type ActionState = {
-  analysis: string | null;
+  analysis: PerformanceAnalyzerOutput | null;
   message: string | null;
 };
 
@@ -27,7 +28,7 @@ export async function analyzePerformanceAction(
   try {
     const result = await analyzePerformance({ studentPerformanceData });
     return {
-      analysis: result.analysis,
+      analysis: result,
       message: 'Analysis successful.',
     };
   } catch (error: any) {

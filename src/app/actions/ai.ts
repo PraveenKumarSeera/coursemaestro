@@ -2,9 +2,10 @@
 'use server';
 
 import { askStudyAssistant } from '@/ai/flows/ai-study-assistant';
+import type { AiStudyAssistantOutput } from '@/lib/ai-types';
 
 type AiState = {
-  answer: string;
+  answer: AiStudyAssistantOutput | null;
   question: string;
   error?: string;
 };
@@ -18,7 +19,7 @@ export async function askAI(
 
   if (!studentQuestion) {
     return {
-      answer: '',
+      answer: null,
       question: '',
       error: 'Please enter a question.',
     };
@@ -26,7 +27,7 @@ export async function askAI(
   
   if (!courseMaterial) {
     return {
-        answer: '',
+        answer: null,
         question: studentQuestion,
         error: 'Error: Course context is missing.',
     }
@@ -35,13 +36,13 @@ export async function askAI(
   try {
     const result = await askStudyAssistant({ courseMaterial, studentQuestion });
     return {
-      answer: result.answer,
+      answer: result,
       question: studentQuestion,
     };
   } catch (error: any) {
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
     return {
-      answer: '',
+      answer: null,
       question: studentQuestion,
       error: `Sorry, I encountered an error: ${errorMessage}`,
     };

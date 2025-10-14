@@ -12,7 +12,6 @@ import {
   type PerformanceAnalyzerInput,
   type PerformanceAnalyzerOutput,
 } from '@/lib/ai-types';
-import { z } from 'zod';
 import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
@@ -27,15 +26,12 @@ Your role is to analyze a student's academic performance based on their graded a
 Here is the student's performance data:
 {{{studentPerformanceData}}}
 
-Your response should be a markdown-formatted string with the following sections:
-- **Overall Summary:** A brief, motivating overview of the student's overall performance.
-- **Strengths:** Highlight subjects or topics where the student shows consistent excellence.
-- **Areas for Improvement:** Identify subjects or assignments that require more focus.
-- **Actionable Suggestions:** Provide 2–3 concrete, supportive recommendations (e.g., study methods, topic focus, or resource use).
+Your response must be in the specified JSON format.
+- **summary:** A brief, motivating overview of the student's overall performance.
+- **strengths:** A list of subjects or topics where the student shows consistent excellence.
+- **improvements:** A list of subjects or assignments that require more focus.
 
 Maintain a **positive and empathetic tone** throughout.
-
-Generate ONLY the markdown for the analysis and nothing else. Your entire output should be the markdown content.
 `,
 });
 

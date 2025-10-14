@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview This file contains all the Zod schemas and TypeScript types for the AI features.
  * This centralized location prevents circular dependencies between server actions and AI flow files.
@@ -13,6 +14,7 @@ export type AiStudyAssistantInput = z.infer<typeof AiStudyAssistantInputSchema>;
 
 export const AiStudyAssistantOutputSchema = z.object({
   answer: z.string().describe('The answer to the student question, based on the course material.'),
+  keywords: z.array(z.string()).describe('A list of related keywords from the material.'),
 });
 export type AiStudyAssistantOutput = z.infer<typeof AiStudyAssistantOutputSchema>;
 
@@ -42,12 +44,14 @@ export const PerformanceAnalyzerInputSchema = z.object({
 export type PerformanceAnalyzerInput = z.infer<typeof PerformanceAnalyzerInputSchema>;
 
 export const PerformanceAnalyzerOutputSchema = z.object({
-    analysis: z.string().describe('A detailed analysis of the student\'s performance, formatted as a markdown string. Include headings, bullet points, and bold text.'),
+    summary: z.string().describe("A brief, motivating overview of the student's overall performance."),
+    strengths: z.array(z.string()).describe("A list of subjects or topics where the student shows consistent excellence."),
+    improvements: z.array(z.string()).describe("A list of subjects or assignments that require more focus."),
 });
 export type PerformanceAnalyzerOutput = z.infer<typeof PerformanceAnalyzerOutputSchema>;
 
 
-// Quiz Generator
+// Quiz Generator / Instant Course Builder
 const QuestionSchema = z.object({
   question: z.string().describe('The quiz question.'),
   options: z.array(z.string()).describe('An array of possible answers.'),
@@ -78,6 +82,15 @@ export const QuizGeneratorOutputSchema = z.object({
   flashcards: z.array(FlashcardSchema).describe('An array of flashcards with key terms.'),
 });
 export type QuizGeneratorOutput = z.infer<typeof QuizGeneratorOutputSchema>;
+
+// Course Builder is an extension of quiz generator for this implementation
+export const CourseBuilderOutputSchema = z.object({
+    courseTitle: z.string().describe("A suitable title for the course based on the material."),
+    modules: z.array(z.string()).describe("A list of module or lesson titles."),
+    quiz: QuizSchema,
+    flashcards: z.array(FlashcardSchema).describe('An array of flashcards with key terms.'),
+});
+export type CourseBuilderOutput = z.infer<typeof CourseBuilderOutputSchema>;
 
 
 // Resume Builder
@@ -132,7 +145,7 @@ export const MaterialParserOutputSchema = z.object({
 export type MaterialParserOutput = z.infer<typeof MaterialParserOutputSchema>;
 
 
-// Timetable Generator
+// Timetable Generator / Smart Study Scheduler
 export const TimetableGeneratorInputSchema = z.object({
   enrolledCourses: z.string().describe('A summary of the student\'s enrolled courses.'),
   upcomingAssignments: z.string().describe('A summary of upcoming assignments with due dates.'),
@@ -221,3 +234,20 @@ export const TargetedPracticeOutputSchema = z.object({
   microLesson: z.string().describe("A markdown-formatted micro-lesson that includes a concept review, a new practice problem, and a step-by-step solution."),
 });
 export type TargetedPracticeOutput = z.infer<typeof TargetedPracticeOutputSchema>;
+
+
+// Fallback for app-guide, which is not fully implemented
+export const AppGuideInputSchema = z.object({
+    chatHistory: z.array(
+      z.object({
+        role: z.enum(['user', 'model']),
+        content: z.string(),
+      })
+    ).describe('The history of the conversation so far.'),
+});
+export type AppGuideInput = z.infer<typeof AppGuideInputSchema>;
+
+export const AppGuideOutputSchema = z.object({
+  answer: z.string().describe('The answer to the user\'s question.'),
+});
+export type AppGuideOutput = z.infer<typeof AppGuideOutputSchema>;

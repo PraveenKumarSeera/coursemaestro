@@ -11,10 +11,12 @@ import { Loader2, Sparkles, User, Bot, AlertTriangle } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from './ui/badge';
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
+  keywords?: string[];
 };
 
 function SubmitButton() {
@@ -39,7 +41,7 @@ export default function AiAssistant({ course }: { course: Course }) {
   const courseMaterial = `${course.title}: ${course.description}`;
   
   const [state, dispatch] = useActionState(askAI, {
-    answer: '',
+    answer: null,
     question: '',
     error: undefined,
   });
@@ -49,7 +51,7 @@ export default function AiAssistant({ course }: { course: Course }) {
       setMessages((prev) => [
         ...prev,
         { role: 'user', content: state.question },
-        { role: 'assistant', content: state.answer },
+        { role: 'assistant', content: state.answer.answer, keywords: state.answer.keywords },
       ]);
       formRef.current?.reset();
     } else if (state.error) {
@@ -111,17 +113,26 @@ export default function AiAssistant({ course }: { course: Course }) {
                         </div>
                     </>
                  ) : (
-                    <>
-                        <div className="p-2 bg-muted rounded-full">
-                           { message.content.includes("error") || message.content.includes("Sorry") 
-                           ? <AlertTriangle className="h-5 w-5 text-destructive" />
-                           : <Bot className="h-5 w-5 text-primary" />
-                           }
+                    <div className="flex-1">
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-muted rounded-full">
+                            { message.content.includes("error") || message.content.includes("Sorry") 
+                            ? <AlertTriangle className="h-5 w-5 text-destructive" />
+                            : <Bot className="h-5 w-5 text-primary" />
+                            }
+                            </div>
+                            <div className={message.content.includes("error") || message.content.includes("Sorry") ? "bg-destructive/10 rounded-lg p-3 text-sm" : "bg-muted rounded-lg p-3 text-sm"}>
+                                <p>{message.content}</p>
+                            </div>
                         </div>
-                        <div className={message.content.includes("error") || message.content.includes("Sorry") ? "bg-destructive/10 rounded-lg p-3 text-sm" : "bg-muted rounded-lg p-3 text-sm"}>
-                            <p>{message.content}</p>
-                        </div>
-                    </>
+                        {message.keywords && message.keywords.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2 ml-12">
+                                {message.keywords.map(keyword => (
+                                    <Badge key={keyword} variant="secondary">{keyword}</Badge>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                  )}
               </div>
             ))}

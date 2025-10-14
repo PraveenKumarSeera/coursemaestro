@@ -8,23 +8,35 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import { AppGuideInputSchema, AppGuideOutputSchema, type AppGuideInput, type AppGuideOutput } from '@/lib/ai-types';
 
-const AppGuideInputSchema = z.object({
-  chatHistory: z
-    .array(
-      z.object({
-        role: z.enum(['user', 'model']),
-        content: z.string(),
-      })
-    )
-    .describe('The history of the conversation so far.'),
+
+const prompt = ai.definePrompt({
+    name: 'appGuidePrompt',
+    input: { schema: AppGuideInputSchema },
+    output: { schema: AppGuideOutputSchema },
+    prompt: `You are a helpful AI assistant for the CourseMaestro application. Answer the user's question based on the provided conversation history.
+    
+    Conversation History:
+    {{{chatHistory}}}
+    `,
 });
 
-export type AppGuideInput = z.infer<typeof AppGuideInputSchema>;
+const appGuideFlow = ai.defineFlow(
+  {
+    name: 'appGuideFlow',
+    inputSchema: AppGuideInputSchema,
+    outputSchema: AppGuideOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+      throw new Error('The AI returned an invalid response. Please try again.');
+    }
+    return output;
+  }
+);
 
-const AppGuideOutputSchema = z.object({
-  answer: z.string().describe('The answer to the user\'s question.'),
-});
-
-export type AppGuideOutput = z.infer<typeof AppGuideOutputSchema>;
+export async function getAppGuidance(input: AppGuideInput): Promise<AppGuideOutput> {
+    return appGuideFlow(input);
+}
