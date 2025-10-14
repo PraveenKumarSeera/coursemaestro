@@ -207,3 +207,17 @@ export const BrainStretchGeneratorOutputSchema = z.object({
   puzzles: z.array(BrainStretchPuzzleSchema).describe('An array of 3-5 brain stretch puzzles.'),
 });
 export type BrainStretchGeneratorOutput = z.infer<typeof BrainStretchGeneratorOutputSchema>;
+
+
+// Targeted Practice Generator
+export const TargetedPracticeInputSchema = z.object({
+    courseTitle: z.string().describe("The title of the course."),
+    assignmentTitle: z.string().describe("The title of the assignment the student performed poorly on."),
+    grade: z.number().describe("The grade the student received (out of 100).")
+});
+export type TargetedPracticeInput = z.infer<typeof TargetedPracticeInputSchema>;
+
+export const TargetedPracticeOutputSchema = z.object({
+  microLesson: z.string().describe("A markdown-formatted micro-lesson that includes a concept review, a new practice problem, and a step-by-step solution."),
+});
+export type TargetedPracticeOutput = z.infer<typeof TargetedPracticeOutputSchema>;

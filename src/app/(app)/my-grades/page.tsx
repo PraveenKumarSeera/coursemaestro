@@ -3,12 +3,11 @@ import { getSession } from '@/lib/session';
 import { getStudentGrades } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import PerformanceAnalyzer from '@/components/performance-analyzer';
 import type { GradedSubmission } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import TargetedPractice from '@/components/practice/targeted-practice';
 
 
 export default async function MyGradesPage() {
@@ -51,8 +50,17 @@ export default async function MyGradesPage() {
                     </AccordionTrigger>
                     <AccordionContent>
                         <div className="px-4 py-2 space-y-4">
-                            <h4 className="font-semibold">Teacher Feedback:</h4>
-                            <p className="text-muted-foreground">{sub.feedback || "No feedback provided."}</p>
+                            <div>
+                                <h4 className="font-semibold">Teacher Feedback:</h4>
+                                <p className="text-muted-foreground">{sub.feedback || "No feedback provided."}</p>
+                            </div>
+                            {sub.grade && sub.grade < 80 && (
+                                <TargetedPractice
+                                    courseTitle={sub.course.title}
+                                    assignmentTitle={sub.assignment.title}
+                                    grade={sub.grade}
+                                />
+                            )}
                         </div>
                     </AccordionContent>
                 </AccordionItem>

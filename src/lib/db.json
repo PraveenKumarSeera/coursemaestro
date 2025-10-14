@@ -20,6 +20,13 @@
       "password": "123456",
       "role": "teacher",
       "id": "1759821661427"
+    },
+    {
+      "name": "charan",
+      "email": "praveenoscar7702@gmail.com",
+      "password": "123456",
+      "role": "student",
+      "id": "1760440561283"
     }
   ],
   "courses": [
