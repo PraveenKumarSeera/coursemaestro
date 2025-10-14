@@ -19,7 +19,7 @@ const prompt = ai.definePrompt({
     name: 'quizGeneratorPrompt',
     input: { schema: QuizGeneratorInputSchema },
     output: { schema: QuizGeneratorOutputSchema },
-    model: googleAI.model('gemini-1.5-flash'),
+    model: googleAI.model('gemini-1.5-flash-latest'),
     prompt: `You are an AI assistant that creates educational materials for teachers.
       Based on the provided course material, generate a quiz and a set of flashcards.
     
