@@ -13,13 +13,14 @@ import {
   type CareerAdvisorOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt(
   {
     name: 'careerAdvisorPrompt',
     input: { schema: CareerAdvisorInputSchema },
     output: { schema: CareerAdvisorOutputSchema },
-    model: 'gemini-1.5-flash-latest',
+    model: googleAI.model('gemini-1.5-flash-latest'),
     prompt: `You are an expert career advisor for students.
 
 Analyze the student's performance based on their grades in different courses.

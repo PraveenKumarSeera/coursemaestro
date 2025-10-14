@@ -15,13 +15,14 @@ import {
   type MaterialParserOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt(
     {
         name: 'materialParserPrompt',
         input: { schema: MaterialParserInputSchema },
         output: { schema: MaterialParserOutputSchema },
-        model: 'gemini-1.5-flash-latest',
+        model: googleAI.model('gemini-1.5-flash-latest'),
         prompt: `Extract the text content from the following document.
   
         Document:

@@ -12,12 +12,13 @@ import {
   type TargetedPracticeInput,
   type TargetedPracticeOutput,
 } from '@/lib/ai-types';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
   name: 'targetedPracticePrompt',
   input: { schema: TargetedPracticeInputSchema },
   output: { schema: TargetedPracticeOutputSchema },
-  model: 'gemini-1.5-flash-latest',
+  model: googleAI.model('gemini-1.5-flash-latest'),
   prompt: `You are an expert AI tutor. A student has performed poorly on an assignment and needs a targeted micro-lesson to help them improve.
 
 Course: "{{courseTitle}}"

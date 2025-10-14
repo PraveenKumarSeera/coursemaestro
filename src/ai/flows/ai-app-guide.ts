@@ -9,13 +9,14 @@
 
 import {ai} from '@/ai/genkit';
 import { AppGuideInputSchema, AppGuideOutputSchema, type AppGuideInput, type AppGuideOutput } from '@/lib/ai-types';
+import { googleAI } from '@genkit-ai/google-genai';
 
 
 const prompt = ai.definePrompt({
     name: 'appGuidePrompt',
     input: { schema: AppGuideInputSchema },
     output: { schema: AppGuideOutputSchema },
-    model: 'gemini-1.5-flash-latest',
+    model: googleAI.model('gemini-1.5-flash-latest'),
     prompt: `You are a helpful AI assistant for the CourseMaestro application. Answer the user's question based on the provided conversation history.
     
     Conversation History:
