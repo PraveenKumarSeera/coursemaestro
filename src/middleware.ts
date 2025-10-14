@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getSession } from './lib/session';
 
 const SESSION_COOKIE_NAME = 'coursemestro_session';
 const PROTECTED_ROUTES = ['/dashboard', '/courses', '/my-grades', '/ai-assistant', '/assignments', '/students', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/brain-stretches', '/challenges', '/internship', '/my-certificates'];
@@ -11,11 +10,7 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === '/') {
     const url = request.nextUrl.clone();
-    if (sessionCookie) {
-      url.pathname = '/dashboard';
-    } else {
-      url.pathname = '/login';
-    }
+    url.pathname = '/login';
     return NextResponse.redirect(url);
   }
   
