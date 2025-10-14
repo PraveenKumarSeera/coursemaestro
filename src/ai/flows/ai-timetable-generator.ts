@@ -18,7 +18,7 @@ const prompt = ai.definePrompt({
   name: 'timetableGeneratorPrompt',
   input: { schema: TimetableGeneratorInputSchema },
   output: { schema: TimetableGeneratorOutputSchema },
-  model: 'gemini-pro',
+  model: 'gemini-1.5-flash-latest',
   prompt: `You are an expert academic planner AI. Your task is to create a personalized weekly study timetable for a student.
 
 Analyze the student's enrolled courses, upcoming assignment deadlines, and their stated free hours.

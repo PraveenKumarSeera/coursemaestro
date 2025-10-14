@@ -19,7 +19,7 @@ const prompt = ai.definePrompt({
     name: 'resumeBuilderPrompt',
     input: { schema: ResumeBuilderInputSchema },
     output: { schema: ResumeBuilderOutputSchema },
-    model: 'gemini-pro',
+    model: 'gemini-1.5-flash-latest',
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.

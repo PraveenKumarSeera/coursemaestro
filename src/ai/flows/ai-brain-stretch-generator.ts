@@ -17,7 +17,7 @@ const prompt = ai.definePrompt({
   name: 'brainStretchGeneratorPrompt',
   input: { schema: BrainStretchGeneratorInputSchema },
   output: { schema: BrainStretchGeneratorOutputSchema },
-  model: 'gemini-pro',
+  model: 'gemini-1.5-flash-latest',
   prompt: `You are an AI that creates cognitive puzzles for students based on course material.
     
       Generate a set of 3-5 "Brain Stretch" puzzles based on the provided course material. The puzzles should test reasoning and memory.
