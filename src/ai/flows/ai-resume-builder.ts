@@ -13,14 +13,13 @@ import {
   type ResumeBuilderOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
-import {googleAI} from '@genkit-ai/google-genai';
 
 
 const prompt = ai.definePrompt({
     name: 'resumeBuilderPrompt',
     input: { schema: ResumeBuilderInputSchema },
     output: { schema: ResumeBuilderOutputSchema },
-    model: googleAI('gemini-pro'),
+    model: 'gemini-pro',
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.

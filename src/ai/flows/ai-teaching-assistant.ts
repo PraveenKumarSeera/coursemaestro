@@ -13,14 +13,13 @@ import {
   type TeachingAssistantOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
-import {googleAI} from '@genkit-ai/google-genai';
 
 
 const grammarPrompt = ai.definePrompt({
     name: 'grammarCheckPrompt',
     input: { schema: TeachingAssistantInputSchema },
     output: { schema: TeachingAssistantOutputSchema },
-    model: googleAI('gemini-pro'),
+    model: 'gemini-pro',
     prompt: `You are an expert grammar and style checker for a teaching assistant.
 Analyze the following student submission for grammatical errors, spelling mistakes, and clarity.
 Provide a bulleted list of suggested improvements. If there are no errors, state that the submission is well-written.
@@ -38,7 +37,7 @@ const summarizePrompt = ai.definePrompt({
     name: 'summarizePrompt',
     input: { schema: TeachingAssistantInputSchema },
     output: { schema: TeachingAssistantOutputSchema },
-    model: googleAI('gemini-pro'),
+    model: 'gemini-pro',
     prompt: `You are an expert summarizer for a teaching assistant.
 Provide a concise, 2-3 sentence summary of the key points in the following student submission.
 
