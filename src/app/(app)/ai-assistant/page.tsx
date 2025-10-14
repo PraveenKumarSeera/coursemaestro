@@ -1,14 +1,20 @@
 
-import { getSession } from '@/lib/session';
+
+import { initializeFirebase } from '@/firebase';
 import { notFound } from 'next/navigation';
 import { getStudentEnrollments } from '@/lib/data';
 import AiAssistantPageClient from '@/components/ai-assistant-page-client';
-import { getAllCourses } from '@/lib/data';
+import { getAllCourses, findUserById } from '@/lib/data';
 import type { Course } from '@/lib/types';
 
 
 export default async function AiAssistantPage() {
-    const { user } = await getSession();
+    const { auth } = initializeFirebase();
+    const firebaseUser = auth.currentUser;
+    if(!firebaseUser) {
+        notFound();
+    }
+    const user = await findUserById(firebaseUser.uid);
     if (!user || user.role !== 'student') {
         notFound();
     }

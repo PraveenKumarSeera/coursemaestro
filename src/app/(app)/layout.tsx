@@ -1,3 +1,4 @@
+
 'use client';
 
 import AppHeader from '@/components/app-header';
@@ -6,30 +7,35 @@ import type { User } from '@/lib/types';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactFlowProvider } from 'reactflow';
 import { useEffect, useState } from 'react';
-import { getSession } from '@/lib/session';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUser } from '@/firebase';
+import { findUserById } from '@/lib/data';
 
-// This is a temporary client-side wrapper to fetch session,
-// a proper solution might involve a session provider or middleware.
 function useUserSession() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user: firebaseUser, isUserLoading, userError } = useUser();
+  const [appUser, setAppUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    async function fetchSession() {
-      const { user: sessionUser } = await getSession();
-      if (!sessionUser) {
+    if (!isUserLoading) {
+      if (firebaseUser) {
+        findUserById(firebaseUser.uid).then(userFromDb => {
+            if (userFromDb && userFromDb.id !== '0') {
+                setAppUser(userFromDb);
+            } else {
+                // User exists in Firebase Auth, but not in our DB.
+                // This can happen, e.g. if DB entry failed during signup.
+                // For now, treat as not logged in.
+                router.push('/login');
+            }
+        });
+      } else if (!userError) {
         router.push('/login');
-      } else {
-        setUser(sessionUser);
       }
-      setLoading(false);
     }
-    fetchSession();
-  }, [router]);
+  }, [firebaseUser, isUserLoading, userError, router]);
 
-  return { user, loading };
+  return { user: appUser, loading: isUserLoading || (firebaseUser && !appUser) };
 }
 
 export default function AuthenticatedLayout({
@@ -40,7 +46,6 @@ export default function AuthenticatedLayout({
   const { user, loading } = useUserSession();
   const pathname = usePathname();
 
-  // Special case for certificate page, which has a different layout
   if (pathname.includes('/certificates/')) {
     return <>{children}</>;
   }

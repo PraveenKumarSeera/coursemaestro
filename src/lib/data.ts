@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { placeholderImages } from './placeholder-images.json';
@@ -8,6 +9,8 @@ import path from 'path';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
 import { differenceInDays, parseISO } from 'date-fns';
+import { getAuth } from 'firebase/auth';
+import { initializeFirebase } from '@/firebase';
 
 // In-memory "database" has been replaced with a file-based one.
 // The data is now persisted in `src/lib/db.json`
@@ -76,7 +79,7 @@ async function writeDb(data: Db): Promise<void> {
     await fs.writeFile(dbPath, JSON.stringify(data, null, 2));
 }
 
-const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student', password: '' };
+const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student' };
 
 
 // --- User Functions ---
@@ -90,12 +93,21 @@ export async function findUserById(id: string): Promise<User> {
   return db.users.find(user => user.id === id) || unknownUser;
 }
 
-export async function createUser(data: Omit<User, 'id'>): Promise<User> {
+export async function createUser(data: Omit<User, 'password'>): Promise<User> {
   const db = await getDb();
-  const newUser: User = { ...data, id: String(Date.now()) };
+  const newUser: User = { ...data };
   db.users.push(newUser);
   await writeDb(db);
   return newUser;
+}
+
+export async function getAuthenticatedUser(): Promise<User | null> {
+    const { auth } = initializeFirebase();
+    const firebaseUser = auth.currentUser;
+    if (!firebaseUser) {
+        return null;
+    }
+    return findUserById(firebaseUser.uid);
 }
 
 // --- Course Functions ---
@@ -872,5 +884,3 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         };
     }
 }
-
-    

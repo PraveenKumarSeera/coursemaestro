@@ -1,9 +1,10 @@
 
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { enrollInCourse } from '@/lib/data';
-import { getSession } from '@/lib/session';
+import { enrollInCourse, findUserById } from '@/lib/data';
+import { initializeFirebase } from '@/firebase';
 
 type FormState = {
   message: string;
@@ -15,7 +16,13 @@ export async function enrollInCourseAction(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const { user } = await getSession();
+  const { auth } = initializeFirebase();
+  const firebaseUser = auth.currentUser;
+  if (!firebaseUser) {
+    return { message: 'You must be logged in to enroll.', success: false };
+  }
+
+  const user = await findUserById(firebaseUser.uid);
   if (!user || user.role !== 'student') {
     return { message: 'Only students can enroll in courses.', success: false };
   }
