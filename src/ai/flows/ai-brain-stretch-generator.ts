@@ -12,13 +12,11 @@ import {
   type BrainStretchGeneratorInput,
   type BrainStretchGeneratorOutput,
 } from '@/lib/ai-types';
-import { llama3 } from 'genkitx-groq';
 
 const prompt = ai.definePrompt({
   name: 'brainStretchGeneratorPrompt',
   input: { schema: BrainStretchGeneratorInputSchema },
   output: { schema: BrainStretchGeneratorOutputSchema },
-  model: llama3('llama3-70b-8192'),
   prompt: `You are an AI that creates cognitive puzzles for students based on course material.
     
       Generate a set of 3-5 "Brain Stretch" puzzles based on the provided course material. The puzzles should test reasoning and memory.

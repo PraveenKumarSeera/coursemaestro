@@ -13,14 +13,12 @@ import {
   type CareerAdvisorOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
-import { llama3 } from 'genkitx-groq';
 
 const prompt = ai.definePrompt(
   {
     name: 'careerAdvisorPrompt',
     input: { schema: CareerAdvisorInputSchema },
     output: { schema: CareerAdvisorOutputSchema },
-    model: llama3('llama3-70b-8192'),
     prompt: `You are an expert career advisor for students.
 
 Analyze the student's performance based on their grades in different courses.

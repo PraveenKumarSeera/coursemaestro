@@ -15,14 +15,12 @@ import {
   type MaterialParserOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
-import { llama3 } from 'genkitx-groq';
 
 const prompt = ai.definePrompt(
     {
         name: 'materialParserPrompt',
         input: { schema: MaterialParserInputSchema },
         output: { schema: MaterialParserOutputSchema },
-        model: llama3('llama3-70b-8192'),
         prompt: `Extract the text content from the following document.
   
         Document:

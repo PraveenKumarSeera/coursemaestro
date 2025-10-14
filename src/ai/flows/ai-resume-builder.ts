@@ -13,14 +13,12 @@ import {
   type ResumeBuilderOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
-import { llama3 } from 'genkitx-groq';
 
 
 const prompt = ai.definePrompt({
     name: 'resumeBuilderPrompt',
     input: { schema: ResumeBuilderInputSchema },
     output: { schema: ResumeBuilderOutputSchema },
-    model: llama3('llama3-70b-8192'),
     prompt: `You are an expert resume writer helping a student create a professional resume.
 
 Generate a resume in Markdown format based on the student's information and academic performance provided in the input.

@@ -12,13 +12,11 @@ import {
   type AiStudyAssistantInput,
   type AiStudyAssistantOutput,
 } from '@/lib/ai-types';
-import { llama3 } from 'genkitx-groq';
 
 const prompt = ai.definePrompt({
     name: 'studyAssistantPrompt',
     input: { schema: AiStudyAssistantInputSchema },
     output: { schema: AiStudyAssistantOutputSchema },
-    model: llama3('llama3-70b-8192'),
     prompt: `You are an AI study assistant helping students understand course material.
     Use the provided course material to answer the student's question.
     Your answer should be concise and accurate. Also provide a few related keywords.

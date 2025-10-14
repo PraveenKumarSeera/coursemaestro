@@ -13,13 +13,11 @@ import {
   type QuizGeneratorOutput,
 } from '@/lib/ai-types';
 import { z } from 'zod';
-import { llama3 } from 'genkitx-groq';
 
 const prompt = ai.definePrompt({
     name: 'quizGeneratorPrompt',
     input: { schema: QuizGeneratorInputSchema },
     output: { schema: QuizGeneratorOutputSchema },
-    model: llama3('llama3-70b-8192'),
     prompt: `You are an AI assistant that creates educational materials for teachers.
       Based on the provided course material, generate a quiz and a set of flashcards.
     

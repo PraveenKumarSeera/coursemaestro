@@ -1,11 +1,10 @@
 
 import {genkit} from 'genkit';
-import {groq} from 'genkitx-groq';
-import next from '@genkit-ai/next';
+import {googleAI} from '@genkit-ai/google-genai';
 
 export const ai = genkit({
   plugins: [
-    groq({apiKey: process.env.GROQ_API_KEY}),
+    googleAI(),
   ],
   logLevel: 'debug',
   enableTracingAndMetrics: true,

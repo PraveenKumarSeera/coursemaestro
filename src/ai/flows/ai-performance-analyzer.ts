@@ -12,13 +12,11 @@ import {
   type PerformanceAnalyzerInput,
   type PerformanceAnalyzerOutput,
 } from '@/lib/ai-types';
-import { llama3 } from 'genkitx-groq';
 
 const prompt = ai.definePrompt({
     name: 'performanceAnalyzerPrompt',
     input: { schema: PerformanceAnalyzerInputSchema },
     output: { schema: PerformanceAnalyzerOutputSchema },
-    model: llama3('llama3-70b-8192'),
     prompt: `
 You are an expert academic advisor bot named **"Maestro"**.
 Your role is to analyze a student's academic performance based on their graded assignments and provide **encouraging, actionable feedback**.
