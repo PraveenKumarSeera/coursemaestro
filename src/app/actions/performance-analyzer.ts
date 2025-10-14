@@ -2,7 +2,7 @@
 'use server';
 
 import { analyzePerformance } from "@/ai/flows/ai-performance-analyzer";
-import type { GradedSubmission } from "@/lib/types";
+import type { GradedSubmission, User } from "@/lib/types";
 import type { PerformanceAnalyzerOutput } from "@/lib/ai-types";
 
 type ActionState = {
@@ -11,7 +11,7 @@ type ActionState = {
 };
 
 export async function analyzePerformanceAction(
-  { gradedSubmissions }: { gradedSubmissions: GradedSubmission[] }
+  { user, gradedSubmissions }: { user: User, gradedSubmissions: GradedSubmission[] }
 ): Promise<ActionState> {
   
   if (!gradedSubmissions || gradedSubmissions.length === 0) {
@@ -26,7 +26,10 @@ export async function analyzePerformanceAction(
     .join('\n');
 
   try {
-    const result = await analyzePerformance({ studentPerformanceData });
+    const result = await analyzePerformance({ 
+        studentName: user.name,
+        studentPerformanceData 
+    });
     return {
       analysis: result,
       message: 'Analysis successful.',

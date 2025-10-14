@@ -14,10 +14,10 @@ import {
 } from '@/components/ui/dialog';
 import { Loader2, Wand2 } from 'lucide-react';
 import { analyzePerformanceAction } from '@/app/actions/performance-analyzer';
-import type { GradedSubmission } from '@/lib/types';
+import type { GradedSubmission, User } from '@/lib/types';
 import { Badge } from './ui/badge';
 
-export default function PerformanceAnalyzer({ gradedSubmissions }: { gradedSubmissions: GradedSubmission[] }) {
+export default function PerformanceAnalyzer({ user, gradedSubmissions }: { user: User, gradedSubmissions: GradedSubmission[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<{ summary: string; strengths: string[]; improvements: string[] } | null>(null);
@@ -28,7 +28,7 @@ export default function PerformanceAnalyzer({ gradedSubmissions }: { gradedSubmi
     setError(null);
     setAnalysis(null);
 
-    const result = await analyzePerformanceAction({ gradedSubmissions });
+    const result = await analyzePerformanceAction({ user, gradedSubmissions });
     
     if (result.analysis) {
         setAnalysis(result.analysis);

@@ -39,6 +39,7 @@ export type CareerAdvisorOutput = z.infer<typeof CareerAdvisorOutputSchema>;
 
 // Performance Analyzer
 export const PerformanceAnalyzerInputSchema = z.object({
+  studentName: z.string().describe("The name of the student."),
   studentPerformanceData: z.string().describe("A string summarizing the student's graded assignments."),
 });
 export type PerformanceAnalyzerInput = z.infer<typeof PerformanceAnalyzerInputSchema>;
