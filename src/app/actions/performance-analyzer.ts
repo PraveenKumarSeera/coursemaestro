@@ -11,7 +11,8 @@ type ActionState = {
 };
 
 export async function analyzePerformanceAction(
-  { user, gradedSubmissions }: { user: User, gradedSubmissions: GradedSubmission[] }
+  user: User, 
+  gradedSubmissions: GradedSubmission[]
 ): Promise<ActionState> {
   
   if (!gradedSubmissions || gradedSubmissions.length === 0) {
