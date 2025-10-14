@@ -11,13 +11,11 @@ import {
   type InternshipTaskGeneratorInput,
   type InternshipTaskGeneratorOutput,
 } from '@/lib/ai-types';
-import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
   name: 'internshipTaskGeneratorPrompt',
   input: { schema: InternshipTaskGeneratorInputSchema },
   output: { schema: InternshipTaskGeneratorOutputSchema },
-  model: googleAI.model('gemini-pro'),
   prompt: `You are a Senior Manager at a prestigious tech company, responsible for creating challenging and realistic tasks for interns.
 
 Your goal is to generate a single, compelling task based on the provided company domain. The task should be a self-contained problem that a smart university student could reasonably tackle in a few hours.
