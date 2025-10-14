@@ -21,7 +21,7 @@ const prompt = ai.definePrompt(
         name: 'materialParserPrompt',
         input: { schema: MaterialParserInputSchema },
         output: { schema: MaterialParserOutputSchema },
-        model: 'groq/llama3-70b-8192',
+        model: 'gemini-1.5-flash-latest',
         prompt: `Extract the text content from the following document.
   
         Document:
