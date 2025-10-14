@@ -9,6 +9,16 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
 
+  if (pathname === '/') {
+    const url = request.nextUrl.clone();
+    if (sessionCookie) {
+      url.pathname = '/dashboard';
+    } else {
+      url.pathname = '/login';
+    }
+    return NextResponse.redirect(url);
+  }
+  
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
   if (isProtectedRoute && !sessionCookie) {
