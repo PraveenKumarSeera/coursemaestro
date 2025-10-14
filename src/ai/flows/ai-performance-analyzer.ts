@@ -12,11 +12,13 @@ import {
   type PerformanceAnalyzerInput,
   type PerformanceAnalyzerOutput,
 } from '@/lib/ai-types';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const prompt = ai.definePrompt({
     name: 'performanceAnalyzerPrompt',
     input: { schema: PerformanceAnalyzerInputSchema },
     output: { schema: PerformanceAnalyzerOutputSchema },
+    model: googleAI.model('gemini-1.5-flash'),
     prompt: `
 You are an expert academic advisor bot named **"Maestro"**.
 Your role is to analyze a student's academic performance based on their graded assignments and provide **encouraging, actionable feedback**.
