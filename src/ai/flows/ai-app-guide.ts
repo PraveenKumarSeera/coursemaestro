@@ -15,6 +15,7 @@ const prompt = ai.definePrompt({
     name: 'appGuidePrompt',
     input: { schema: AppGuideInputSchema },
     output: { schema: AppGuideOutputSchema },
+    model: 'gemini-pro',
     prompt: `You are a helpful AI assistant for the CourseMaestro application. Answer the user's question based on the provided conversation history.
     
     Conversation History:
