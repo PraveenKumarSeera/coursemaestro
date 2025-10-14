@@ -22,7 +22,7 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
     setError(null);
     setResume(null);
 
-    const actionResult = await generateResumeAction({ user, gradedSubmissions });
+    const actionResult = await generateResumeAction(user, gradedSubmissions);
 
     if (actionResult.resumeMarkdown) {
         setResume(actionResult.resumeMarkdown);
@@ -116,3 +116,5 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
     </div>
   );
 }
+
+    
