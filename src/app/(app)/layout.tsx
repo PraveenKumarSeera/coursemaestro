@@ -1,41 +1,26 @@
-
 'use client';
 
 import AppHeader from '@/components/app-header';
 import AppSidebar from '@/components/app-sidebar';
 import type { User } from '@/lib/types';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { ReactFlowProvider } from 'reactflow';
 import { useEffect, useState } from 'react';
+import { getSession } from '@/lib/session';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useUser } from '@/firebase';
-import { findUserById } from '@/lib/data';
 
 function useUserSession() {
-  const { user: firebaseUser, isUserLoading, userError } = useUser();
-  const [appUser, setAppUser] = useState<User | null>(null);
-  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isUserLoading) {
-      if (firebaseUser) {
-        findUserById(firebaseUser.uid).then(userFromDb => {
-            if (userFromDb && userFromDb.id !== '0') {
-                setAppUser(userFromDb);
-            } else {
-                // User exists in Firebase Auth, but not in our DB.
-                // This can happen, e.g. if DB entry failed during signup.
-                // For now, treat as not logged in.
-                router.push('/login');
-            }
-        });
-      } else if (!userError) {
-        router.push('/login');
-      }
-    }
-  }, [firebaseUser, isUserLoading, userError, router]);
+    getSession().then(({ user }) => {
+      setUser(user);
+      setLoading(false);
+    });
+  }, []);
 
-  return { user: appUser, loading: isUserLoading || (firebaseUser && !appUser) };
+  return { user, loading };
 }
 
 export default function AuthenticatedLayout({

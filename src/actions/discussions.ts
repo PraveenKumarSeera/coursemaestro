@@ -5,7 +5,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createThread, createPost } from '@/lib/data';
-import { initializeFirebase } from '@/firebase';
+import { getSession } from '@/lib/session';
 
 const createThreadSchema = z.object({
   courseId: z.string(),
@@ -29,8 +29,7 @@ export async function createThreadAction(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const { auth } = initializeFirebase();
-  const user = auth.currentUser;
+  const { user } = await getSession();
   if (!user) {
     return { message: 'Permission denied. You must be logged in.', success: false };
   }
@@ -48,8 +47,8 @@ export async function createThreadAction(
   
   try {
     const { courseId, title, content } = validatedFields.data;
-    const newThread = await createThread({ courseId, title, authorId: user.uid });
-    await createPost({ threadId: newThread.id, content, authorId: user.uid });
+    const newThread = await createThread({ courseId, title, authorId: user.id });
+    await createPost({ threadId: newThread.id, content, authorId: user.id });
 
     revalidatePath(`/courses/${courseId}`);
     return { message: 'Discussion started successfully.', success: true };
@@ -63,8 +62,7 @@ export async function createPostAction(
     prevState: FormState,
     formData: FormData
 ): Promise<FormState> {
-    const { auth } = initializeFirebase();
-    const user = auth.currentUser;
+    const { user } = await getSession();
     if (!user) {
         return { message: 'Permission denied. You must be logged in.', success: false };
     }
@@ -79,7 +77,7 @@ export async function createPostAction(
     
     try {
         const { threadId, content, courseId } = validatedFields.data;
-        await createPost({ threadId, content, authorId: user.uid });
+        await createPost({ threadId, content, authorId: user.id });
         
         revalidatePath(`/courses/${courseId}/discussions/${threadId}`);
         return { message: 'Reply posted.', success: true };

@@ -5,7 +5,6 @@ import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
-import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
   title: 'CourseMaestro',
@@ -38,9 +37,7 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider>
-          <FirebaseClientProvider>
-            {children}
-          </FirebaseClientProvider>
+          {children}
           <Toaster />
         </ThemeProvider>
       </body>

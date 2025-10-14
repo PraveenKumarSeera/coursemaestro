@@ -5,8 +5,8 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createCourse, updateCourse, deleteCourse } from '@/lib/data';
+import { getSession } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { initializeFirebase } from '@/firebase';
 
 const courseSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -24,9 +24,8 @@ export async function createCourseAction(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const { auth } = initializeFirebase();
-  const user = auth.currentUser;
-  if (!user) {
+  const { user } = await getSession();
+  if (!user || user.role !== 'teacher') {
     return { message: 'Permission denied', success: false };
   }
 
@@ -42,7 +41,7 @@ export async function createCourseAction(
   }
   
   try {
-    await createCourse(validatedFields.data, user.uid);
+    await createCourse(validatedFields.data, user.id);
     revalidatePath('/courses');
     return { message: 'Course created successfully.', success: true };
   } catch (error) {
@@ -55,9 +54,8 @@ export async function updateCourseAction(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-    const { auth } = initializeFirebase();
-    const user = auth.currentUser;
-    if (!user) {
+    const { user } = await getSession();
+    if (!user || user.role !== 'teacher') {
         return { message: 'Permission denied', success: false };
     }
 
@@ -83,9 +81,8 @@ export async function updateCourseAction(
 }
 
 export async function deleteCourseAction(courseId: string): Promise<void> {
-    const { auth } = initializeFirebase();
-    const user = auth.currentUser;
-    if (!user) {
+    const { user } = await getSession();
+    if (!user || user.role !== 'teacher') {
         throw new Error('Permission denied');
     }
     

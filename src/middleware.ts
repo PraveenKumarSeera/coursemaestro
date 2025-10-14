@@ -1,41 +1,22 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
-import { initializeApp, getApps } from 'firebase-admin/app';
 
-const PROTECTED_ROUTES = ['/dashboard', '/courses', '/my-grades', '/ai-assistant', '/assignments', '/students', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/brain-stretches', '/challenges', '/internship', '/my-certificates'];
+const SESSION_COOKIE_NAME = 'coursemestro_session';
+const PROTECTED_ROUTES = ['/dashboard', '/courses'];
 
-if (!getApps().length) {
-  initializeApp();
-}
-
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
-  const sessionCookie = request.cookies.get('session')?.value || '';
 
-  if (pathname === '/') {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  let decodedToken = null;
-  try {
-    decodedToken = await getAuth().verifySessionCookie(sessionCookie, true);
-  } catch (error) {
-    // Session cookie is invalid or expired.
-  }
-  
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
-  if (isProtectedRoute && !decodedToken) {
+  if (isProtectedRoute && !sessionCookie) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
   }
 
-  if ((pathname === '/login' || pathname === '/signup') && decodedToken) {
+  if ((pathname === '/login' || pathname === '/signup') && sessionCookie) {
      const url = request.nextUrl.clone();
      url.pathname = '/dashboard';
      return NextResponse.redirect(url);

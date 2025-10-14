@@ -1,15 +1,9 @@
-
 'use server';
 
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { findUserByEmail, createUser } from '@/lib/data';
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from 'firebase/auth';
-import { initializeFirebase } from '@/firebase';
+import { createSession, deleteSession } from '@/lib/session';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -44,17 +38,16 @@ export async function login(
   }
 
   const { email, password } = validatedFields.data;
-  
-  try {
-    const { auth } = initializeFirebase();
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (e: any) {
+  const user = await findUserByEmail(email);
+
+  if (!user || user.password !== password) {
     return {
-      message: e.message,
+      message: 'Invalid email or password.',
       success: false,
     };
   }
-  
+
+  await createSession(user.id);
   redirect('/dashboard');
 }
 
@@ -75,24 +68,22 @@ export async function signup(
 
   const { name, email, password, role } = validatedFields.data;
 
-  try {
-    const { auth } = initializeFirebase();
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Now create user in our db
-    await createUser({ id: userCredential.user.uid, name, email, role });
-  } catch (e: any) {
-     return {
-      message: e.message,
+  const existingUser = await findUserByEmail(email);
+  if (existingUser) {
+    return {
+      message: 'An account with this email already exists.',
       success: false,
     };
   }
+
+  const newUser = await createUser({ name, email, password, role });
+  await createSession(newUser.id);
 
   redirect('/dashboard');
 }
 
 
 export async function logout() {
-  const { auth } = initializeFirebase();
-  await auth.signOut();
+  await deleteSession();
   redirect('/login');
 }

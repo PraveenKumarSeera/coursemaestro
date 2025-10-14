@@ -1,10 +1,9 @@
 
-
 'use server';
 
 import { revalidatePath } from 'next/cache';
 import { createChallengeSubmission, voteOnSubmission } from '@/lib/data';
-import { initializeFirebase } from '@/firebase';
+import { getSession } from '@/lib/session';
 
 type FormState = {
   message: string;
@@ -16,10 +15,8 @@ export async function submitChallengeAction(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const { auth } = initializeFirebase();
-  const user = auth.currentUser;
-
-  if (!user) {
+  const { user } = await getSession();
+  if (!user || user.role !== 'student') {
     return { message: 'Only students can submit solutions.', success: false };
   }
 
@@ -31,7 +28,7 @@ export async function submitChallengeAction(
   try {
     await createChallengeSubmission({
       challengeId,
-      studentId: user.uid,
+      studentId: user.id,
       content,
     });
     revalidatePath(`/challenges/${challengeId}`);
@@ -42,15 +39,13 @@ export async function submitChallengeAction(
 }
 
 export async function voteOnSubmissionAction(submissionId: string, challengeId: string) {
-    const { auth } = initializeFirebase();
-    const user = auth.currentUser;
-
-    if (!user) {
+    const { user } = await getSession();
+    if (!user || user.role !== 'student') {
         return { message: 'Only students can vote.', success: false };
     }
 
     try {
-        const result = await voteOnSubmission(submissionId, user.uid);
+        const result = await voteOnSubmission(submissionId, user.id);
         if (!result) {
             return { message: 'You have already voted or cannot vote for your own submission.', success: false };
         }

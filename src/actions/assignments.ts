@@ -1,14 +1,12 @@
 
-
 'use server';
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { createAssignment, createSubmission, gradeSubmission, getStudentsByCourse, getCourseById, getAssignmentById, getSubmissionById, getStudentGrades, findUserById, createNotification } from '@/lib/data';
+import { getSession } from '@/lib/session';
 import { generateMotivationalMessage } from '@/ai/flows/ai-motivation-bot';
 import type { MotivationBotOutput } from '@/lib/ai-types';
-import { getAuth } from 'firebase/auth';
-import { initializeFirebase } from '@/firebase';
 
 const createAssignmentSchema = z.object({
   courseId: z.string(),
@@ -71,8 +69,7 @@ const submitAssignmentSchema = z.object({
 });
 
 export async function submitAssignmentAction(prevState: FormState, formData: FormData): Promise<FormState> {
-    const { auth } = initializeFirebase();
-    const user = auth.currentUser;
+    const { user } = await getSession();
     if (!user) {
         return { message: 'You must be logged in to submit an assignment.', success: false };
     }
@@ -88,7 +85,7 @@ export async function submitAssignmentAction(prevState: FormState, formData: For
     try {
         const submission = await createSubmission({
             ...validatedFields.data,
-            studentId: user.uid,
+            studentId: user.id,
         });
 
         // Create notification for the teacher
@@ -97,7 +94,7 @@ export async function submitAssignmentAction(prevState: FormState, formData: For
         if (course && assignment && course.teacher) {
             await createNotification({
                 userId: course.teacherId,
-                message: `${user.displayName} submitted "${assignment.title}"`,
+                message: `${user.name} submitted "${assignment.title}"`,
                 link: `/assignments/${submission.assignmentId}`,
             });
         }
