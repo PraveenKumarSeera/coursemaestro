@@ -1,4 +1,6 @@
 
+'use client';
+
 import Link from 'next/link';
 import {
   DropdownMenu,
@@ -11,27 +13,32 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GraduationCap, LogOut, Menu, User as UserIcon } from 'lucide-react';
-import type { User } from '@/lib/types';
+import type { User, Notification } from '@/lib/types';
 import { logout } from '@/app/actions/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AppSidebar from './app-sidebar';
 import NotificationBell from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
+import { getNotificationsForUser } from '@/lib/data';
+import { useEffect, useState } from 'react';
 
 type AppHeaderProps = {
   user: User;
 };
 
 export default function AppHeader({ user }: AppHeaderProps) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  useEffect(() => {
+    getNotificationsForUser(user.id).then(setNotifications);
+  }, [user.id]);
+  
   const getInitials = (name: string) => {
     return name
       .split(' ')
       .map((n) => n[0])
       .join('');
   };
-
-  // const notifications = await getNotificationsForUser(user.id);
-  const notifications = [];
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30">
