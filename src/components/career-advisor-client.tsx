@@ -3,13 +3,41 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Wand2, Briefcase } from 'lucide-react';
+import { Loader2, Wand2, Briefcase, Bot, Cpu, Database, Shield } from 'lucide-react';
 import { suggestCareersAction } from '@/app/actions/career-advisor';
 import type { GradedSubmission } from '@/lib/types';
 import type { CareerAdvisorOutput } from '@/lib/ai-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+
+const trendingCareers = [
+    {
+        title: "AI/ML Engineer",
+        description: "Build intelligent systems that can learn and make predictions. This role is at the forefront of innovation.",
+        skills: ["Python", "TensorFlow", "PyTorch", "Data Modeling", "Algorithms"],
+        icon: <Bot className="h-5 w-5 text-accent" />,
+    },
+    {
+        title: "Data Scientist",
+        description: "Analyze large datasets to extract meaningful insights and help drive business decisions.",
+        skills: ["SQL", "R", "Python", "Statistics", "Machine Learning", "Data Visualization"],
+        icon: <Database className="h-5 w-5 text-accent" />,
+    },
+    {
+        title: "Full-Stack Developer",
+        description: "Work on both the front-end and back-end of applications, creating a seamless user experience.",
+        skills: ["JavaScript", "React", "Node.js", "APIs", "Databases", "HTML/CSS"],
+        icon: <Cpu className="h-5 w-5 text-accent" />,
+    },
+    {
+        title: "Cybersecurity Analyst",
+        description: "Protect computer systems and networks from security breaches and cyber threats.",
+        skills: ["Networking", "Penetration Testing", "Cryptography", "Incident Response"],
+        icon: <Shield className="h-5 w-5 text-accent" />,
+    },
+];
+
 
 export default function CareerAdvisorClient({ gradedSubmissions }: { gradedSubmissions: GradedSubmission[] }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -45,7 +73,7 @@ export default function CareerAdvisorClient({ gradedSubmissions }: { gradedSubmi
 
       <Card>
         <CardHeader>
-          <CardTitle>Get Started</CardTitle>
+          <CardTitle>Get Your Personalized Suggestions</CardTitle>
           <CardDescription>
             Our AI advisor will analyze your grades to suggest careers where you're likely to excel.
           </CardDescription>
@@ -80,7 +108,7 @@ export default function CareerAdvisorClient({ gradedSubmissions }: { gradedSubmi
       
       {result && result.suggestions && (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold font-headline">Your Suggested Career Paths</h2>
+            <h2 className="text-2xl font-bold font-headline">Your AI-Powered Suggestions</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {result.suggestions.map((suggestion, index) => (
                     <Card key={index} className="flex flex-col">
@@ -106,6 +134,33 @@ export default function CareerAdvisorClient({ gradedSubmissions }: { gradedSubmi
             </div>
         </div>
       )}
+
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold font-headline">Explore Trending Careers</h2>
+        <div className="grid gap-6 md:grid-cols-2">
+            {trendingCareers.map((career) => (
+                <Card key={career.title} className="flex flex-col">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 font-headline">
+                            {career.icon}
+                            {career.title}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow space-y-4">
+                        <p className="text-muted-foreground text-sm">{career.description}</p>
+                        <div>
+                            <h4 className="font-semibold text-sm mb-2">Key Skills:</h4>
+                            <div className="flex flex-wrap gap-2">
+                                {career.skills.map(skill => (
+                                    <Badge key={skill} variant="secondary">{skill}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+      </div>
 
     </div>
   );
