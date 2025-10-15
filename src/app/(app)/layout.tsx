@@ -1,26 +1,35 @@
+
 'use client';
 
 import AppHeader from '@/components/app-header';
 import AppSidebar from '@/components/app-sidebar';
-import type { User } from '@/lib/types';
+import type { User, Notification } from '@/lib/types';
 import { usePathname } from 'next/navigation';
 import { ReactFlowProvider } from 'reactflow';
 import { useEffect, useState } from 'react';
 import { getSession } from '@/lib/session';
+import { getNotificationsForUser } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getSession().then(({ user }) => {
-      setUser(user);
+    async function loadSession() {
+      const { user } = await getSession();
+      if (user) {
+        const userNotifications = await getNotificationsForUser(user.id);
+        setUser(user);
+        setNotifications(userNotifications);
+      }
       setLoading(false);
-    });
+    }
+    loadSession();
   }, []);
 
-  return { user, loading };
+  return { user, notifications, loading };
 }
 
 export default function AuthenticatedLayout({
@@ -28,7 +37,7 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useUserSession();
+  const { user, notifications, loading } = useUserSession();
   const pathname = usePathname();
 
   if (pathname.includes('/certificates/')) {
@@ -62,7 +71,7 @@ export default function AuthenticatedLayout({
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <AppSidebar user={user} />
         <div className="flex flex-col">
-          <AppHeader user={user} />
+          <AppHeader user={user} notifications={notifications} />
           <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
             {children}
           </main>

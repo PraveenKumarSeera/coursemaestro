@@ -10,6 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GraduationCap, LogOut, Menu, User as UserIcon, Settings } from 'lucide-react';
@@ -19,20 +27,15 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import AppSidebar from './app-sidebar';
 import NotificationBell from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
-import { getNotificationsForUser } from '@/lib/data';
 import { useEffect, useState } from 'react';
+import ProfileForm from '../profile/profile-form';
 
 type AppHeaderProps = {
   user: User;
+  notifications: Notification[];
 };
 
-export default function AppHeader({ user }: AppHeaderProps) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-
-  useEffect(() => {
-    getNotificationsForUser(user.id).then(setNotifications);
-  }, [user.id]);
-  
+export default function AppHeader({ user, notifications }: AppHeaderProps) {
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -64,42 +67,51 @@ export default function AppHeader({ user }: AppHeaderProps) {
       <NotificationBell notifications={notifications} />
       <ThemeToggle />
         
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="icon" className="rounded-full">
-            <Avatar>
-              <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-            </Avatar>
-            <span className="sr-only">Toggle user menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {user.email}
-              </p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-           <DropdownMenuItem asChild>
-            <Link href="/profile">
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Profile Settings</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <form action={logout}>
-            <button type="submit" className="w-full">
-              <DropdownMenuItem>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </button>
-          </form>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Dialog>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+            <Button variant="secondary" size="icon" className="rounded-full">
+                <Avatar>
+                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                </Avatar>
+                <span className="sr-only">Toggle user menu</span>
+            </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+            <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">{user.name}</p>
+                <p className="text-xs leading-none text-muted-foreground">
+                    {user.email}
+                </p>
+                </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DialogTrigger asChild>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Profile Settings</span>
+                </DropdownMenuItem>
+            </DialogTrigger>
+            <DropdownMenuSeparator />
+            <form action={logout}>
+                <button type="submit" className="w-full">
+                <DropdownMenuItem>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                </DropdownMenuItem>
+                </button>
+            </form>
+            </DropdownMenuContent>
+        </DropdownMenu>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Profile Settings</DialogTitle>
+                <DialogDescription>Update your name and password here.</DialogDescription>
+            </DialogHeader>
+            <ProfileForm user={user} />
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }

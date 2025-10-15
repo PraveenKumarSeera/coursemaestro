@@ -3,12 +3,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'coursemestro_session';
-const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/quiz-generator', '/my-grades', '/my-certificates', '/leaderboard', '/ai-assistant', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/profile'];
+const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/quiz-generator', '/my-grades', '/my-certificates', '/leaderboard', '/ai-assistant', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches'];
 const PUBLIC_ROUTES = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
+
+  const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
   // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !sessionCookie) {
@@ -24,9 +26,10 @@ export function middleware(request: NextRequest) {
      return NextResponse.redirect(url);
   }
   
+  // If visiting the root, redirect to dashboard if logged in, otherwise login
   if (pathname === '/') {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = sessionCookie ? '/dashboard' : '/login';
     return NextResponse.redirect(url);
   }
 
