@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Trophy, Medal, Award, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 
 type Ranking = {
     user: User;
@@ -58,10 +57,7 @@ const AcademicLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], c
                     </TableCell>
                     <TableCell className="text-center hidden md:table-cell">{entry.assignmentsCompleted}</TableCell>
                     <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-3">
-                            <span className="font-bold text-lg text-primary">{entry.averageGrade}%</span>
-                            <Progress value={entry.averageGrade} className="w-24 hidden sm:block" />
-                        </div>
+                        <span className="font-bold text-lg text-primary">{entry.averageGrade}%</span>
                     </TableCell>
                 </TableRow>
                 ))}
@@ -72,7 +68,6 @@ const AcademicLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], c
 
 const CredibilityLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], currentUser: User }) => {
     const sortedRankings = [...rankings].sort((a, b) => b.credibilityPoints - a.credibilityPoints);
-    const maxPoints = sortedRankings.length > 0 ? sortedRankings[0].credibilityPoints : 1;
 
     return (
         <Table>
@@ -100,13 +95,10 @@ const CredibilityLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[]
                     </div>
                     </TableCell>
                     <TableCell className="text-right">
-                         <div className="flex items-center justify-end gap-3">
-                            <span className="font-bold text-lg text-accent flex items-center gap-1">
-                                <Star className="h-5 w-5" />
-                                {entry.credibilityPoints}
-                            </span>
-                            <Progress value={(entry.credibilityPoints / maxPoints) * 100} className="w-24 hidden sm:block" indicatorClassName="bg-accent" />
-                         </div>
+                         <span className="font-bold text-lg text-accent flex items-center gap-1 justify-end">
+                            <Star className="h-5 w-5" />
+                            {entry.credibilityPoints}
+                        </span>
                     </TableCell>
                 </TableRow>
                 ))}
