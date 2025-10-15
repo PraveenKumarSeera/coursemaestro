@@ -830,7 +830,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         let studentOfTheWeek: StudentOfTheWeek = null;
         const sevenDaysAgo = subDays(new Date(), 7);
         
-        const weeklyScores: { studentId: string, name: string, score: number, grade: number }[] = [];
+        const weeklyScores: { studentId: string; name: string; score: number; grade: number }[] = [];
 
         for (const studentId of studentIds) {
             const student = db.users.find(u => u.id === studentId);
