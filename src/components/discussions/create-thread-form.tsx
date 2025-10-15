@@ -23,9 +23,10 @@ function SubmitButton() {
 
 type CreateThreadFormProps = {
   courseId: string;
+  setDialogOpen: (isOpen: boolean) => void;
 };
 
-export default function CreateThreadForm({ courseId }: CreateThreadFormProps) {
+export default function CreateThreadForm({ courseId, setDialogOpen }: CreateThreadFormProps) {
   const initialState = { message: '', success: false };
   const [state, formAction] = useActionState(createThreadAction, initialState);
   const { toast } = useToast();
@@ -40,11 +41,10 @@ export default function CreateThreadForm({ courseId }: CreateThreadFormProps) {
       });
       if (state.success) {
         formRef.current?.reset();
-        // This is a workaround to close the dialog. A better solution would use the Dialog's open/onOpenChange props.
-        document.querySelector('[data-radix-dialog-content] [aria-label="Close"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+        setDialogOpen(false);
       }
     }
-  }, [state, toast]);
+  }, [state, toast, setDialogOpen]);
 
   return (
     <form ref={formRef} action={formAction} className="space-y-4">

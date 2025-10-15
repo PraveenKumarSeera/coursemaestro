@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import CreateThreadForm from './create-thread-form';
+import { useState } from 'react';
 
 
 type ThreadWithAuthor = DiscussionThread & { author: User, postCount: number };
@@ -26,6 +27,7 @@ type DiscussionListProps = {
 };
 
 export default function DiscussionList({ courseId, threads }: DiscussionListProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   return (
     <Card>
@@ -36,7 +38,7 @@ export default function DiscussionList({ courseId, threads }: DiscussionListProp
             Ask questions, share ideas, and connect with your peers.
             </CardDescription>
         </div>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" /> Start Discussion
@@ -49,7 +51,7 @@ export default function DiscussionList({ courseId, threads }: DiscussionListProp
                 Post a new topic for discussion in this course.
               </DialogDescription>
             </DialogHeader>
-            <CreateThreadForm courseId={courseId} />
+            <CreateThreadForm courseId={courseId} setDialogOpen={setIsDialogOpen} />
           </DialogContent>
         </Dialog>
       </CardHeader>
