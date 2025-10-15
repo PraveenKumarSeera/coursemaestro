@@ -92,8 +92,31 @@
       "feedback": "nice "
     }
   ],
-  "discussionThreads": [],
-  "discussionPosts": [],
+  "discussionThreads": [
+    {
+      "courseId": "1759821872336",
+      "title": "what is html",
+      "authorId": "1759816290832",
+      "id": "1760550313671",
+      "createdAt": "2025-10-15T17:45:13.671Z"
+    }
+  ],
+  "discussionPosts": [
+    {
+      "threadId": "1760550313671",
+      "content": "can any one explain about html",
+      "authorId": "1759816290832",
+      "id": "1760550313692",
+      "createdAt": "2025-10-15T17:45:13.692Z"
+    },
+    {
+      "threadId": "1760550313671",
+      "content": "html is a forntend lang and the full form of html is hyper text markup lang",
+      "authorId": "1759816272542",
+      "id": "1760551128824",
+      "createdAt": "2025-10-15T17:58:48.824Z"
+    }
+  ],
   "materials": [
     {
       "courseId": "1759821872336",

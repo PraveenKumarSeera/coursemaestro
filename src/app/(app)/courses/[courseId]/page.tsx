@@ -16,6 +16,7 @@ import MaterialList from '@/components/materials/material-list';
 import AttendanceTracker from '@/components/attendance/attendance-tracker';
 import EnrollButton from '@/components/courses/enroll-button';
 import EmbeddedVideoPlayer from '@/components/courses/embedded-video-player';
+import { cn } from '@/lib/utils';
 
 export const revalidate = 0;
 
@@ -141,7 +142,7 @@ export default async function CourseDetailPage({
       )}
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className={cn("grid w-full", isTeacher ? "grid-cols-5" : "grid-cols-4")}>
           <TabsTrigger value="overview">
             <BookText className="mr-2 h-4 w-4" /> Overview
           </TabsTrigger>
