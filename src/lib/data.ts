@@ -95,6 +95,36 @@ const defaultDb: Db = {
             tags: ['AI', 'Genkit', 'Next.js', 'Generative AI'],
             createdAt: subDays(new Date(), 2).toISOString(),
         },
+        {
+            id: 'proj4',
+            studentId: '5',
+            title: 'Task Management App',
+            description: 'A Kanban-style task management application with drag-and-drop functionality to organize tasks into different stages of completion. Includes features like due dates and priority levels.',
+            imageUrl: 'https://picsum.photos/seed/proj4/600/400',
+            projectUrl: 'https://github.com/example/task-manager',
+            tags: ['React', 'dnd-kit', 'Firebase', 'Real-time'],
+            createdAt: subDays(new Date(), 20).toISOString(),
+        },
+        {
+            id: 'proj5',
+            studentId: '2',
+            title: 'Weather Forecast App',
+            description: 'A clean and simple weather application that provides current weather conditions and a 5-day forecast for any city. It fetches data from a third-party weather API.',
+            imageUrl: 'https://picsum.photos/seed/proj5/600/400',
+            projectUrl: 'https://github.com/example/weather-app',
+            tags: ['JavaScript', 'API', 'HTML/CSS', 'Geolocation'],
+            createdAt: subDays(new Date(), 8).toISOString(),
+        },
+        {
+            id: 'proj6',
+            studentId: '3',
+            title: 'Recipe Finder',
+            description: 'A web app that helps users discover new recipes based on ingredients they have on hand. Features a search and filter system to find the perfect meal.',
+            imageUrl: 'https://picsum.photos/seed/proj6/600/400',
+            projectUrl: 'https://github.com/example/recipe-finder',
+            tags: ['Vue.js', 'API Integration', 'UI/UX'],
+            createdAt: subDays(new Date(), 15).toISOString(),
+        },
     ],
 };
 
@@ -1119,5 +1149,7 @@ async function runOneTimeScripts() {
 // Run the one-time script
 runOneTimeScripts().catch(console.error);
 
+
+    
 
     
