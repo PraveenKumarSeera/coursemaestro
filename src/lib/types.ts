@@ -116,18 +116,19 @@ export type ChallengeVote = {
 };
 
 // Internship Simulator Types
-export type InternshipDomain = {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-};
-
 export type InternshipTask = {
   title: string;
   scenario: string;
   task: string;
   deliverables: string[];
+};
+
+export type InternshipDomain = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  task: InternshipTask;
 };
 
 export type InternshipGrade = {

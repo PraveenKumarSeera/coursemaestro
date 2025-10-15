@@ -6,7 +6,7 @@ import type { InternshipDomain, InternshipTask, InternshipGrade } from '@/lib/ty
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Wand2, Building, Bot, Rocket, Wind, ArrowLeft } from 'lucide-react';
-import { generateInternshipTaskAction, gradeInternshipSubmissionAction } from '@/app/actions/internship';
+import { gradeInternshipSubmissionAction } from '@/app/actions/internship';
 import { Textarea } from '../ui/textarea';
 import { Progress } from '../ui/progress';
 
@@ -26,18 +26,12 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
   const [isGrading, setIsGrading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDomainSelect = async (domain: InternshipDomain) => {
+  const handleDomainSelect = (domain: InternshipDomain) => {
     setIsLoading(true);
     setError(null);
     setTask(null);
     setSelectedDomain(domain);
-    
-    const result = await generateInternshipTaskAction(domain);
-    if (result.task) {
-      setTask(result.task);
-    } else {
-      setError(result.message || 'Failed to generate task.');
-    }
+    setTask(domain.task);
     setIsLoading(false);
   };
   
@@ -106,8 +100,8 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
     return (
          <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <h2 className="text-2xl font-semibold">Generating Your Task...</h2>
-            <p className="text-muted-foreground">The AI is creating a custom scenario for you from the {selectedDomain.name} domain.</p>
+            <h2 className="text-2xl font-semibold">Loading Your Task...</h2>
+            <p className="text-muted-foreground">Please wait a moment.</p>
         </div>
     )
   }
