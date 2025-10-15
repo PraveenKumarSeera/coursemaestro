@@ -51,9 +51,12 @@ const defaultDb: Db = {
     attendance: [],
     certificates: [],
     challenges: [
-      { id: 'ch1', title: 'E-commerce Search Component', description: 'Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.', company: 'Shopify', points: 150, imageUrl: 'https://picsum.photos/seed/ch1/600/400' },
-      { id: 'ch2', title: 'Social Media Dashboard UI', description: 'Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.', company: 'Meta', points: 200, imageUrl: 'https://picsum.photos/seed/ch2/600/400' },
-      { id: 'ch3', title: 'API for a Simple To-Do App', description: 'Develop a RESTful API for a to-do list application. The API should support creating, reading, updating, and deleting tasks, and include user authentication.', company: 'Google', points: 250, imageUrl: 'https://picsum.photos/seed/ch3/600/400' }
+      { id: 'ch1', title: 'E-commerce Search Component', description: 'Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.', company: 'Shopify', points: 150, icon: 'ShoppingCart' },
+      { id: 'ch2', title: 'Social Media Dashboard UI', description: 'Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.', company: 'Meta', points: 200, icon: 'Users' },
+      { id: 'ch3', title: 'API for a Simple To-Do App', description: 'Develop a RESTful API for a to-do list application. The API should support creating, reading, updating, and deleting tasks, and include user authentication.', company: 'Google', points: 250, icon: 'Code' },
+      { id: 'ch4', title: 'Real-time Chat Application', description: 'Build a real-time chat application using WebSockets. Users should be able to join rooms and send messages that are instantly visible to other users in the same room.', company: 'Slack', points: 300, icon: 'MessageSquare' },
+      { id: 'ch5', title: 'CI/CD Pipeline for a Node.js App', description: 'Set up a complete CI/CD pipeline for a simple Node.js application using GitHub Actions. The pipeline should automatically test, build, and deploy the application to a cloud service.', company: 'GitHub', points: 280, icon: 'GitMerge' },
+      { id: 'ch6', title: 'Database Schema for a Booking System', description: 'Design a normalized SQL database schema for a hotel booking system. It should handle rooms, bookings, users, and payments efficiently.', company: 'Booking.com', points: 220, icon: 'Database' }
     ],
     challengeSubmissions: [],
     challengeVotes: []

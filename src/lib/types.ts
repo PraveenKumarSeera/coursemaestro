@@ -98,7 +98,7 @@ export type Challenge = {
   description: string;
   company: string;
   points: number;
-  imageUrl: string;
+  icon: string;
 };
 
 export type ChallengeSubmission = {

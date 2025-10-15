@@ -2,9 +2,8 @@
 import { getChallengeById, getSubmissionsForChallenge } from "@/lib/data";
 import { getSession } from "@/lib/session";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, Star, ThumbsUp, User } from "lucide-react";
+import { Briefcase, Star } from "lucide-react";
 import SubmitChallengeForm from "@/components/challenges/submit-challenge-form";
 import VoteButton from "@/components/challenges/vote-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -26,30 +25,22 @@ export default async function ChallengeDetailPage({ params }: { params: { challe
 
     return (
         <div className="space-y-8">
-            <div className="relative h-72 w-full rounded-lg overflow-hidden">
-                <Image
-                src={challenge.imageUrl}
-                alt={challenge.title}
-                fill
-                className="object-cover"
-                data-ai-hint="project abstract dark"
-                />
-                <div className="absolute inset-0 bg-black/60 flex flex-col justify-end p-8">
-                    <h1 className="text-4xl font-bold text-white font-headline">
-                        {challenge.title}
-                    </h1>
-                    <div className="flex items-center space-x-6 text-lg text-gray-300 mt-2">
-                        <div className="flex items-center gap-2">
-                            <Briefcase className="h-5 w-5" />
-                            <span>From {challenge.company}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                            <span>{challenge.points} Credibility Points</span>
-                        </div>
+            <div className="space-y-2">
+                <h1 className="text-4xl font-bold font-headline">
+                    {challenge.title}
+                </h1>
+                <div className="flex items-center space-x-6 text-lg text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <Briefcase className="h-5 w-5" />
+                        <span>From {challenge.company}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                        <span>{challenge.points} Credibility Points</span>
                     </div>
                 </div>
             </div>
+
 
             <Card>
                 <CardHeader>
