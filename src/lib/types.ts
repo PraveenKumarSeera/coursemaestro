@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string;
   name: string;
@@ -113,6 +114,17 @@ export type ChallengeVote = {
   id: string;
   submissionId: string;
   voterId: string;
+};
+
+export type Project = {
+  id: string;
+  studentId: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  projectUrl: string;
+  tags: string[];
+  createdAt: string;
 };
 
 // Internship Simulator Types

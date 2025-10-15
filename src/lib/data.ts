@@ -3,7 +3,7 @@
 'use server';
 
 import { placeholderImages } from './placeholder-images.json';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote, Project } from './types';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -32,6 +32,7 @@ type Db = {
     challenges: Challenge[];
     challengeSubmissions: ChallengeSubmission[];
     challengeVotes: ChallengeVote[];
+    projects: Project[];
 }
 
 const defaultDb: Db = {
@@ -62,7 +63,8 @@ const defaultDb: Db = {
       { id: 'ch9', title: 'Serverless Image Processing Pipeline', description: 'Using AWS Lambda and S3, create a pipeline that automatically resizes uploaded images into multiple formats (e.g., thumbnail, medium, large).', company: 'Amazon Web Services', points: 320, icon: 'Code' },
     ],
     challengeSubmissions: [],
-    challengeVotes: []
+    challengeVotes: [],
+    projects: [],
 };
 
 // --- Caching Layer for DB Reads ---
@@ -728,6 +730,36 @@ export async function voteOnSubmission(submissionId: string, voterId: string): P
 export async function getVotesForSubmission(submissionId: string): Promise<number> {
     const db = await getDb();
     return db.challengeVotes.filter(v => v.submissionId === submissionId).length;
+}
+
+// --- Project Showcase Functions ---
+export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl'>): Promise<Project> {
+  const db = await getDb();
+  const newProject: Project = {
+    ...data,
+    id: String(Date.now()),
+    imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
+    createdAt: new Date().toISOString(),
+  };
+  db.projects.push(newProject);
+  await writeDb(db);
+  return newProject;
+}
+
+export async function getAllProjects(): Promise<(Project & { student: User })[]> {
+  const db = await getDb();
+  const projectsWithStudent = await Promise.all(
+    db.projects.map(async (project) => {
+      const student = await findUserById(project.studentId);
+      return { ...project, student };
+    })
+  );
+  return projectsWithStudent.filter(p => p.student.id !== '0').sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export async function getProjectsByStudent(studentId: string): Promise<Project[]> {
+  const db = await getDb();
+  return db.projects.filter(p => p.studentId === studentId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 

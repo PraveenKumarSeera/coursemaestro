@@ -22,6 +22,8 @@ import {
   Lightbulb,
   Building,
   BrainCircuit,
+  FolderKanban,
+  Rocket,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -37,6 +39,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const commonRoutes = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/courses', label: user.role === 'student' ? 'My Courses' : 'My Courses', icon: BookOpen },
+    { href: '/showcase', label: 'Project Showcase', icon: Rocket },
   ];
 
   const teacherRoutes = [
@@ -47,6 +50,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   ];
 
   const studentRoutes = [
+    { href: '/my-projects', label: 'My Projects', icon: FolderKanban },
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },
     { href: '/internship', label: 'Internship Sim', icon: Building },
@@ -86,7 +90,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
+                {(label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches' || label === 'Project Showcase' || label === 'My Projects') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
