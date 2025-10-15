@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A general-purpose AI chatbot using Groq.
+ * @fileOverview A general-purpose AI chatbot.
  */
 
 import { ai } from '@/ai/genkit';
@@ -51,7 +51,7 @@ const chatFlow = ai.defineFlow(
     }
 
     const response = await generate({
-      model: 'groq/llama3-8b-8192',
+      model: 'gemini-pro',
       history,
       config: {
         temperature: 0.7,
