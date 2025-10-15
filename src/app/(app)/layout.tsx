@@ -11,6 +11,7 @@ import { getSession } from '@/lib/session';
 import { getNotificationsForUser } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
+import { useToast } from '@/hooks/use-toast';
 
 function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
@@ -79,6 +80,27 @@ export default function AuthenticatedLayout({
 }) {
   const { user, notifications, loading } = useUserSession();
   const pathname = usePathname();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (user?.role !== 'student') return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        toast({
+          title: '🧠 Stay Focused!',
+          description: "Don't forget your learning goals. We're here when you get back!",
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user, toast]);
+
 
   if (pathname.includes('/certificates/')) {
     return <>{children}</>;
