@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookText, ClipboardList, Users, Clock, User as UserIcon, Sparkles, Edit, MessageSquare, FileText } from 'lucide-react';
-import AiAssistant from '@/components/ai-assistant';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import AssignmentList from '@/components/assignments/assignment-list';
 import { Button } from '@/components/ui/button';
@@ -142,7 +141,7 @@ export default async function CourseDetailPage({
       )}
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">
             <BookText className="mr-2 h-4 w-4" /> Overview
           </TabsTrigger>
@@ -155,13 +154,9 @@ export default async function CourseDetailPage({
            <TabsTrigger value="materials">
             <FileText className="mr-2 h-4 w-4" /> Materials
           </TabsTrigger>
-           {isTeacher ? (
+           {isTeacher && (
              <TabsTrigger value="students">
                 <Users className="mr-2 h-4 w-4" /> Students
-            </TabsTrigger>
-           ) : (
-            <TabsTrigger value="ai-assistant">
-                <Sparkles className="mr-2 h-4 w-4" /> AI Assistant
             </TabsTrigger>
            )}
         </TabsList>
@@ -193,7 +188,7 @@ export default async function CourseDetailPage({
                 materials={materials}
             />
         </TabsContent>
-        {isTeacher ? (
+        {isTeacher && (
             <TabsContent value="students">
             <Card>
                 <CardHeader>
@@ -218,10 +213,6 @@ export default async function CourseDetailPage({
                     )}
                 </CardContent>
             </Card>
-            </TabsContent>
-        ) : (
-            <TabsContent value="ai-assistant">
-                <AiAssistant course={course} />
             </TabsContent>
         )}
       </Tabs>

@@ -55,7 +55,6 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
     { href: '/my-certificates', label: 'My Certificates', icon: Award },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-    { href: '/ai-assistant', label: 'AI Assistant', icon: Sparkles },
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase },
     { href: '/resume-builder', label: 'Resume Builder', icon: FileDown },
     { href: '/timetable', label: 'Smart Timetable', icon: CalendarClock },
@@ -88,7 +87,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'AI Assistant' || label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
+                {(label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>

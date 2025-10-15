@@ -18,3 +18,4 @@ import './flows/ai-internship-task-generator';
 import './flows/ai-internship-grader';
 import './flows/ai-brain-stretch-generator';
 import './flows/ai-targeted-practice-generator';
+import './flows/ai-chat-bot';

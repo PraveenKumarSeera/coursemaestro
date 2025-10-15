@@ -10,6 +10,7 @@ import { useEffect, useState, useRef } from 'react';
 import { getSession } from '@/lib/session';
 import { getNotificationsForUser } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
+import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
 
 function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
@@ -115,6 +116,7 @@ export default function AuthenticatedLayout({
             {children}
           </main>
         </div>
+        {user.role === 'student' && <FloatingAIAssistant />}
       </div>
     </ReactFlowProvider>
   );
