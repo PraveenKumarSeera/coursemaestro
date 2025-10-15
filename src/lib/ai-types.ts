@@ -252,5 +252,3 @@ export const AppGuideOutputSchema = z.object({
   answer: z.string().describe('The answer to the user\'s question.'),
 });
 export type AppGuideOutput = z.infer<typeof AppGuideOutputSchema>;
-
-    

@@ -4,7 +4,6 @@ import { getStudentGrades } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import PerformanceAnalyzer from '@/components/performance-analyzer';
 import type { GradedSubmission } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import TargetedPractice from '@/components/practice/targeted-practice';
@@ -22,7 +21,6 @@ export default async function MyGradesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-headline">My Grades</h1>
-        {gradedSubmissions.length > 0 && <PerformanceAnalyzer user={user} gradedSubmissions={gradedSubmissions} />}
       </div>
       <Card>
         <CardHeader>
