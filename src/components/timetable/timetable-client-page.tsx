@@ -3,13 +3,20 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, CalendarClock, Clock, BookOpen } from 'lucide-react';
+import { Loader2, Wand2, CalendarClock, Clock, BookOpen, Check } from 'lucide-react';
 import { generateTimetableAction } from '@/app/actions/timetable';
 import type { Course, Assignment } from '@/lib/types';
 import type { TimetableGeneratorOutput } from '@/lib/ai-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
+
+const availabilityOptions = [
+    { id: 'evenings', label: 'Weekday Evenings' },
+    { id: 'weekends', label: 'Weekends' },
+    { id: 'flexible', label: 'Flexible (Mix of both)' },
+    { id: 'intensive', label: 'Intensive (Daily)' },
+];
 
 export default function TimetableClientPage({
   enrolledCourses,
@@ -21,9 +28,13 @@ export default function TimetableClientPage({
   const [isLoading, setIsLoading] = useState(false);
   const [schedule, setSchedule] = useState<TimetableGeneratorOutput['weeklySchedule'] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [freeHours, setFreeHours] = useState('');
+  const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null);
 
   const handleGeneration = async () => {
+    if (!selectedAvailability) {
+        setError('Please select your availability first.');
+        return;
+    }
     setIsLoading(true);
     setError(null);
     setSchedule(null);
@@ -36,7 +47,7 @@ export default function TimetableClientPage({
         dueDate: a.dueDate,
         courseTitle: enrolledCourses.find(c => c.id === a.courseId)?.title || 'Unknown'
       })),
-      freeHours,
+      availability: selectedAvailability,
     });
 
     if (actionResult.schedule) {
@@ -55,47 +66,56 @@ export default function TimetableClientPage({
       <div className="space-y-1">
         <h1 className="text-3xl font-bold font-headline">Smart Timetable</h1>
         <p className="text-muted-foreground">
-          Let AI generate a personalized study schedule for you based on your courses and availability.
+          Let our system generate a personalized study schedule for you based on your courses and availability.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>1. Enter Your Availability</CardTitle>
+          <CardTitle>1. Choose Your Availability</CardTitle>
           <CardDescription>
-            Describe your free time for the week. Be as specific as you like. For example: "I'm free on Monday evenings after 6 PM, all day Wednesday, and weekends from 10 AM to 4 PM."
+            Select the time that best describes when you are free to study during the week.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Textarea
-            placeholder="e.g., Weekday evenings, Weekend mornings..."
-            value={freeHours}
-            onChange={(e) => setFreeHours(e.target.value)}
-            className="min-h-24"
-          />
-          {!hasEnoughData ? (
-            <Alert>
-              <CalendarClock className="h-4 w-4" />
-              <AlertTitle>Enroll in a Course</AlertTitle>
-              <AlertDescription>
-                You need to be enrolled in at least one course to generate a timetable.
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <Button onClick={handleGeneration} disabled={isLoading || !freeHours} size="lg">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating Your Schedule...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Generate My Timetable
-                </>
-              )}
-            </Button>
-          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {availabilityOptions.map((option) => (
+              <Button
+                key={option.id}
+                variant={selectedAvailability === option.id ? 'default' : 'outline'}
+                className="h-auto py-4 flex-col gap-2"
+                onClick={() => setSelectedAvailability(option.id)}
+              >
+                {selectedAvailability === option.id && <Check className="h-4 w-4 absolute top-2 right-2" />}
+                {option.label}
+              </Button>
+            ))}
+          </div>
+          <div className='pt-4'>
+            {!hasEnoughData ? (
+                <Alert>
+                <CalendarClock className="h-4 w-4" />
+                <AlertTitle>Enroll in a Course</AlertTitle>
+                <AlertDescription>
+                    You need to be enrolled in at least one course to generate a timetable.
+                </AlertDescription>
+                </Alert>
+            ) : (
+                <Button onClick={handleGeneration} disabled={isLoading || !selectedAvailability} size="lg">
+                {isLoading ? (
+                    <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating Your Schedule...
+                    </>
+                ) : (
+                    <>
+                    <Wand2 className="mr-2 h-4 w-4" />
+                    Generate My Timetable
+                    </>
+                )}
+                </Button>
+            )}
+          </div>
           {error && <p className="text-destructive text-sm text-center mt-4">{error}</p>}
         </CardContent>
       </Card>
