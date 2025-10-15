@@ -214,6 +214,13 @@
       "courseId": "1759821872336",
       "date": "2025-10-12",
       "isPresent": true
+    },
+    {
+      "id": "1760549193310",
+      "studentId": "1759816290832",
+      "courseId": "1759821872336",
+      "date": "2025-10-15",
+      "isPresent": true
     }
   ],
   "certificates": [

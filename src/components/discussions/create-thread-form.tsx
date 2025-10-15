@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { createThreadAction } from '@/app/actions/discussions';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,6 @@ export default function CreateThreadForm({ courseId }: CreateThreadFormProps) {
   const [state, formAction] = useActionState(createThreadAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [open, setOpen] = useState(true);
 
   useEffect(() => {
     if (state.message) {
@@ -62,4 +61,3 @@ export default function CreateThreadForm({ courseId }: CreateThreadFormProps) {
     </form>
   );
 }
-
