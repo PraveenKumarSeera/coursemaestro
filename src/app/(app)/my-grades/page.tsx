@@ -7,10 +7,6 @@ import { format } from 'date-fns';
 import type { GradedSubmission } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import PerformanceAnalyzer from '@/components/performance-analyzer';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Target } from 'lucide-react';
-
 
 export default async function MyGradesPage() {
   const { user } = await getSession();
@@ -19,7 +15,6 @@ export default async function MyGradesPage() {
   }
 
   const gradedSubmissions: GradedSubmission[] = await getStudentGrades(user.id);
-  const hasLowGrades = gradedSubmissions.some(sub => sub.grade && sub.grade < 80);
 
   return (
     <div className="space-y-6">
@@ -32,25 +27,6 @@ export default async function MyGradesPage() {
           <PerformanceAnalyzer user={user} gradedSubmissions={gradedSubmissions} />
         )}
       </div>
-
-       {hasLowGrades && (
-            <Card className="bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-900">
-                <CardHeader className="flex-row items-center gap-4 space-y-0">
-                    <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/50">
-                        <Target className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div>
-                        <CardTitle className="text-amber-900 dark:text-amber-200">Practice Makes Perfect</CardTitle>
-                        <CardDescription className="text-amber-800 dark:text-amber-300">You have some assignments that could use improvement. Get a personalized practice session!</CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <Button asChild variant="default" className="bg-amber-600 hover:bg-amber-700 text-white">
-                        <Link href="/targeted-practice">Go to Targeted Practice</Link>
-                    </Button>
-                </CardContent>
-            </Card>
-        )}
 
       <Card>
         <CardHeader>

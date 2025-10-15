@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview This file imports all AI flows and ensures they are registered with Genkit.
  * It is imported by the Next.js API route handler to guarantee that all flows
@@ -17,5 +18,4 @@ import './flows/ai-timetable-generator';
 import './flows/ai-internship-task-generator';
 import './flows/ai-internship-grader';
 import './flows/ai-brain-stretch-generator';
-import './flows/ai-targeted-practice-generator';
 import './flows/ai-chat-bot';
