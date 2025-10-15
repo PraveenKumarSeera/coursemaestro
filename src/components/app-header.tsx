@@ -28,7 +28,7 @@ import AppSidebar from './app-sidebar';
 import NotificationBell from './notifications/notification-bell';
 import { ThemeToggle } from './theme-toggle';
 import { useEffect, useState } from 'react';
-import ProfileForm from '../profile/profile-form';
+import ProfileForm from './profile/profile-form';
 
 type AppHeaderProps = {
   user: User;
