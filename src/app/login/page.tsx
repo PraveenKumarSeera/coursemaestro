@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/card';
 import { LoginForm } from '@/components/auth/login-form';
 import { GraduationCap } from 'lucide-react';
-import AnimatedBackground from '@/components/auth/animated-background';
 
 export default function LoginPage() {
   return (
@@ -27,7 +26,6 @@ export default function LoginPage() {
             <h1 className="text-4xl font-bold font-headline">Welcome to CourseMaestro</h1>
             <p className="text-xl text-muted-foreground">Let's begin your journey</p>
         </div>
-        <AnimatedBackground />
       </div>
       <div className="flex items-center justify-center py-12 px-4 min-h-screen">
          <div className="absolute top-4 right-4 lg:hidden">
