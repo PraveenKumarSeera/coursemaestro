@@ -22,6 +22,7 @@ import {
   Lightbulb,
   Building,
   BrainCircuit,
+  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -53,6 +54,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/internship', label: 'Internship Sim', icon: Building },
     { href: '/brain-stretches', label: 'Brain Stretches', icon: BrainCircuit },
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
+    { href: '/targeted-practice', label: 'Targeted Practice', icon: Target },
     { href: '/my-certificates', label: 'My Certificates', icon: Award },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase },
@@ -87,7 +89,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
+                {(label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches' || label === 'Targeted Practice') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
