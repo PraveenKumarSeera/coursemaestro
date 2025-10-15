@@ -1,4 +1,3 @@
-
 'use client';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Trophy, Medal, Award, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 
 type Ranking = {
     user: User;
@@ -35,7 +35,7 @@ const AcademicLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], c
                 <TableRow>
                 <TableHead className="w-[80px]">Rank</TableHead>
                 <TableHead>Student</TableHead>
-                <TableHead className="text-center">Assignments Completed</TableHead>
+                <TableHead className="text-center hidden md:table-cell">Assignments</TableHead>
                 <TableHead className="text-right">Average Grade</TableHead>
                 </TableRow>
             </TableHeader>
@@ -55,8 +55,13 @@ const AcademicLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], c
                         <span className="font-medium">{entry.user.name}</span>
                     </div>
                     </TableCell>
-                    <TableCell className="text-center">{entry.assignmentsCompleted}</TableCell>
-                    <TableCell className="text-right font-bold text-lg text-primary">{entry.averageGrade}%</TableCell>
+                    <TableCell className="text-center hidden md:table-cell">{entry.assignmentsCompleted}</TableCell>
+                    <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-3">
+                            <span className="font-bold text-lg text-primary">{entry.averageGrade}%</span>
+                            <Progress value={entry.averageGrade} className="w-24 hidden sm:block" />
+                        </div>
+                    </TableCell>
                 </TableRow>
                 ))}
             </TableBody>
@@ -66,6 +71,8 @@ const AcademicLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], c
 
 const CredibilityLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], currentUser: User }) => {
     const sortedRankings = [...rankings].sort((a, b) => b.credibilityPoints - a.credibilityPoints);
+    const maxPoints = sortedRankings.length > 0 ? sortedRankings[0].credibilityPoints : 1;
+
     return (
         <Table>
             <TableHeader>
@@ -91,9 +98,14 @@ const CredibilityLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[]
                         <span className="font-medium">{entry.user.name}</span>
                     </div>
                     </TableCell>
-                    <TableCell className="text-right font-bold text-lg text-accent flex items-center justify-end gap-1">
-                        <Star className="h-5 w-5" />
-                        {entry.credibilityPoints}
+                    <TableCell className="text-right">
+                         <div className="flex items-center justify-end gap-3">
+                            <span className="font-bold text-lg text-accent flex items-center gap-1">
+                                <Star className="h-5 w-5" />
+                                {entry.credibilityPoints}
+                            </span>
+                            <Progress value={(entry.credibilityPoints / maxPoints) * 100} className="w-24 hidden sm:block" indicatorClassName="bg-accent" />
+                         </div>
                     </TableCell>
                 </TableRow>
                 ))}
