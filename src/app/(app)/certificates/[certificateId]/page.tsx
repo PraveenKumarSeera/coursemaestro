@@ -2,9 +2,9 @@
 import { getCertificateById } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Download, GraduationCap } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import Link from 'next/link';
+import DownloadCertificateButton from "@/components/certificates/download-certificate-button";
 
 export default async function CertificatePage({ params }: { params: { certificateId: string } }) {
     const certificate = await getCertificateById(params.certificateId);
@@ -15,12 +15,16 @@ export default async function CertificatePage({ params }: { params: { certificat
 
     return (
         <div className="bg-muted min-h-screen py-12 px-4 flex items-center justify-center">
-            <div className="w-full max-w-4xl bg-background border-4 border-primary rounded-lg shadow-2xl p-8 relative aspect-[1.414/1]">
-                 <div className="absolute top-8 right-8">
+            <div className="w-full max-w-4xl bg-background border-4 border-primary rounded-lg shadow-2xl p-8 relative aspect-[1.414/1] print:border-none print:shadow-none print:bg-white">
+                 <div className="absolute top-8 right-8 print:hidden">
                     <Link href="/my-certificates" className="text-muted-foreground hover:text-primary text-sm">
                         Back to My Certificates
                     </Link>
                 </div>
+                 <div className="absolute top-8 left-8 print:hidden">
+                    <DownloadCertificateButton />
+                </div>
+
 
                 <div className="text-center space-y-4">
                     <GraduationCap className="h-16 w-16 mx-auto text-accent" />
