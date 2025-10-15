@@ -828,7 +828,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
 
         // --- Student of the Week Logic ---
         let studentOfTheWeek: StudentOfTheWeek = null;
-        const sevenDaysAgo = subDays(new Date(), 7).toISOString();
+        const sevenDaysAgo = subDays(new Date(), 7);
         
         const weeklyScores: { studentId: string, name: string, score: number, grade: number }[] = [];
 
@@ -839,7 +839,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             const recentSubmissions = submissions.filter(s => 
                 s.studentId === studentId && 
                 s.grade !== null &&
-                new Date(s.submittedAt) >= new Date(sevenDaysAgo)
+                new Date(s.submittedAt) >= sevenDaysAgo
             );
 
             if (recentSubmissions.length > 0) {
@@ -1055,3 +1055,6 @@ async function runOneTimeScripts() {
 
 // Run the one-time script
 runOneTimeScripts().catch(console.error);
+
+
+    

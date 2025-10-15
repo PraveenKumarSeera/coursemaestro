@@ -88,7 +88,7 @@
       "studentId": "1759816290832",
       "id": "1759826852014",
       "submittedAt": "2025-10-07T08:47:32.014Z",
-      "grade": 95,
+      "grade": 90,
       "feedback": "nice "
     }
   ],
@@ -127,6 +127,14 @@
     }
   ],
   "notifications": [
+    {
+      "userId": "1759816290832",
+      "message": "Your submission for \"dbms\" has been graded.",
+      "link": "/my-grades",
+      "id": "1760553888022",
+      "isRead": false,
+      "createdAt": "2025-10-15T18:44:48.022Z"
+    },
     {
       "userId": "1760440561283",
       "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
