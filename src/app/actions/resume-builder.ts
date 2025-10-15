@@ -11,7 +11,15 @@ type ActionState = {
 
 export async function generateResumeAction(
   user: User, 
-  gradedSubmissions: GradedSubmission[]
+  gradedSubmissions: GradedSubmission[],
+  formData: {
+    name: string;
+    email: string;
+    phone: string;
+    experience: string;
+    education: string;
+  },
+  template: string,
 ): Promise<ActionState> {
   
   if (!gradedSubmissions || gradedSubmissions.length === 0) {
@@ -26,18 +34,15 @@ export async function generateResumeAction(
       .map(sub => `Course: "${sub.course.title}", Assignment: "${sub.assignment.title}", Grade: ${sub.grade}%`)
       .join('\n');
 
-  if (!studentPerformanceData) {
-    return {
-      resumeMarkdown: null,
-      message: 'You need at least one assignment with a grade of 85% or higher to build a resume.',
-    };
-  }
-
   try {
     const result = await generateResume({
-        studentName: user.name,
-        studentEmail: user.email,
+        studentName: formData.name,
+        studentEmail: formData.email,
+        studentPhone: formData.phone,
+        education: formData.education,
+        experience: formData.experience,
         studentPerformanceData,
+        template,
     });
     return {
         resumeMarkdown: result.resumeMarkdown,
@@ -50,5 +55,3 @@ export async function generateResumeAction(
     };
   }
 }
-
-    
