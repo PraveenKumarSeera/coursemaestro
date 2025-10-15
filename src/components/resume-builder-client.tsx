@@ -210,7 +210,7 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
                     </style>
                 </head>
                 <body>
-                    <div class="prose">${resume}</div>
+                    <div class="prose">${resume.replace(/\n/g, '<br />')}</div>
                 </body>
             </html>
         `);
@@ -343,5 +343,3 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
     </div>
   );
 }
-
-    
