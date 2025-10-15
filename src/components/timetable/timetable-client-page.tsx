@@ -29,8 +29,13 @@ export default function TimetableClientPage({
     setSchedule(null);
 
     const actionResult = await generateTimetableAction({
-      enrolledCourses,
-      upcomingAssignments,
+      enrolledCourses: enrolledCourses.map(c => ({ id: c.id, title: c.title })),
+      upcomingAssignments: upcomingAssignments.map(a => ({
+        id: a.id,
+        title: a.title,
+        dueDate: a.dueDate,
+        courseTitle: enrolledCourses.find(c => c.id === a.courseId)?.title || 'Unknown'
+      })),
       freeHours,
     });
 

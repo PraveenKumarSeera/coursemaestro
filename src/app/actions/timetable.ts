@@ -1,8 +1,19 @@
 
 'use server';
 
-import type { Course, Assignment } from '@/lib/types';
 import type { TimetableGeneratorOutput } from '@/lib/ai-types';
+
+type SimpleCourse = {
+    id: string;
+    title: string;
+};
+
+type SimpleAssignment = {
+    id: string;
+    title: string;
+    dueDate: string;
+    courseTitle: string;
+};
 
 type ActionState = {
   schedule: TimetableGeneratorOutput['weeklySchedule'] | null;
@@ -11,8 +22,8 @@ type ActionState = {
 
 // --- System-Generated Timetable Logic ---
 function generateSystemTimetable(
-  enrolledCourses: Course[],
-  upcomingAssignments: Assignment[],
+  enrolledCourses: SimpleCourse[],
+  upcomingAssignments: SimpleAssignment[],
   freeHours: string
 ): TimetableGeneratorOutput['weeklySchedule'] {
     
@@ -27,7 +38,7 @@ function generateSystemTimetable(
     
     // Add high-priority assignment tasks
     sortedAssignments.slice(0, 3).forEach(assignment => {
-        tasks.push({ type: 'assignment', name: `Work on "${assignment.title}"`, course: (assignment as any).courseTitle || '' });
+        tasks.push({ type: 'assignment', name: `Work on "${assignment.title}"`, course: assignment.courseTitle || '' });
     });
     
     // Add general study tasks for enrolled courses
@@ -79,8 +90,8 @@ export async function generateTimetableAction({
   upcomingAssignments,
   freeHours,
 }: {
-  enrolledCourses: Course[];
-  upcomingAssignments: Assignment[];
+  enrolledCourses: SimpleCourse[];
+  upcomingAssignments: SimpleAssignment[];
   freeHours: string;
 }): Promise<ActionState> {
   if (enrolledCourses.length === 0) {
