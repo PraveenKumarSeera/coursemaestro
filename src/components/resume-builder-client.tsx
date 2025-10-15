@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Wand2, FileDown, ArrowLeft, ArrowRight, Check, Briefcase, GraduationCap, User as UserIcon } from 'lucide-react';
-import { generateResumeAction } from '@/app/actions/resume-builder';
 import type { GradedSubmission, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
@@ -21,6 +20,98 @@ const templates = [
   { id: 'professional', name: 'Professional' },
   { id: 'creative', name: 'Creative' },
 ];
+
+const generateResumeMarkdown = (templateId: string, data: any, highPerformingProjects: string): string => {
+    let markdown = '';
+    const { name, email, phone, education, experience } = data;
+
+    const skillsFromCourses = [...new Set(education.split(',').map((c: string) => c.trim()).filter(Boolean))].slice(0, 5);
+
+    switch (templateId) {
+        case 'professional':
+            markdown = `
+# ${name}
+${email} | ${phone}
+
+---
+
+## Professional Summary
+A motivated and detail-oriented student with a strong foundation in ${skillsFromCourses.join(', ')}. Eager to apply academic knowledge and practical skills to solve real-world problems in a dynamic environment.
+
+## Skills
+- **Technical:** ${skillsFromCourses.join(', ')}
+- **Soft Skills:** Problem-Solving, Team Collaboration, Quick Learner, Communication
+
+## Projects & Coursework
+${highPerformingProjects}
+
+## Education
+${education}
+
+## Experience
+${experience || "No professional experience provided."}
+`;
+            break;
+        case 'creative':
+             markdown = `
+> **${name}**
+> ${email} | ${phone}
+
+### Summary
+A creative and driven student specializing in ${skillsFromCourses.join(', ')}. Passionate about building innovative solutions and continuously learning new technologies.
+
+---
+
+### Key Projects
+${highPerformingProjects}
+
+---
+
+### Skills & Proficiencies
+* **Core Areas:** ${skillsFromCourses.join(' | ')}
+* **Abilities:** Analytical Thinking, Collaborative Development, Project Management
+
+---
+
+### Education
+*${education}*
+
+---
+
+### Professional Experience
+${experience || "No professional experience to display."}
+`;
+            break;
+        case 'modern':
+        default:
+            markdown = `
+<div align="center">
+  <h1>${name}</h1>
+  <p>${email} | ${phone}</p>
+</div>
+
+## Summary
+A results-oriented student with a passion for technology and a proven ability to excel in courses like ${skillsFromCourses.join(', ')}. Seeking opportunities to contribute to challenging projects.
+
+## Education
+- **Relevant Coursework:** ${education}
+
+## Top Projects
+${highPerformingProjects}
+
+## Skills
+- **Languages & Frameworks:** ${skillsFromCourses.join(', ')}
+- **Professional:** Communication, Teamwork, Critical Thinking
+
+## Experience
+${experience || "No professional experience listed."}
+`;
+            break;
+    }
+
+    return markdown;
+};
+
 
 const TemplatePreview = ({ name }: { name: string }) => {
     return (
@@ -85,15 +176,15 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
     setError(null);
     setResume(null);
 
-    const actionResult = await generateResumeAction(user, gradedSubmissions, formData, selectedTemplate);
+    const highPerformingProjects = gradedSubmissions
+      .filter(sub => sub.grade && sub.grade >= 85)
+      .map(sub => `- **${sub.assignment.title} (Course: ${sub.course.title})**: Achieved a grade of ${sub.grade}%.`)
+      .join('\n');
 
-    if (actionResult.resumeMarkdown) {
-        setResume(actionResult.resumeMarkdown);
-        setStep(3);
-    } else {
-        setError(actionResult.message || 'An unknown error occurred.');
-    }
-
+    const generatedResume = generateResumeMarkdown(selectedTemplate, formData, highPerformingProjects);
+    
+    setResume(generatedResume);
+    setStep(3);
     setIsLoading(false);
   };
 
@@ -139,7 +230,7 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold font-headline">AI Resume Builder</h1>
+        <h1 className="text-3xl font-bold font-headline">Resume Builder</h1>
         <p className="text-muted-foreground">
           Generate a professional resume from your coursework and grades.
         </p>
@@ -244,7 +335,7 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
                         </Button>
                     </div>
                     <ScrollArea className="h-[600px] w-full rounded-md border p-6 bg-muted/20">
-                        <article className="prose dark:prose-invert max-w-none bg-background p-8 shadow-md" dangerouslySetInnerHTML={{ __html: resume.replace(/\\n/g, '<br />') }} />
+                        <article className="prose dark:prose-invert max-w-none bg-background p-8 shadow-md" dangerouslySetInnerHTML={{ __html: resume.replace(/\n/g, '<br />') }} />
                     </ScrollArea>
                 </div>
             )}
