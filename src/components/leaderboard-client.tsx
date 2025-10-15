@@ -1,3 +1,4 @@
+
 'use client';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,10 +22,10 @@ type LeaderboardClientProps = {
 };
 
 const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy className="h-5 w-5 text-yellow-500" />;
-    if (rank === 2) return <Medal className="h-5 w-5 text-gray-400" />;
-    if (rank === 3) return <Award className="h-5 w-5 text-yellow-700" />;
-    return <span className="text-sm font-medium w-5 text-center">{rank}</span>;
+    if (rank === 1) return <Trophy className="h-6 w-6 text-yellow-500 fill-yellow-400" />;
+    if (rank === 2) return <Medal className="h-6 w-6 text-gray-400 fill-gray-300" />;
+    if (rank === 3) return <Award className="h-6 w-6 text-yellow-700 fill-yellow-600" />;
+    return <span className="text-sm font-medium w-6 text-center">{rank}</span>;
 }
 
 const AcademicLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[], currentUser: User }) => {
