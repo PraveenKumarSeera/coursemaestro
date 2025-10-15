@@ -105,6 +105,38 @@
   ],
   "notifications": [
     {
+      "userId": "1760440561283",
+      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
+      "link": "/dashboard",
+      "id": "1760525034846",
+      "isRead": false,
+      "createdAt": "2025-10-15T10:43:54.846Z"
+    },
+    {
+      "userId": "1759821661427",
+      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
+      "link": "/dashboard",
+      "id": "1760525034802",
+      "isRead": false,
+      "createdAt": "2025-10-15T10:43:54.802Z"
+    },
+    {
+      "userId": "1759816290832",
+      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
+      "link": "/dashboard",
+      "id": "1760525034765",
+      "isRead": false,
+      "createdAt": "2025-10-15T10:43:54.765Z"
+    },
+    {
+      "userId": "1759816272542",
+      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
+      "link": "/dashboard",
+      "id": "1760525034735",
+      "isRead": false,
+      "createdAt": "2025-10-15T10:43:54.735Z"
+    },
+    {
       "userId": "1759816290832",
       "message": "Your submission for \"dbms\" has been graded.",
       "link": "/my-grades",

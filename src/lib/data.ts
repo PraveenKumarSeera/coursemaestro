@@ -56,7 +56,10 @@ const defaultDb: Db = {
       { id: 'ch3', title: 'API for a Simple To-Do App', description: 'Develop a RESTful API for a to-do list application. The API should support creating, reading, updating, and deleting tasks, and include user authentication.', company: 'Google', points: 250, icon: 'Code' },
       { id: 'ch4', title: 'Real-time Chat Application', description: 'Build a real-time chat application using WebSockets. Users should be able to join rooms and send messages that are instantly visible to other users in the same room.', company: 'Slack', points: 300, icon: 'MessageSquare' },
       { id: 'ch5', title: 'CI/CD Pipeline for a Node.js App', description: 'Set up a complete CI/CD pipeline for a simple Node.js application using GitHub Actions. The pipeline should automatically test, build, and deploy the application to a cloud service.', company: 'GitHub', points: 280, icon: 'GitMerge' },
-      { id: 'ch6', title: 'Database Schema for a Booking System', description: 'Design a normalized SQL database schema for a hotel booking system. It should handle rooms, bookings, users, and payments efficiently.', company: 'Booking.com', points: 220, icon: 'Database' }
+      { id: 'ch6', title: 'Database Schema for a Booking System', description: 'Design a normalized SQL database schema for a hotel booking system. It should handle rooms, bookings, users, and payments efficiently.', company: 'Booking.com', points: 220, icon: 'Database' },
+      { id: 'ch7', title: 'Dynamic OG Image Generator', description: 'Create a service that dynamically generates social media preview images (Open Graph images) based on an article title and author. This is a common requirement for blogs and news sites.', company: 'Vercel', points: 260, icon: 'Code' },
+      { id: 'ch8', title: 'Webhook Handler Service', description: 'Develop a robust webhook handler that can receive and process events from a third-party service like Stripe. The handler needs to be secure, reliable, and able to handle retries.', company: 'Stripe', points: 270, icon: 'GitMerge' },
+      { id: 'ch9', title: 'Serverless Image Processing Pipeline', description: 'Using AWS Lambda and S3, create a pipeline that automatically resizes uploaded images into multiple formats (e.g., thumbnail, medium, large).', company: 'Amazon Web Services', points: 320, icon: 'Code' },
     ],
     challengeSubmissions: [],
     challengeVotes: []
@@ -895,3 +898,42 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         };
     }
 }
+
+// One-time script to send welcome notifications to existing users
+async function runOneTimeScripts() {
+    const db = await getDb();
+
+    // Check if a flag file exists. If not, run the script and create it.
+    const flagPath = path.join(process.cwd(), 'src', 'lib', '.welcome-sent');
+    try {
+        await fs.access(flagPath);
+        // If file exists, do nothing.
+        return;
+    } catch (error) {
+        // File does not exist, proceed with script.
+        const welcomeMessage = `Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro`;
+
+        const existingNotificationSubjects = new Set(
+            db.notifications
+                .filter(n => n.message.startsWith("Welcome"))
+                .map(n => n.userId)
+        );
+
+        for (const user of db.users) {
+            if (!existingNotificationSubjects.has(user.id)) {
+                await createNotification({
+                    userId: user.id,
+                    message: welcomeMessage,
+                    link: '/dashboard',
+                });
+            }
+        }
+
+        // Create the flag file to prevent re-running
+        await fs.writeFile(flagPath, 'done');
+        console.log("One-time welcome notification script completed.");
+    }
+}
+
+// Run the one-time script
+runOneTimeScripts().catch(console.error);
