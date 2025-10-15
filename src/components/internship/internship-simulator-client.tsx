@@ -5,16 +5,17 @@ import { useState } from 'react';
 import type { InternshipDomain, InternshipTask, InternshipGrade } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Wand2, Building, Bot, Rocket, Wind, ArrowLeft } from 'lucide-react';
+import { Loader2, Wand2, Building, Bot, ArrowLeft, Tv, Cloud, Code } from 'lucide-react';
 import { gradeInternshipSubmissionAction } from '@/app/actions/internship';
 import { Textarea } from '../ui/textarea';
 import { Progress } from '../ui/progress';
 
 const iconMap: { [key: string]: React.ElementType } = {
   google: Building,
-  bot: Bot,
-  rocket: Rocket,
-  wind: Wind,
+  openai: Bot,
+  netflix: Tv,
+  microsoft: Cloud,
+  innovate: Code,
 };
 
 export default function InternshipSimulatorClient({ domains }: { domains: InternshipDomain[] }) {
@@ -161,7 +162,7 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
                         ) : (
                              <>
                                 <Wand2 className="mr-2 h-4 w-4" />
-                                Submit for AI Grading
+                                Submit for Grading
                             </>
                         )}
                     </Button>
@@ -174,7 +175,7 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
       {isGrading && (
          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 pt-10">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-            <h2 className="text-2xl font-semibold">AI Grading in Progress...</h2>
+            <h2 className="text-2xl font-semibold">Grading in Progress...</h2>
             <p className="text-muted-foreground">Your submission is being analyzed for creativity and problem-solving.</p>
         </div>
       )}
@@ -183,7 +184,7 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
         <Card>
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">Task Grade & Feedback</CardTitle>
-                <CardDescription>AI-powered assessment of your solution.</CardDescription>
+                <CardDescription>Assessment of your solution.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
@@ -217,3 +218,5 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
     </div>
   );
 }
+
+    
