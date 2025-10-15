@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Wand2, FileDown, Clipboard, ArrowLeft, ArrowRight, Check, Briefcase, GraduationCap, User as UserIcon } from 'lucide-react';
+import { Loader2, Wand2, FileDown, ArrowLeft, ArrowRight, Check, Briefcase, GraduationCap, User as UserIcon } from 'lucide-react';
 import { generateResumeAction } from '@/app/actions/resume-builder';
 import type { GradedSubmission, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
@@ -13,15 +13,51 @@ import { ScrollArea } from './ui/scroll-area';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Progress } from './ui/progress';
 
 const templates = [
-  { id: 'modern', name: 'Modern', imageUrl: 'https://picsum.photos/seed/resume1/400/566' },
-  { id: 'professional', name: 'Professional', imageUrl: 'https://picsum.photos/seed/resume2/400/566' },
-  { id: 'creative', name: 'Creative', imageUrl: 'https://picsum.photos/seed/resume3/400/566' },
+  { id: 'modern', name: 'Modern' },
+  { id: 'professional', name: 'Professional' },
+  { id: 'creative', name: 'Creative' },
 ];
+
+const TemplatePreview = ({ name }: { name: string }) => {
+    return (
+        <div className="border bg-muted/30 aspect-[1/1.414] p-2 md:p-3 rounded-t-lg overflow-hidden">
+            <div className={cn("w-full h-full bg-background rounded-sm p-2 md:p-4", {
+                "flex flex-col gap-4": name === 'Creative',
+            })}>
+                {/* Header */}
+                <div className={cn("flex items-center gap-2", {
+                    'flex-col': name === 'Modern',
+                    'pb-2 border-b': name === 'Professional',
+                })}>
+                    <div className={cn("h-6 w-6 rounded-full bg-muted shrink-0", {'h-10 w-10': name === 'Creative'})}></div>
+                    <div className="w-full space-y-1">
+                        <div className={cn("h-2.5 w-1/3 bg-muted rounded-sm", {'mx-auto': name === 'Modern'})}></div>
+                        <div className="h-1.5 w-full bg-muted/50 rounded-sm"></div>
+                    </div>
+                </div>
+
+                {/* Body */}
+                <div className="mt-4 space-y-3">
+                    <div className="h-2 w-1/4 bg-muted rounded-sm"></div>
+                    <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-muted/50 rounded-sm"></div>
+                        <div className="h-1.5 w-5/6 bg-muted/50 rounded-sm"></div>
+                    </div>
+                     <div className="h-2 w-1/4 bg-muted rounded-sm pt-2"></div>
+                    <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-muted/50 rounded-sm"></div>
+                        <div className="h-1.5 w-full bg-muted/50 rounded-sm"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+};
+
 
 export default function ResumeBuilderClient({ user, gradedSubmissions }: { user: User, gradedSubmissions: GradedSubmission[] }) {
   const [step, setStep] = useState(1);
@@ -138,7 +174,7 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
                                 onClick={() => setSelectedTemplate(template.id)}
                             >
                                 <CardContent className="p-0">
-                                    <Image src={template.imageUrl} alt={template.name} width={400} height={566} className="rounded-t-lg" data-ai-hint="resume template" />
+                                    <TemplatePreview name={template.name} />
                                 </CardContent>
                                 <CardFooter className="p-4 flex items-center justify-between">
                                     <p className="font-semibold">{template.name}</p>
@@ -217,3 +253,5 @@ export default function ResumeBuilderClient({ user, gradedSubmissions }: { user:
     </div>
   );
 }
+
+    
