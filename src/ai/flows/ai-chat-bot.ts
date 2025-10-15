@@ -6,7 +6,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { generate } from 'genkit/ai';
 
 const ChatInputSchema = z.object({
   history: z.array(
@@ -50,7 +49,7 @@ const chatFlow = ai.defineFlow(
         systemPrompt += `\n\n## Course Context\nThe user is currently viewing a page related to the following course material:\n\`\`\`\n${courseContext}\n\`\`\``
     }
 
-    const response = await generate({
+    const response = await ai.generate({
       model: 'gemini-pro',
       history,
       config: {
