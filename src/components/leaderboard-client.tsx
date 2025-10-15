@@ -4,9 +4,12 @@ import type { User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Trophy, Medal, Award, Star } from 'lucide-react';
+import { Trophy, Medal, Award, Star, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from './ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { useRef } from 'react';
 
 type Ranking = {
     user: User;
@@ -108,6 +111,38 @@ const CredibilityLeaderboard = ({ rankings, currentUser }: { rankings: Ranking[]
 }
 
 export default function LeaderboardClient({ rankings, currentUser }: LeaderboardClientProps) {
+  const { toast } = useToast();
+  const academicRef = useRef<HTMLDivElement>(null);
+  const challengeRef = useRef<HTMLDivElement>(null);
+
+  const handleShare = async (leaderboardTitle: string) => {
+    const shareData = {
+      title: 'CourseMaestro Leaderboard',
+      text: `Check out the ${leaderboardTitle} on CourseMaestro!`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+          variant: "destructive",
+          title: "Share Failed",
+          description: "Could not open share dialog.",
+        });
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      navigator.clipboard.writeText(shareData.url);
+      toast({
+        title: 'Link Copied',
+        description: 'Leaderboard URL copied to clipboard.',
+      });
+    }
+  };
+
   return (
     <Tabs defaultValue="academics">
         <TabsList className="grid w-full grid-cols-2">
@@ -119,12 +154,18 @@ export default function LeaderboardClient({ rankings, currentUser }: Leaderboard
             </TabsTrigger>
         </TabsList>
         <TabsContent value="academics">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Top Students by Grade</CardTitle>
-                    <CardDescription>
-                    This leaderboard ranks students by their average grade across all courses.
-                    </CardDescription>
+            <Card ref={academicRef}>
+                <CardHeader className='flex-row items-center justify-between'>
+                    <div>
+                        <CardTitle>Top Students by Grade</CardTitle>
+                        <CardDescription>
+                        This leaderboard ranks students by their average grade across all courses.
+                        </CardDescription>
+                    </div>
+                    <Button variant="outline" onClick={() => handleShare('Academic Performance Leaderboard')}>
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Share
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     {rankings.length > 0 ? (
@@ -138,12 +179,18 @@ export default function LeaderboardClient({ rankings, currentUser }: Leaderboard
             </Card>
         </TabsContent>
         <TabsContent value="challenges">
-             <Card>
-                <CardHeader>
-                    <CardTitle>Top Innovators by Credibility</CardTitle>
-                    <CardDescription>
-                    This leaderboard ranks students by credibility points earned from real-world challenges.
-                    </CardDescription>
+             <Card ref={challengeRef}>
+                <CardHeader className='flex-row items-center justify-between'>
+                    <div>
+                        <CardTitle>Top Innovators by Credibility</CardTitle>
+                        <CardDescription>
+                        This leaderboard ranks students by credibility points earned from real-world challenges.
+                        </CardDescription>
+                    </div>
+                     <Button variant="outline" onClick={() => handleShare('Challenge Credibility Leaderboard')}>
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Share
+                    </Button>
                 </CardHeader>
                 <CardContent>
                     {rankings.length > 0 ? (
