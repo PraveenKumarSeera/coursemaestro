@@ -738,6 +738,13 @@ export type CoursePerformance = {
     gradeDistribution: { name: string; students: number }[];
 };
 
+export type StudentOfTheWeek = {
+    studentId: string;
+    studentName: string;
+    averageGrade: number;
+    reason: string;
+} | null;
+
 export type StudentDashboardStats = {
     stats: {
         title: string;
@@ -766,6 +773,7 @@ export type TeacherDashboardStats = {
         link?: { href: string; text: string; };
     }[];
     coursePerformances: CoursePerformance[];
+    studentOfTheWeek: StudentOfTheWeek;
 }
 
 export type DashboardStats = StudentDashboardStats | TeacherDashboardStats;
@@ -818,6 +826,44 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             };
         });
 
+        // --- Student of the Week Logic ---
+        let studentOfTheWeek: StudentOfTheWeek = null;
+        const sevenDaysAgo = subDays(new Date(), 7).toISOString();
+        
+        const weeklyScores: { studentId: string, name: string, score: number, grade: number }[] = [];
+
+        for (const studentId of studentIds) {
+            const student = db.users.find(u => u.id === studentId);
+            if (!student) continue;
+
+            const recentSubmissions = submissions.filter(s => 
+                s.studentId === studentId && 
+                s.grade !== null &&
+                new Date(s.submittedAt) >= new Date(sevenDaysAgo)
+            );
+
+            if (recentSubmissions.length > 0) {
+                const totalGrade = recentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+                const averageGrade = totalGrade / recentSubmissions.length;
+                
+                // Simple score: average grade + bonus for number of submissions
+                const score = averageGrade + (recentSubmissions.length * 5);
+                weeklyScores.push({ studentId, name: student.name, score, grade: Math.round(averageGrade) });
+            }
+        }
+
+        if (weeklyScores.length > 0) {
+            weeklyScores.sort((a, b) => b.score - a.score);
+            const topStudent = weeklyScores[0];
+            studentOfTheWeek = {
+                studentId: topStudent.studentId,
+                studentName: topStudent.name,
+                averageGrade: topStudent.grade,
+                reason: 'Top Performer This Week',
+            };
+        }
+        // --- End Student of the Week Logic ---
+
         return {
             stats: [
                 { title: 'Courses Taught', value: courses.length, subtitle: 'Total active courses', icon: 'BookOpen', link: { href: "/courses", text: "Manage Courses"} },
@@ -825,6 +871,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
                 { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
             ],
             coursePerformances,
+            studentOfTheWeek
         };
     } else { // role is 'student'
         const enrollments = await getStudentEnrollments(userId);

@@ -1,8 +1,8 @@
 
 
 import { getSession } from '@/lib/session';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList, Flame } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList, Flame, Award, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { getDashboardData, type StudentDashboardStats, type TeacherDashboardStats } from '@/lib/data';
@@ -10,6 +10,7 @@ import type { LucideIcon } from 'lucide-react';
 import TeacherPerformanceChart from '@/components/dashboard/teacher-performance-chart';
 import LearningEfficiencyMeter from '@/components/dashboard/learning-efficiency-meter';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const iconMap: { [key: string]: LucideIcon } = {
     BookOpen,
@@ -44,6 +45,26 @@ export default async function DashboardPage() {
                         <CardContent>
                             <div className="text-2xl font-bold">{dashboardData.streak} Day{dashboardData.streak !== 1 && 's'}</div>
                             <p className="text-xs text-muted-foreground">Keep it going by checking in daily!</p>
+                        </CardContent>
+                    </Card>
+                )}
+                 {user.role === 'teacher' && 'studentOfTheWeek' in dashboardData && (dashboardData as TeacherDashboardStats).studentOfTheWeek && (
+                    <Card className="bg-gradient-to-tr from-primary/10 via-background to-background">
+                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Student Spotlight</CardTitle>
+                             <Award className="h-4 w-4 text-primary" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-12 w-12">
+                                    <AvatarFallback>{(dashboardData as TeacherDashboardStats).studentOfTheWeek!.studentName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="text-lg font-bold font-headline">{(dashboardData as TeacherDashboardStats).studentOfTheWeek!.studentName}</p>
+                                    <p className="text-xs text-primary font-semibold">{(dashboardData as TeacherDashboardStats).studentOfTheWeek!.reason}</p>
+                                </div>
+                            </div>
+                             <p className="text-xs text-muted-foreground mt-2">Weekly Average Grade: <strong>{(dashboardData as TeacherDashboardStats).studentOfTheWeek!.averageGrade}%</strong></p>
                         </CardContent>
                     </Card>
                 )}
