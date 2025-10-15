@@ -8,42 +8,42 @@ type ActionState = {
   message: string;
 };
 
-// Pre-defined bank of puzzles
+// Pre-defined bank of CSE-related puzzles
 const puzzleBank: BrainStretchPuzzle[] = [
     {
         type: 'analogy',
-        question: 'HTML is to Structure as CSS is to _______?',
-        options: ['Logic', 'Styling', 'Data', 'Network'],
-        answer: 'Styling',
-        explanation: 'HTML provides the basic structure of a webpage, while CSS is used to control the visual presentation and styling.'
+        question: 'Stack is to LIFO as Queue is to _______?',
+        options: ['FIFO', 'LIFO', 'FILO', 'Random'],
+        answer: 'FIFO',
+        explanation: 'A Stack operates on a Last-In, First-Out (LIFO) basis, while a Queue operates on a First-In, First-Out (FIFO) basis.'
     },
     {
         type: 'odd-one-out',
-        question: 'Which of these does not belong: JavaScript, Python, HTML, Ruby?',
-        options: ['JavaScript', 'Python', 'HTML', 'Ruby'],
-        answer: 'HTML',
-        explanation: 'HTML is a markup language used for structuring content, whereas the others are programming languages used for writing logic.'
+        question: 'Which of these is not a sorting algorithm: Bubble Sort, Quick Sort, Merge Sort, Binary Search?',
+        options: ['Bubble Sort', 'Quick Sort', 'Merge Sort', 'Binary Search'],
+        answer: 'Binary Search',
+        explanation: 'Binary Search is an algorithm for finding an item from a sorted list of items, whereas the others are algorithms for sorting a list.'
     },
     {
         type: 'anagram',
-        question: 'Unscramble the letters to find a common data structure: "a hhs pma"',
-        options: ['Hash Map', 'Stack', 'Queue', 'Tree'],
-        answer: 'Hash Map',
-        explanation: 'The letters unscramble to "Hash Map", a data structure that stores key-value pairs.'
+        question: 'Unscramble the letters to find a core programming concept: "ecursnior"',
+        options: ['Recursion', 'Pointers', 'Variables', 'Classes'],
+        answer: 'Recursion',
+        explanation: 'The letters unscramble to "Recursion", a method of solving a problem where the solution depends on solutions to smaller instances of the same problem.'
     },
     {
         type: 'analogy',
-        question: 'Function is to JavaScript as Method is to _______?',
-        options: ['Variable', 'Object', 'String', 'Loop'],
-        answer: 'Object',
-        explanation: 'A function that is a property of an object is called a method in object-oriented programming.'
+        question: 'Array is to Index as Hash Map is to _______?',
+        options: ['Value', 'Key', 'Pointer', 'Node'],
+        answer: 'Key',
+        explanation: 'Elements in an Array are accessed via a numerical index, while values in a Hash Map are accessed via a unique key.'
     },
     {
         type: 'odd-one-out',
-        question: 'Which of these is not a primary color in the RGB model: Red, Green, Yellow, Blue?',
-        options: ['Red', 'Green', 'Yellow', 'Blue'],
-        answer: 'Yellow',
-        explanation: 'The RGB color model uses Red, Green, and Blue as its primary additive colors. Yellow is a primary color in the CMYK model.'
+        question: 'Which of these is not a database type: SQL, NoSQL, GraphQL, Document?',
+        options: ['SQL', 'NoSQL', 'GraphQL', 'Document'],
+        answer: 'GraphQL',
+        explanation: 'GraphQL is a query language for APIs, whereas SQL, NoSQL, and Document databases are all types of databases or database models.'
     },
     {
         type: 'anagram',
@@ -54,17 +54,17 @@ const puzzleBank: BrainStretchPuzzle[] = [
     },
     {
         type: 'analogy',
-        question: 'Array is to Ordered List as Object is to _______?',
-        options: ['Key-Value Pairs', 'Number List', 'Function', 'Single Value'],
-        answer: 'Key-Value Pairs',
-        explanation: 'Arrays store ordered lists of items, while objects store collections of key-value pairs.'
+        question: 'Class is to Object as Blueprint is to _______?',
+        options: ['House', 'Function', 'Variable', 'Data'],
+        answer: 'House',
+        explanation: 'A class is a blueprint for creating objects, much like a blueprint is a plan for building a house.'
     },
     {
         type: 'odd-one-out',
-        question: 'Which of these is not a CSS property: color, font-size, background-color, variable?',
-        options: ['color', 'font-size', 'background-color', 'variable'],
-        answer: 'variable',
-        explanation: '`variable` is a keyword used in programming languages like JavaScript to declare variables, whereas the others are valid CSS properties for styling.'
+        question: 'Which of these is not a layer in the OSI model: Application, Transport, Network, Code?',
+        options: ['Application', 'Transport', 'Network', 'Code'],
+        answer: 'Code',
+        explanation: '`Code` is not a layer in the 7-layer OSI model of computer networking. Application, Transport, and Network are all layers in the model.'
     }
 ];
 
