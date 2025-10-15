@@ -52,10 +52,10 @@ const chatFlow = ai.defineFlow(
     const response = await ai.generate({
       model: 'gemini-pro',
       history,
+      system: systemPrompt,
       config: {
         temperature: 0.7,
       },
-      system: systemPrompt,
     });
 
     return {
