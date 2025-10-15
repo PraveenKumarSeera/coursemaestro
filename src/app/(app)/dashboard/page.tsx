@@ -2,19 +2,21 @@
 
 import { getSession } from '@/lib/session';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList } from 'lucide-react';
+import { BookOpen, Users, GraduationCap, ArrowRight, ClipboardList, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { getDashboardData, type StudentDashboardStats, type TeacherDashboardStats } from '@/lib/data';
 import type { LucideIcon } from 'lucide-react';
 import TeacherPerformanceChart from '@/components/dashboard/teacher-performance-chart';
 import LearningEfficiencyMeter from '@/components/dashboard/learning-efficiency-meter';
+import { cn } from '@/lib/utils';
 
 const iconMap: { [key: string]: LucideIcon } = {
     BookOpen,
     Users,
     GraduationCap,
     ClipboardList,
+    Flame,
 };
 
 
@@ -33,6 +35,18 @@ export default async function DashboardPage() {
                 Welcome back, {user.name.split(' ')[0]}!
             </h1>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {user.role === 'student' && 'streak' in dashboardData && (
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Daily Streak</CardTitle>
+                             <Flame className={cn("h-4 w-4 text-muted-foreground", dashboardData.streak > 0 && "text-orange-500 fill-orange-400")} />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{dashboardData.streak} Day{dashboardData.streak !== 1 && 's'}</div>
+                            <p className="text-xs text-muted-foreground">Keep it going by checking in daily!</p>
+                        </CardContent>
+                    </Card>
+                )}
                 {dashboardData.stats.map((stat, index) => {
                     const Icon = iconMap[stat.icon];
                     return (

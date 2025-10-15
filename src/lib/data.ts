@@ -8,7 +8,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, isSameDay, subDays } from 'date-fns';
 import { getSession } from './session';
 
 
@@ -753,7 +753,8 @@ export type StudentDashboardStats = {
             completion: number;
             accuracy: number;
         }
-    }
+    };
+    streak: number;
 };
 
 export type TeacherDashboardStats = {
@@ -880,6 +881,75 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
 
         const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (accuracyScore * 0.35);
 
+        // --- Streak Calculation ---
+        const attendanceRecords = db.attendance
+            .filter(a => a.studentId === userId)
+            .map(a => parseISO(a.date))
+            .sort((a, b) => b.getTime() - a.getTime());
+        
+        let streak = 0;
+        if (attendanceRecords.length > 0) {
+            const uniqueDates = [...new Set(attendanceRecords.map(d => d.toISOString().split('T')[0]))]
+                .map(d => parseISO(d))
+                .sort((a,b) => b.getTime() - a.getTime());
+
+            let currentDate = new Date();
+            if (uniqueDates.length > 0 && (isSameDay(uniqueDates[0], currentDate) || isSameDay(uniqueDates[0], subDays(currentDate, 1)))) {
+                 streak = 1;
+                 currentDate = uniqueDates[0];
+                 for (let i = 1; i < uniqueDates.length; i++) {
+                     const previousDate = subDays(currentDate, 1);
+                     if (isSameDay(uniqueDates[i], previousDate)) {
+                         streak++;
+                         currentDate = uniqueDates[i];
+                     } else {
+                         break;
+                     }
+                 }
+            }
+             // If the last activity was yesterday, the streak is maintained. If it was today, it's also maintained. If it's older, streak is 0 unless today they log in.
+            if (uniqueDates.length > 0) {
+                 const lastDay = uniqueDates[0];
+                 const today = new Date();
+                 const yesterday = subDays(today, 1);
+                 
+                 if (isSameDay(lastDay, today) || isSameDay(lastDay, yesterday)) {
+                    // Streak is active, calculate it
+                    let currentStreak = 0;
+                    let expectedDate = today;
+                    
+                    if (isSameDay(lastDay, today)) {
+                        currentStreak = 1;
+                        expectedDate = subDays(today, 1);
+                    } else { // last day was yesterday
+                         currentStreak = 1;
+                         expectedDate = subDays(yesterday, 1);
+                    }
+
+                    let dateIndex = 1;
+                    while(dateIndex < uniqueDates.length) {
+                        if (isSameDay(uniqueDates[dateIndex], expectedDate)) {
+                            currentStreak++;
+                            expectedDate = subDays(expectedDate, 1);
+                            dateIndex++;
+                        } else if (uniqueDates[dateIndex] < expectedDate) {
+                            // Gap in dates, stop counting
+                            break;
+                        } else {
+                           // This can happen if there are multiple records for the same day, just skip
+                           dateIndex++;
+                        }
+                    }
+                    streak = currentStreak;
+
+                 } else {
+                    streak = 0;
+                 }
+            }
+
+
+        }
+
 
         return {
             stats: [
@@ -894,7 +964,8 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
                     completion: Math.round(completionScore),
                     accuracy: Math.round(accuracyScore),
                 }
-            }
+            },
+            streak,
         };
     }
 }
