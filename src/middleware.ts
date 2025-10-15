@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { NextResponse } from 'next/server';
@@ -6,11 +7,16 @@ import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'coursemestro_session';
 const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/my-grades', '/my-certificates', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/my-projects'];
-const PUBLIC_ROUTES = ['/login', '/signup', '/showcase'];
+const PUBLIC_ROUTES = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
+
+  // Allow public access to the showcase page
+  if (pathname.startsWith('/showcase')) {
+    return NextResponse.next();
+  }
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
   const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
@@ -43,3 +49,5 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
+
+    

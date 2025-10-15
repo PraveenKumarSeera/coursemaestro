@@ -921,33 +921,29 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
 
         // --- Student of the Week Logic ---
         let studentOfTheWeek: StudentOfTheWeek = null;
-        const sevenDaysAgo = subDays(new Date(), 7);
         
-        const weeklyScores: { studentId: string; name: string; score: number; grade: number }[] = [];
+        const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
 
         for (const studentId of studentIds) {
             const student = db.users.find(u => u.id === studentId);
             if (!student) continue;
 
-            const recentSubmissions = submissions.filter(s => 
-                s.studentId === studentId && 
-                s.grade !== null &&
-                new Date(s.submittedAt) >= sevenDaysAgo
+            const studentSubmissions = submissions.filter(s => 
+                s.studentId === studentId && s.grade !== null
             );
 
-            if (recentSubmissions.length > 0) {
-                const totalGrade = recentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
-                const averageGrade = totalGrade / recentSubmissions.length;
+            if (studentSubmissions.length > 0) {
+                const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+                const averageGrade = totalGrade / studentSubmissions.length;
                 
-                // Simple score: average grade + bonus for number of submissions
-                const score = averageGrade + (recentSubmissions.length * 5);
-                weeklyScores.push({ studentId, name: student.name, score, grade: Math.round(averageGrade) });
+                const score = averageGrade + (studentSubmissions.length * 2); // Simple score
+                studentScores.push({ studentId, name: student.name, score, grade: Math.round(averageGrade) });
             }
         }
 
-        if (weeklyScores.length > 0) {
-            weeklyScores.sort((a, b) => b.score - a.score);
-            const topStudent = weeklyScores[0];
+        if (studentScores.length > 0) {
+            studentScores.sort((a, b) => b.score - a.score);
+            const topStudent = studentScores[0];
             studentOfTheWeek = {
                 studentId: topStudent.studentId,
                 studentName: topStudent.name,
@@ -1149,6 +1145,8 @@ async function runOneTimeScripts() {
 // Run the one-time script
 runOneTimeScripts().catch(console.error);
 
+
+    
 
     
 
