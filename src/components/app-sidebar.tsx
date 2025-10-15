@@ -22,6 +22,7 @@ import {
   Lightbulb,
   Building,
   BrainCircuit,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -37,6 +38,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const commonRoutes = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/courses', label: user.role === 'student' ? 'My Courses' : 'My Courses', icon: BookOpen },
+    { href: '/profile', label: 'Profile', icon: Settings },
   ];
 
   const teacherRoutes = [
@@ -82,8 +84,8 @@ export default function AppSidebar({ user }: AppSidebarProps) {
                 href={href}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-                  (pathname.startsWith(href) && href !== '/dashboard' && href !== '/courses') && 'bg-muted text-primary',
-                  (pathname === href && (href === '/dashboard' || href === '/courses')) && 'bg-muted text-primary'
+                  pathname.startsWith(href) && href !== '/dashboard' && href !== '/courses' && 'bg-muted text-primary',
+                  pathname === href && (href === '/dashboard' || href === '/courses') && 'bg-muted text-primary'
                 )}
               >
                 <Icon className="h-4 w-4" />

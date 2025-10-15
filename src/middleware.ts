@@ -3,14 +3,12 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'coursemestro_session';
-const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/quiz-generator', '/my-grades', '/my-certificates', '/leaderboard', '/ai-assistant', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches'];
+const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/quiz-generator', '/my-grades', '/my-certificates', '/leaderboard', '/ai-assistant', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/profile'];
 const PUBLIC_ROUTES = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
-
-  const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
 
   // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !sessionCookie) {
@@ -24,6 +22,12 @@ export function middleware(request: NextRequest) {
      const url = request.nextUrl.clone();
      url.pathname = '/dashboard';
      return NextResponse.redirect(url);
+  }
+  
+  if (pathname === '/') {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

@@ -101,6 +101,18 @@ export async function createUser(data: Omit<User, 'id'>): Promise<User> {
   return newUser;
 }
 
+export async function updateUser(id: string, data: Partial<Omit<User, 'id' | 'email' | 'role'>>): Promise<User | undefined> {
+    const db = await getDb();
+    const userIndex = db.users.findIndex(u => u.id === id);
+    if (userIndex === -1) return undefined;
+    
+    // Merge data, but don't allow changing email or role
+    const { email, role, ...updatableData } = data;
+    db.users[userIndex] = { ...db.users[userIndex], ...updatableData };
+    await writeDb(db);
+    return db.users[userIndex];
+}
+
 export async function getAuthenticatedUser(): Promise<User | null> {
     const { user } = await getSession();
     return user;

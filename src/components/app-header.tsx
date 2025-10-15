@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GraduationCap, LogOut, Menu, User as UserIcon } from 'lucide-react';
+import { GraduationCap, LogOut, Menu, User as UserIcon, Settings } from 'lucide-react';
 import type { User, Notification } from '@/lib/types';
 import { logout } from '@/app/actions/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -83,9 +83,11 @@ export default function AppHeader({ user }: AppHeaderProps) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>Profile</span>
+           <DropdownMenuItem asChild>
+            <Link href="/profile">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Profile Settings</span>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <form action={logout}>
