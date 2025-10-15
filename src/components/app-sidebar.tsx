@@ -44,7 +44,6 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/assignments', label: 'Assignments', icon: ClipboardList },
     { href: '/attendance', label: 'Attendance', icon: CalendarCheck },
     { href: '/materials/upload', label: 'Upload Materials', icon: UploadCloud },
-    { href: '/quiz-generator', label: 'Quiz Generator', icon: FileText },
   ];
 
   const studentRoutes = [
@@ -87,7 +86,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(label === 'Quiz Generator' || label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
+                {(label === 'Career Advisor' || label === 'Upload Materials' || label === 'Resume Builder' || label === 'Leaderboard' || label === 'Attendance' || label === 'My Certificates' || label === 'Smart Timetable' || label === 'Browse Courses' || label === 'Challenges' || label === 'Internship Sim' || label === 'Brain Stretches') && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>
