@@ -1,7 +1,6 @@
 
 'use server';
 
-import type { Course } from '@/lib/types';
 import type { BrainStretchPuzzle } from '@/lib/ai-types';
 
 type ActionState = {
@@ -76,12 +75,7 @@ function getRandomPuzzles(arr: BrainStretchPuzzle[], n: number): BrainStretchPuz
 }
 
 
-export async function generateBrainStretchesAction(
-  course: Course
-): Promise<ActionState> {
-  if (!course) {
-    return { puzzles: null, message: 'Please select a course first.' };
-  }
+export async function generateBrainStretchesAction(): Promise<ActionState> {
 
   // System-generated puzzles instead of AI
   try {

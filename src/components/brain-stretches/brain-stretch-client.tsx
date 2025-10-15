@@ -1,8 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
-import type { Course } from '@/lib/types';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -11,45 +10,27 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Loader2, Wand2, BrainCircuit, Check, X } from 'lucide-react';
+import { Loader2, Wand2, BrainCircuit, Check, X, RefreshCw } from 'lucide-react';
 import { generateBrainStretchesAction } from '@/app/actions/brain-stretches';
 import { BrainStretchPuzzle } from '@/lib/ai-types';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
 
-export default function BrainStretchClient({ courses }: { courses: Course[] }) {
-  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+export default function BrainStretchClient() {
+  const [isLoading, setIsLoading] = useState(true);
   const [puzzles, setPuzzles] = useState<BrainStretchPuzzle[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [showResults, setShowResults] = useState(false);
 
-  const handleCourseChange = (courseId: string) => {
-    const course = courses.find((c) => c.id === courseId);
-    setSelectedCourse(course || null);
-    setPuzzles([]);
-    setAnswers({});
-    setShowResults(false);
-    setError(null);
-  };
-
   const handleGenerate = async () => {
-    if (!selectedCourse) return;
     setIsLoading(true);
     setError(null);
     setPuzzles([]);
     setAnswers({});
     setShowResults(false);
 
-    const result = await generateBrainStretchesAction(selectedCourse);
+    const result = await generateBrainStretchesAction();
     if (result.puzzles) {
       setPuzzles(result.puzzles);
     } else {
@@ -57,6 +38,10 @@ export default function BrainStretchClient({ courses }: { courses: Course[] }) {
     }
     setIsLoading(false);
   };
+  
+  useEffect(() => {
+    handleGenerate();
+  }, []);
   
   const handleAnswerSelect = (puzzleIndex: number, option: string) => {
     setAnswers(prev => ({ ...prev, [puzzleIndex]: option }));
@@ -74,47 +59,34 @@ export default function BrainStretchClient({ courses }: { courses: Course[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold font-headline">Brain Stretches</h1>
-        <p className="text-muted-foreground">
-          Boost your reasoning and memory with AI-powered puzzles based on your courses.
-        </p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Select a Course</CardTitle>
-          <CardDescription>
-            Choose one of your enrolled courses to generate brain stretch puzzles.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col sm:flex-row items-center gap-4">
-          <Select onValueChange={handleCourseChange} disabled={isLoading}>
-            <SelectTrigger className="w-full sm:w-[300px]">
-              <SelectValue placeholder="Select a course..." />
-            </SelectTrigger>
-            <SelectContent>
-              {courses.map((course) => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={handleGenerate} disabled={!selectedCourse || isLoading}>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold font-headline">Brain Stretches</h1>
+          <p className="text-muted-foreground">
+            A fresh set of puzzles to boost your reasoning and memory.
+          </p>
+        </div>
+        <Button onClick={handleGenerate} variant="outline" disabled={isLoading}>
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Wand2 className="mr-2 h-4 w-4" />
+              <RefreshCw className="mr-2 h-4 w-4" />
             )}
-            Generate Puzzles
-          </Button>
-        </CardContent>
-      </Card>
+            New Puzzles
+        </Button>
+      </div>
+
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center text-center p-10 min-h-[400px]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <h2 className="text-2xl font-semibold mt-4">Generating Puzzles...</h2>
+            <p className="text-muted-foreground">Please wait a moment.</p>
+        </div>
+      )}
       
       {error && <p className="text-destructive text-sm text-center">{error}</p>}
 
-      {puzzles.length > 0 && (
+      {!isLoading && puzzles.length > 0 && (
         <div className="space-y-6">
           {puzzles.map((puzzle, index) => (
             <Card key={index}>
@@ -166,18 +138,6 @@ export default function BrainStretchClient({ courses }: { courses: Course[] }) {
             </div>
           )}
         </div>
-      )}
-
-      {!isLoading && puzzles.length === 0 && (
-         <Card className="flex flex-col items-center justify-center text-center p-10 min-h-[200px]">
-            <CardHeader>
-                <div className='p-4 bg-muted rounded-full mx-auto'>
-                    <BrainCircuit className="h-8 w-8 text-accent" />
-                </div>
-                <CardTitle>Ready to Stretch Your Brain?</CardTitle>
-                <CardDescription>Select a course and generate your puzzles to get started.</CardDescription>
-            </CardHeader>
-        </Card>
       )}
     </div>
   );
