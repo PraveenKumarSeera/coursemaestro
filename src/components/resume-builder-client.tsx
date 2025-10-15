@@ -3,10 +3,9 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader2, Wand2, FileDown, ArrowLeft, ArrowRight, Check, Briefcase, GraduationCap, User as UserIcon } from 'lucide-react';
+import { Loader2, FileDown, ArrowLeft, ArrowRight, Check, Briefcase, GraduationCap, User as UserIcon, Wand2 } from 'lucide-react';
 import type { GradedSubmission, User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from './ui/scroll-area';
 import { Input } from './ui/input';
