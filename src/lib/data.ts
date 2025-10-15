@@ -64,7 +64,38 @@ const defaultDb: Db = {
     ],
     challengeSubmissions: [],
     challengeVotes: [],
-    projects: [],
+    projects: [
+        {
+            id: 'proj1',
+            studentId: '2',
+            title: 'Personal Portfolio Website',
+            description: 'A responsive personal portfolio website built with Next.js and Tailwind CSS to showcase my projects and skills. Features a clean design, animations, and a contact form.',
+            imageUrl: 'https://picsum.photos/seed/proj1/600/400',
+            projectUrl: 'https://github.com/example/portfolio',
+            tags: ['Next.js', 'React', 'Tailwind CSS', 'UI/UX'],
+            createdAt: subDays(new Date(), 5).toISOString(),
+        },
+        {
+            id: 'proj2',
+            studentId: '3',
+            title: 'E-commerce Storefront',
+            description: 'A full-featured e-commerce storefront with product browsing, a shopping cart, and a checkout process. Built with React and integrated with a mock API for product data.',
+            imageUrl: 'https://picsum.photos/seed/proj2/600/400',
+            projectUrl: 'https://github.com/example/ecommerce',
+            tags: ['React', 'TypeScript', 'E-commerce', 'API'],
+            createdAt: subDays(new Date(), 12).toISOString(),
+        },
+        {
+            id: 'proj3',
+            studentId: '4',
+            title: 'AI-Powered Blog Generator',
+            description: 'A web app that uses generative AI to create blog posts from a simple prompt. Users can input a topic, and the app generates a well-structured article. Built with Genkit and Next.js.',
+            imageUrl: 'https://picsum.photos/seed/proj3/600/400',
+            projectUrl: 'https://github.com/example/ai-blog',
+            tags: ['AI', 'Genkit', 'Next.js', 'Generative AI'],
+            createdAt: subDays(new Date(), 2).toISOString(),
+        },
+    ],
 };
 
 // --- Caching Layer for DB Reads ---
