@@ -799,7 +799,7 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
   const newProject: Project = {
     ...data,
     id: String(Date.now()),
-    imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
+    imageUrl: `https://picsum.photos/seed/proj${Date.now()}/600/400`,
     createdAt: new Date().toISOString(),
   };
   db.projects.push(newProject);
@@ -922,34 +922,37 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         // --- Student of the Week Logic ---
         let studentOfTheWeek: StudentOfTheWeek = null;
         
-        const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
+        if (studentIds.size > 0) {
+            const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
 
-        for (const studentId of studentIds) {
-            const student = db.users.find(u => u.id === studentId);
-            if (!student) continue;
+            for (const studentId of studentIds) {
+                const student = db.users.find(u => u.id === studentId);
+                if (!student) continue;
 
-            const studentSubmissions = submissions.filter(s => 
-                s.studentId === studentId && s.grade !== null
-            );
+                const studentSubmissions = submissions.filter(s => 
+                    s.studentId === studentId && s.grade !== null
+                );
 
-            if (studentSubmissions.length > 0) {
-                const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
-                const averageGrade = totalGrade / studentSubmissions.length;
-                
-                const score = averageGrade + (studentSubmissions.length * 2); // Simple score
-                studentScores.push({ studentId, name: student.name, score, grade: Math.round(averageGrade) });
+                if (studentSubmissions.length > 0) {
+                    const totalGrade = studentSubmissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+                    const averageGrade = totalGrade / studentSubmissions.length;
+                    
+                    // Simple score: average grade + bonus for more submissions
+                    const score = averageGrade + (studentSubmissions.length * 2); 
+                    studentScores.push({ studentId, name: student.name, score, grade: Math.round(averageGrade) });
+                }
             }
-        }
 
-        if (studentScores.length > 0) {
-            studentScores.sort((a, b) => b.score - a.score);
-            const topStudent = studentScores[0];
-            studentOfTheWeek = {
-                studentId: topStudent.studentId,
-                studentName: topStudent.name,
-                averageGrade: topStudent.grade,
-                reason: 'Top Performer This Week',
-            };
+            if (studentScores.length > 0) {
+                studentScores.sort((a, b) => b.score - a.score);
+                const topStudent = studentScores[0];
+                studentOfTheWeek = {
+                    studentId: topStudent.studentId,
+                    studentName: topStudent.name,
+                    averageGrade: topStudent.grade,
+                    reason: 'Top Performer This Week',
+                };
+            }
         }
         // --- End Student of the Week Logic ---
 
@@ -1145,6 +1148,8 @@ async function runOneTimeScripts() {
 // Run the one-time script
 runOneTimeScripts().catch(console.error);
 
+
+    
 
     
 
