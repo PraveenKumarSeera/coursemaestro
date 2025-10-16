@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -23,6 +24,7 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
     return () => {
       leaveRoom(roomId, currentUser.id);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, currentUser.id]);
 
    useEffect(() => {

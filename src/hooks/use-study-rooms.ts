@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -15,9 +16,15 @@ import {
   getDocs,
   writeBatch,
   serverTimestamp,
+  initializeApp,
+  getFirestore,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { firebaseConfig } from '@/firebase/config';
 import type { User } from '@/lib/types';
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export type Participant = {
   id: string;
@@ -117,51 +124,53 @@ export function useStudyRooms() {
     }
   }
   
-  const addSystemMessage = async (roomId: string, text: string) => {
+  const addSystemMessage = useCallback(async (roomId: string, text: string) => {
     const messageRef = doc(getMessagesCollection(roomId));
     await setDoc(messageRef, {
         text,
         isSystem: true,
         timestamp: serverTimestamp(),
     });
-  }
+  }, []);
 
-  const joinRoom = async (roomId: string, user: User) => {
+  const joinRoom = useCallback(async (roomId: string, user: User) => {
     const roomRef = doc(db, 'studyRooms', roomId);
     await updateDoc(roomRef, {
         participants: arrayUnion({ id: user.id, name: user.name, isTeacher: user.role === 'teacher' })
     });
     const messageText = user.role === 'teacher' ? 'Instructor has joined the room.' : `${user.name} has joined.`;
     await addSystemMessage(roomId, messageText);
-  };
+  }, [addSystemMessage]);
 
-  const leaveRoom = async (roomId: string, userId: string) => {
+  const leaveRoom = useCallback(async (roomId: string, userId: string) => {
     const roomRef = doc(db, 'studyRooms', roomId);
     const roomDoc = await getDoc(roomRef);
 
     if (roomDoc.exists()) {
         const roomData = roomDoc.data() as Room;
         const user = roomData.participants.find(p => p.id === userId);
-        const messageText = user?.isTeacher ? 'Instructor has left the room.' : `${user?.name} has left.`;
-        await addSystemMessage(roomId, messageText);
-        
-        // Remove participant
-        await updateDoc(roomRef, {
-            participants: arrayRemove(user)
-        });
+        if (user) {
+            const messageText = user.isTeacher ? 'Instructor has left the room.' : `${user.name} has left.`;
+            await addSystemMessage(roomId, messageText);
+            
+            // Remove participant
+            await updateDoc(roomRef, {
+                participants: arrayRemove(user)
+            });
 
-        // If host leaves, make someone else host or close room
-        if (roomData.host.id === userId && roomData.participants.length > 1) {
-            const nextHost = roomData.participants.find(p => p.id !== userId);
-            if (nextHost) {
-                 await updateDoc(roomRef, { host: { id: nextHost.id, name: nextHost.name } });
+            // If host leaves, make someone else host or close room
+            if (roomData.host.id === userId && roomData.participants.length > 1) {
+                const nextHost = roomData.participants.find(p => p.id !== userId);
+                if (nextHost) {
+                    await updateDoc(roomRef, { host: { id: nextHost.id, name: nextHost.name } });
+                }
+            } else if (roomData.participants.length <= 1) {
+                // Last person left
+                await updateDoc(roomRef, { active: false });
             }
-        } else if (roomData.participants.length <= 1) {
-            // Last person left
-            await updateDoc(roomRef, { active: false });
         }
     }
-  };
+  }, [addSystemMessage]);
 
   const sendMessage = async (roomId: string, message: Partial<Message>) => {
     const messageRef = doc(getMessagesCollection(roomId));
