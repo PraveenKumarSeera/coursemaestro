@@ -26,6 +26,7 @@ import {
   Rocket,
   HeartHandshake,
   School,
+  RadioTower,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -47,6 +48,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const teacherRoutes = [
     { href: '/students', label: 'My Students', icon: Users },
     { href: '/assignments', label: 'Assignments', icon: ClipboardList },
+    { href: '/live-progress', label: 'Live Progress', icon: RadioTower, isNew: true },
     { href: '/attendance', label: 'Attendance', icon: CalendarCheck },
     { href: '/materials/upload', label: 'Upload Materials', icon: UploadCloud },
   ];
