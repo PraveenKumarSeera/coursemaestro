@@ -7,11 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Users, School } from 'lucide-react';
 import type { User } from '@/lib/types';
 import { useStudyRooms } from '@/hooks/use-study-rooms';
+import { useMemo } from 'react';
 
 export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: {id: string, title: string}[], user: User }) {
     const router = useRouter();
-    const { getRoomsByTeacherCourses } = useStudyRooms();
-    const activeRooms = getRoomsByTeacherCourses(teacherCourses);
+    const { rooms } = useStudyRooms();
+
+    const teacherCourseIds = useMemo(() => new Set(teacherCourses.map(c => c.id)), [teacherCourses]);
+    
+    const activeRooms = useMemo(() => {
+        return rooms.filter(room => teacherCourseIds.has(room.courseId));
+    }, [rooms, teacherCourseIds]);
     
     return (
         <Card className="mt-6">

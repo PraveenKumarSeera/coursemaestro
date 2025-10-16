@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,11 +26,13 @@ export default function StudyRoomsLobby({ user, enrolledCourses }: { user: User,
     const handleCreateRoom = () => {
         if (selectedCourse) {
             createRoom({ roomName, roomTopic, selectedCourse }, user);
+            setCreateOpen(false);
         }
     };
 
     const handleJoinRoom = () => {
         joinRoom(joinCode);
+        setJoinOpen(false);
     };
 
     return (

@@ -77,7 +77,8 @@ export function useStudyRooms() {
     };
 
     const joinRoom = (roomId: string) => {
-        if (rooms[roomId]) {
+        const allRooms = JSON.parse(localStorage.getItem(STUDY_ROOMS_KEY) || '{}');
+        if (allRooms[roomId]) {
             router.push(`/study-rooms/${roomId}`);
         } else {
             toast({ variant: 'destructive', title: 'Error', description: 'Invalid room code.' });
