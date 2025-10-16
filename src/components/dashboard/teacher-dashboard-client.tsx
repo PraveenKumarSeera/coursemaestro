@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, School } from 'lucide-react';
@@ -21,6 +21,7 @@ interface StudyRoom {
 
 export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: {id: string, title: string}[], user: User }) {
     const router = useRouter();
+    const pathname = usePathname();
     const [activeRooms, setActiveRooms] = useState<StudyRoom[]>([]);
     
     const teacherCourseIds = useMemo(() => new Set(teacherCourses.map(c => c.id)), [teacherCourses]);
@@ -40,7 +41,7 @@ export default function TeacherDashboardClient({ teacherCourses, user }: { teach
         window.addEventListener('storage', updateRooms);
 
         return () => window.removeEventListener('storage', updateRooms);
-    }, [teacherCourseIds]);
+    }, [teacherCourseIds, pathname]);
     
     return (
         <Card className="mt-6">
