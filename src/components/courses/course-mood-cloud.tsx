@@ -4,8 +4,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Sun, Moon, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTheme } from '../theme-provider';
 
 type Emoji = '😕' | '🤓' | '😍' | '😴';
 type Mood = {
@@ -23,72 +24,60 @@ const moods: Mood[] = [
 
 const initialCounts: ReactionCounts = { '😕': 0, '🤓': 0, '😍': 0, '😴': 0 };
 
-export default function ClassroomMoodClient() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+export default function CourseMoodCloud({ courseId }: { courseId: string }) {
+  const { theme } = useTheme();
   const [counts, setCounts] = useState<ReactionCounts>(initialCounts);
   const [userSelection, setUserSelection] = useState<Emoji | null>(null);
   const [isClient, setIsClient] = useState(false);
 
+  const storageKeys = {
+      counts: `mood-cloud-counts-${courseId}`,
+      selection: `mood-cloud-selection-${courseId}`,
+  };
+
   useEffect(() => {
     setIsClient(true);
     // Load saved state from local storage
-    const savedTheme = localStorage.getItem('mood-cloud-theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setTheme(prefersDark ? 'dark' : 'light');
-    }
-
-    const savedCounts = localStorage.getItem('mood-cloud-counts');
+    const savedCounts = localStorage.getItem(storageKeys.counts);
     if (savedCounts) {
       setCounts(JSON.parse(savedCounts));
     }
 
-    const savedSelection = localStorage.getItem('mood-cloud-selection') as Emoji | null;
+    const savedSelection = localStorage.getItem(storageKeys.selection) as Emoji | null;
     if (savedSelection) {
       setUserSelection(savedSelection);
     }
-  }, []);
-
-  useEffect(() => {
-    if (isClient) {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-      localStorage.setItem('mood-cloud-theme', theme);
-    }
-  }, [theme, isClient]);
+  }, [courseId, storageKeys.counts, storageKeys.selection]);
 
    useEffect(() => {
     if (isClient) {
-      localStorage.setItem('mood-cloud-counts', JSON.stringify(counts));
+      localStorage.setItem(storageKeys.counts, JSON.stringify(counts));
     }
-  }, [counts, isClient]);
+  }, [counts, isClient, storageKeys.counts]);
 
    useEffect(() => {
     if (isClient) {
         if (userSelection) {
-            localStorage.setItem('mood-cloud-selection', userSelection);
+            localStorage.setItem(storageKeys.selection, userSelection);
         } else {
-            localStorage.removeItem('mood-cloud-selection');
+            localStorage.removeItem(storageKeys.selection);
         }
     }
-   }, [userSelection, isClient]);
+   }, [userSelection, isClient, storageKeys.selection]);
 
 
   const handleReaction = (emoji: Emoji) => {
     setCounts(prevCounts => {
       const newCounts = { ...prevCounts };
       
-      // If user is changing their reaction
       if (userSelection && userSelection !== emoji) {
         newCounts[userSelection] = Math.max(0, newCounts[userSelection] - 1);
       }
       
-      // If user is deselecting
       if (userSelection === emoji) {
          newCounts[emoji] = Math.max(0, newCounts[emoji] - 1);
          setUserSelection(null);
-      } else { // If new selection or changing selection
+      } else {
         newCounts[emoji] += 1;
         setUserSelection(emoji);
       }
@@ -100,10 +89,6 @@ export default function ClassroomMoodClient() {
   const handleReset = () => {
     setCounts(initialCounts);
     setUserSelection(null);
-  };
-
-  const toggleTheme = () => {
-    setTheme(currentTheme => (currentTheme === 'light' ? 'dark' : 'light'));
   };
 
   const dominantMood = useMemo(() => {
@@ -125,7 +110,7 @@ export default function ClassroomMoodClient() {
     const totalReactions = Math.max(1, Object.values(counts).reduce((sum, count) => sum + count, 0));
     return moods.flatMap(({ emoji }) => 
         Array(counts[emoji]).fill(null).map((_, i) => {
-            const size = 30 + (counts[emoji] / totalReactions) * 100; // Base size + percentage of total
+            const size = 30 + (counts[emoji] / totalReactions) * 100;
             const opacity = 0.4 + (counts[emoji] / totalReactions) * 0.6;
             return {
                 id: `${emoji}-${i}`,
@@ -147,7 +132,7 @@ export default function ClassroomMoodClient() {
   }
 
   return (
-    <div className={cn("min-h-screen w-full bg-background text-foreground transition-colors", theme)}>
+    <div className={cn("min-h-[60vh] w-full bg-background text-foreground transition-colors relative overflow-hidden rounded-lg border", theme)}>
        <style jsx global>{`
         .emoji-cloud {
             position: absolute;
@@ -174,8 +159,7 @@ export default function ClassroomMoodClient() {
         }
       `}</style>
 
-      <main className="container mx-auto py-8 px-4 relative z-10">
-        <Card className="max-w-4xl mx-auto border-2">
+        <Card className="h-full w-full border-none shadow-none bg-transparent">
             <div className="emoji-cloud" aria-hidden="true">
                 {floatingEmojis.map(item => (
                     <span key={item.id} className="floating-emoji" style={item.style}>
@@ -184,23 +168,18 @@ export default function ClassroomMoodClient() {
                 ))}
             </div>
 
-          <CardHeader className="text-center relative">
+          <CardHeader className="text-center relative z-10">
             <div className="absolute top-4 right-4 flex gap-2">
                 <Button variant="outline" size="icon" onClick={handleReset}>
                     <RefreshCw className="h-4 w-4" />
                     <span className="sr-only">Reset Reactions</span>
                 </Button>
-                <Button variant="outline" size="icon" onClick={toggleTheme}>
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                </Button>
             </div>
             <CardTitle className="text-3xl font-bold font-headline">Classroom Mood Cloud</CardTitle>
-            <CardDescription>React to the lecture in real-time and see the collective mood!</CardDescription>
+            <CardDescription>React to the lecture in real-time!</CardDescription>
           </CardHeader>
-          <CardContent className="py-10 space-y-12 relative">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <CardContent className="py-10 space-y-12 relative z-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-lg mx-auto">
               {moods.map(({ emoji, name }) => (
                 <div key={emoji} className="flex flex-col items-center gap-2">
                   <button
@@ -218,7 +197,7 @@ export default function ClassroomMoodClient() {
               ))}
             </div>
 
-            <div className="text-center border-t pt-6">
+            <div className="text-center border-t pt-6 max-w-lg mx-auto">
                 <p className="text-lg text-muted-foreground">
                     Current Class Mood: <span className="font-bold text-xl text-foreground">{dominantMood.name}</span>
                     <span className='text-2xl ml-2'>{dominantMood.emoji}</span>
@@ -226,7 +205,6 @@ export default function ClassroomMoodClient() {
             </div>
           </CardContent>
         </Card>
-      </main>
     </div>
   );
 }

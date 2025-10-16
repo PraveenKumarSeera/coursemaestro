@@ -17,6 +17,7 @@ import AttendanceTracker from '@/components/attendance/attendance-tracker';
 import EnrollButton from '@/components/courses/enroll-button';
 import EmbeddedVideoPlayer from '@/components/courses/embedded-video-player';
 import { cn } from '@/lib/utils';
+import CourseMoodCloud from '@/components/courses/course-mood-cloud';
 
 export const revalidate = 0;
 
@@ -96,6 +97,8 @@ export default async function CourseDetailPage({
 
   const defaultTab = typeof searchParams?.tab === 'string' ? searchParams.tab : 'overview';
 
+  const tabCount = isTeacher ? 6 : 5;
+
   return (
     <div className="space-y-6">
       {user.role === 'student' && <AttendanceTracker courseId={course.id} />}
@@ -142,7 +145,7 @@ export default async function CourseDetailPage({
       )}
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className={cn("grid w-full", isTeacher ? "grid-cols-5" : "grid-cols-4")}>
+        <TabsList className={cn("grid w-full", `grid-cols-${tabCount}`)}>
           <TabsTrigger value="overview">
             <BookText className="mr-2 h-4 w-4" /> Overview
           </TabsTrigger>
@@ -154,6 +157,9 @@ export default async function CourseDetailPage({
           </TabsTrigger>
            <TabsTrigger value="materials">
             <FileText className="mr-2 h-4 w-4" /> Materials
+          </TabsTrigger>
+           <TabsTrigger value="mood">
+              <Users className="mr-2 h-4 w-4" /> Mood
           </TabsTrigger>
            {isTeacher && (
              <TabsTrigger value="students">
@@ -188,6 +194,9 @@ export default async function CourseDetailPage({
             <MaterialList 
                 materials={materials}
             />
+        </TabsContent>
+         <TabsContent value="mood">
+            <CourseMoodCloud courseId={course.id} />
         </TabsContent>
         {isTeacher && (
             <TabsContent value="students">
