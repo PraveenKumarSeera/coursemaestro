@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { RefreshCw, Radio, Ban, Pencil } from 'lucide-react';
 import { ThemeToggle } from '../theme-toggle';
-import { useStudentActivity, type ActivityStatus } from '@/hooks/use-student-activity';
+import { useLiveStudentActivity, type ActivityStatus } from '@/hooks/use-live-student-activity';
 import type { User } from '@/lib/types';
 import { format } from 'date-fns';
 
@@ -51,7 +52,7 @@ export default function LiveProgressClient({
 }: {
   initialStudents: User[];
 }) {
-  const { students, summary, forceRefresh } = useStudentActivity(initialStudents);
+  const { students, summary, forceRefresh } = useLiveStudentActivity(initialStudents);
 
   return (
     <div className="space-y-6">

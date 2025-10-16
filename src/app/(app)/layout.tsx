@@ -1,3 +1,4 @@
+
 'use client';
 
 import AppHeader from '@/components/app-header';
@@ -11,14 +12,19 @@ import { getNotificationsForUser } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
 import { useToast } from '@/hooks/use-toast';
+import { useStudentActivityBroadcaster } from '@/hooks/use-live-student-activity';
 
 const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
+const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+
 
 function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const previousUnreadCount = useRef(0);
+  const { broadcastActivity } = useStudentActivityBroadcaster();
+  const idleTimer = useRef<NodeJS.Timeout | null>(null);
 
   const playNotificationSound = () => {
     try {
@@ -53,6 +59,14 @@ function useUserSession() {
       previousUnreadCount.current = currentUnreadCount;
   }, []);
 
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimer.current) {
+      clearTimeout(idleTimer.current);
+    }
+    idleTimer.current = setTimeout(() => {
+      broadcastActivity('idle');
+    }, IDLE_TIMEOUT);
+  }, [broadcastActivity]);
 
   useEffect(() => {
     async function loadSession() {
@@ -60,6 +74,12 @@ function useUserSession() {
       if (user) {
         setUser(user);
         await fetchNotifications(user); // Initial fetch
+
+        if (user.role === 'student') {
+            const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+            events.forEach(event => window.addEventListener(event, resetIdleTimer));
+            resetIdleTimer(); // Start the timer initially
+        }
       }
       setLoading(false);
     }
@@ -75,9 +95,16 @@ function useUserSession() {
 
     return () => {
         window.removeEventListener('storage', handleStorageChange);
+         if (user && user.role === 'student') {
+            const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+            events.forEach(event => window.removeEventListener(event, resetIdleTimer));
+             if (idleTimer.current) {
+                clearTimeout(idleTimer.current);
+            }
+        }
     };
 
-  }, [fetchNotifications, user]);
+  }, [fetchNotifications, user, resetIdleTimer]);
 
   return { user, notifications, loading };
 }

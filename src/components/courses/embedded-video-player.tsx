@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useStudentActivityBroadcaster } from '@/hooks/use-live-student-activity';
 
 type VideoPlayerProps = {
   videoUrl: string;
@@ -24,6 +25,7 @@ const getVimeoId = (url: string) => {
 export default function EmbeddedVideoPlayer({ videoUrl }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isClient, setIsClient] = useState(false);
+  const { broadcastActivity } = useStudentActivityBroadcaster();
 
   useEffect(() => {
     setIsClient(true);
@@ -42,6 +44,14 @@ export default function EmbeddedVideoPlayer({ videoUrl }: VideoPlayerProps) {
       localStorage.setItem(`video-progress-${videoUrl}`, videoRef.current.currentTime.toString());
     }
   };
+
+  const handlePlay = () => {
+    broadcastActivity('watching');
+  }
+
+  const handlePause = () => {
+    broadcastActivity('idle');
+  }
   
   if (!isClient) {
       return null;
@@ -49,6 +59,8 @@ export default function EmbeddedVideoPlayer({ videoUrl }: VideoPlayerProps) {
 
   const youTubeId = getYouTubeId(videoUrl);
   if (youTubeId) {
+    // YouTube API doesn't easily support play/pause events across origins
+    // For simplicity, we won't broadcast for YouTube
     return (
       <div className="aspect-video w-full">
         <iframe
@@ -65,6 +77,7 @@ export default function EmbeddedVideoPlayer({ videoUrl }: VideoPlayerProps) {
   
   const vimeoId = getVimeoId(videoUrl);
   if(vimeoId) {
+       // Vimeo API also has cross-origin restrictions for events
       return (
           <div className="aspect-video w-full">
                <iframe 
@@ -85,6 +98,8 @@ export default function EmbeddedVideoPlayer({ videoUrl }: VideoPlayerProps) {
         ref={videoRef}
         controls
         onTimeUpdate={handleTimeUpdate}
+        onPlay={handlePlay}
+        onPause={handlePause}
         className="w-full h-full rounded-lg bg-black"
         // The controlsList attribute is not fully standard but works in Chrome/Edge
         // to provide more control over the player UI.

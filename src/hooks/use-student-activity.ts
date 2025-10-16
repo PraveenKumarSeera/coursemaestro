@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -19,7 +20,7 @@ export function useStudentActivity(initialStudents: User[]) {
   const [students, setStudents] = useState<SimulatedStudent[]>(() =>
     initialStudents.map((user) => ({
       ...user,
-      status: 'watching',
+      status: 'idle',
       lastActive: new Date(),
     }))
   );

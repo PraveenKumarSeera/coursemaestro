@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { useStudentActivityBroadcaster } from '@/hooks/use-live-student-activity';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -31,6 +32,7 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
   const [state, formAction] = useActionState(submitAssignmentAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const { broadcastActivity } = useStudentActivityBroadcaster();
   
   const playSuccessSound = () => {
     try {
@@ -66,10 +68,11 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
       });
       if (state.success) {
         formRef.current?.reset();
+        broadcastActivity('idle');
         playSuccessSound();
       }
     }
-  }, [state, toast]);
+  }, [state, toast, broadcastActivity]);
 
   return (
     <Card className="bg-background">
@@ -87,6 +90,8 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
                     name="content"
                     required
                     placeholder="Enter your submission content or a link to your work..."
+                    onFocus={() => broadcastActivity('submitting')}
+                    onBlur={() => broadcastActivity('idle')}
                     />
                 </div>
             </CardContent>
