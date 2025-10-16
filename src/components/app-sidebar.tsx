@@ -28,6 +28,7 @@ import {
   School,
   RadioTower,
   Map,
+  Send,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -50,6 +51,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/students', label: 'My Students', icon: Users },
     { href: '/assignments', label: 'Assignments', icon: ClipboardList },
     { href: '/live-progress', label: 'Live Session', icon: RadioTower, isNew: true },
+    { href: '/instant-quiz', label: 'Instant Quiz', icon: Send, isNew: true },
     { href: '/attendance', label: 'Attendance', icon: CalendarCheck },
     { href: '/materials/upload', label: 'Upload Materials', icon: UploadCloud },
   ];
