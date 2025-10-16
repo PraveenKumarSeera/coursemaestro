@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 import type { User } from './types';
 import { findUserById } from './data';
 
-const SESSION_COOKIE_NAME = 'coursemestro_session';
+const SESSION_COOKIE_NAME = 'coursepilot_session';
 
 // This is not secure for production. Use a proper secret management strategy.
 const SECRET_KEY = process.env.SESSION_SECRET || 'your-super-secret-key-that-is-at-least-32-characters-long';

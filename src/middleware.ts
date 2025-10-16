@@ -4,7 +4,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const SESSION_COOKIE_NAME = 'coursemestro_session';
+const SESSION_COOKIE_NAME = 'coursepilot_session';
 const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/my-grades', '/my-certificates', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/my-projects', '/wellness-check', '/live-progress'];
 const PUBLIC_ROUTES = ['/login', '/signup', '/showcase'];
 

@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'CourseMaestro',
+  title: 'CoursePilot',
   description: 'The Ultimate Learning Management System',
 };
 

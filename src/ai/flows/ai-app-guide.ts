@@ -15,7 +15,7 @@ const prompt = ai.definePrompt({
     name: 'appGuidePrompt',
     input: { schema: AppGuideInputSchema },
     output: { schema: AppGuideOutputSchema },
-    prompt: `You are a helpful AI assistant for the CourseMaestro application. Answer the user's question based on the provided conversation history.
+    prompt: `You are a helpful AI assistant for the CoursePilot application. Answer the user's question based on the provided conversation history.
     
     Conversation History:
     {{{chatHistory}}}

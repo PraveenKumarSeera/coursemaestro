@@ -36,7 +36,7 @@ const chatFlow = ai.defineFlow(
   async (input) => {
     const { history, courseContext } = input;
     
-    let systemPrompt = `You are "Maestro," an AI-powered study assistant for the CourseMaestro platform. You are helpful, encouraging, and an expert in all academic subjects.
+    let systemPrompt = `You are "Maestro," an AI-powered study assistant for the CoursePilot platform. You are helpful, encouraging, and an expert in all academic subjects.
     
     Your primary function is to help students understand their course material.
     - If the user provides course context, prioritize answering questions based on that context.

@@ -1151,7 +1151,7 @@ async function runOneTimeScripts() {
         return;
     } catch (error) {
         // File does not exist, proceed with script.
-        const welcomeMessage = `Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro`;
+        const welcomeMessage = `Welcome to CoursePilot! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CoursePilot`;
 
         const existingNotificationSubjects = new Set(
             db.notifications

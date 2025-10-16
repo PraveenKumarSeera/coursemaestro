@@ -5,8 +5,8 @@ import { useState, useEffect, useCallback, useRef, createContext, useContext, Re
 import { getSession } from '@/lib/session';
 import { useToast } from './use-toast';
 
-const QUIZ_BROADCAST_KEY = 'coursemestro-live-quiz';
-const QUIZ_RESPONSE_KEY = 'coursemestro-quiz-response';
+const QUIZ_BROADCAST_KEY = 'coursepilot-live-quiz';
+const QUIZ_RESPONSE_KEY = 'coursepilot-quiz-response';
 
 export type QuizQuestion = {
   id: string;
@@ -81,15 +81,15 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         }
     };
     
-    const handleStartQuiz = (question: QuizQuestion, duration: number) => {
+    const handleStartQuiz = useCallback((question: QuizQuestion, duration: number) => {
         setResponses({});
         setQuizState({ isActive: true, question, timer: duration });
-    };
+    }, []);
 
-    const handleEndQuiz = () => {
+    const handleEndQuiz = useCallback(() => {
         if (timerRef.current) clearInterval(timerRef.current);
         setQuizState({ isActive: false, question: null, timer: 0 });
-    };
+    }, []);
 
     const launchQuiz = useCallback((question: QuizQuestion, duration: number) => {
         const timestamp = Date.now();
@@ -97,7 +97,7 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
         // Manually trigger for the current tab
         handleStartQuiz(question, duration);
-    }, []);
+    }, [handleStartQuiz]);
 
     const endQuiz = useCallback(() => {
         const timestamp = Date.now();
@@ -105,7 +105,7 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
         // Manually trigger for the current tab
         handleEndQuiz();
-    }, []);
+    }, [handleEndQuiz]);
 
     const submitAnswer = useCallback(async (quizId: string, answer: string) => {
         const { user } = await getSession();
@@ -155,7 +155,7 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
 
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
-    }, [toast, quizState.isActive, quizState.question?.id]);
+    }, [toast, quizState.isActive, quizState.question?.id, handleStartQuiz, handleEndQuiz]);
 
     useEffect(() => {
         if (quizState.isActive && quizState.timer > 0) {

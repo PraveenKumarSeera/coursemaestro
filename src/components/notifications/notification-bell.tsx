@@ -19,7 +19,7 @@ import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 
-const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
+const NOTIFICATION_STORAGE_KEY = 'coursepilot-notifications-update';
 
 
 export default function NotificationBell({ notifications }: { notifications: Notification[] }) {

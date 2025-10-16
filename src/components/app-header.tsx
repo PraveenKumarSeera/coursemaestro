@@ -60,7 +60,7 @@ export default function AppHeader({ user, notifications }: AppHeaderProps) {
         <div className="w-full flex-1">
             <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:hidden">
                 <GraduationCap className="h-6 w-6 text-primary" />
-                <span className="font-headline">CourseMaestro</span>
+                <span className="font-headline">CoursePilot</span>
             </Link>
         </div>
 

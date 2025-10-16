@@ -1,6 +1,6 @@
-# CourseMaestro Feature Overview
+# CoursePilot Feature Overview
 
-This document provides a comprehensive list of all features available in the CourseMaestro application, broken down by user role.
+This document provides a comprehensive list of all features available in the CoursePilot application, broken down by user role.
 
 ---
 
@@ -19,7 +19,7 @@ This document provides a comprehensive list of all features available in the Cou
 - **AI Performance Analyzer:** Get a detailed analysis of your grades, highlighting your strengths and areas for improvement.
 - **AI Career Advisor:** Receive personalized career path suggestions based on your academic performance and skills.
 - **AI Targeted Practice:** For assignments with lower scores, the system generates a custom "micro-lesson" with concept reviews and new practice problems.
-- **AI Smart Timetable:** Generate a personalized weekly study schedule based on your enrolled courses, assignment deadlines, and personal availability.
+-AI Smart Timetable:** Generate a personalized weekly study schedule based on your enrolled courses, assignment deadlines, and personal availability.
 - **AI Resume Builder:** Automatically generate a professional resume using your completed coursework, grades, and personal information.
 
 ### Skill & Portfolio Building

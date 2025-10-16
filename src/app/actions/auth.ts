@@ -81,7 +81,7 @@ export async function signup(
   // Create a welcome notification for the new user
   await createNotification({
     userId: newUser.id,
-    message: `Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro`,
+    message: `Welcome to CoursePilot! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CoursePilot`,
     link: '/dashboard',
   });
 

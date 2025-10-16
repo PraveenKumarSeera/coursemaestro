@@ -19,11 +19,11 @@ export default function LoginPage() {
             className="flex items-center gap-2 text-lg font-semibold"
             >
             <GraduationCap className="h-6 w-6 text-primary" />
-            <span className="font-headline">CourseMaestro</span>
+            <span className="font-headline">CoursePilot</span>
             </Link>
         </div>
         <div className="max-w-md space-y-4">
-            <h1 className="text-4xl font-bold font-headline">Welcome to CourseMaestro</h1>
+            <h1 className="text-4xl font-bold font-headline">Welcome to CoursePilot</h1>
             <p className="text-xl text-muted-foreground">Let's begin your journey</p>
         </div>
       </div>
@@ -34,7 +34,7 @@ export default function LoginPage() {
             className="flex items-center gap-2 text-lg font-semibold"
             >
             <GraduationCap className="h-6 w-6 text-primary" />
-            <span className="font-headline">CourseMaestro</span>
+            <span className="font-headline">CoursePilot</span>
             </Link>
         </div>
         <div className="mx-auto grid w-[350px] gap-6">

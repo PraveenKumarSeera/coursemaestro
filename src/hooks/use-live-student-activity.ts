@@ -19,7 +19,7 @@ type ActivityBroadcast = {
     timestamp: number;
 }
 
-const BROADCAST_KEY = 'coursemestro-activity-broadcast';
+const BROADCAST_KEY = 'coursepilot-activity-broadcast';
 const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 const PULSE_WINDOW = 15 * 1000; // 15 seconds for pulse calculation
 

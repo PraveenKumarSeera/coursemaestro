@@ -82,7 +82,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
         <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <GraduationCap className="h-6 w-6 text-primary" />
-            <span className="font-headline">CourseMaestro</span>
+            <span className="font-headline">CoursePilot</span>
           </Link>
         </div>
         <div className="flex-1">

@@ -15,7 +15,7 @@ export default function SignupPage() {
        <div className="absolute top-4 left-4">
        <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
             <GraduationCap className="h-6 w-6 text-primary" />
-            <span className="font-headline">CourseMaestro</span>
+            <span className="font-headline">CoursePilot</span>
         </Link>
        </div>
       <Card className="w-full max-w-sm">

@@ -14,7 +14,7 @@ export type TimelineEvent = {
   referenceId?: string;
 };
 
-const TIMELINE_STORAGE_KEY = 'coursemestro_timeline_events';
+const TIMELINE_STORAGE_KEY = 'coursepilot_timeline_events';
 
 export function useTimeline() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);

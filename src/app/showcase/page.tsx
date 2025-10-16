@@ -18,7 +18,7 @@ export default async function ShowcasePage() {
         <div className="container flex h-14 items-center">
             <Link href="/" className="flex items-center gap-2 font-semibold">
                 <GraduationCap className="h-6 w-6 text-primary" />
-                <span className="font-headline text-lg">CourseMaestro</span>
+                <span className="font-headline text-lg">CoursePilot</span>
             </Link>
             <nav className="flex items-center space-x-4 ml-auto">
                  <Button asChild>
