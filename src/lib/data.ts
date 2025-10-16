@@ -125,6 +125,36 @@ const defaultDb: Db = {
             tags: ['Vue.js', 'API Integration', 'UI/UX'],
             createdAt: subDays(new Date(), 15).toISOString(),
         },
+        {
+            id: 'proj7',
+            studentId: '4',
+            title: 'Data Visualization Dashboard',
+            description: 'An interactive dashboard that visualizes complex datasets using charts and graphs. Built with D3.js and React to provide dynamic and responsive data exploration tools.',
+            imageUrl: 'https://picsum.photos/seed/proj7/600/400',
+            projectUrl: 'https://github.com/example/data-viz',
+            tags: ['D3.js', 'React', 'Data Visualization'],
+            createdAt: subDays(new Date(), 3).toISOString(),
+        },
+        {
+            id: 'proj8',
+            studentId: '5',
+            title: 'Full-Stack Social Media Clone',
+            description: 'A feature-rich clone of a popular social media platform, including user authentication, posts, comments, and a real-time notification system. Built with a Node.js backend and React frontend.',
+            imageUrl: 'https://picsum.photos/seed/proj8/600/400',
+            projectUrl: 'https://github.com/example/social-clone',
+            tags: ['Node.js', 'Express', 'React', 'Full-Stack'],
+            createdAt: subDays(new Date(), 25).toISOString(),
+        },
+        {
+            id: 'proj9',
+            studentId: '2',
+            title: 'Online Markdown Editor',
+            description: 'A live markdown editor with a side-by-side preview panel. It saves the user\'s work to local storage and provides a clean, distraction-free writing environment.',
+            imageUrl: 'https://picsum.photos/seed/proj9/600/400',
+            projectUrl: 'https://github.com/example/markdown-editor',
+            tags: ['React', 'Markdown', 'Local Storage'],
+            createdAt: subDays(new Date(), 10).toISOString(),
+        }
     ],
 };
 
