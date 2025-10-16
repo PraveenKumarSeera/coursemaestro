@@ -9,31 +9,45 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, LogIn, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import type { User } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { User, Course } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface StudyRoom {
     id: string;
     name: string;
     topic?: string;
+    courseId: string;
+    courseName: string;
     hostId: string;
     hostName: string;
 }
 
-export default function StudyRoomsLobby({ user }: { user: User }) {
+export default function StudyRoomsLobby({ user, enrolledCourses }: { user: User, enrolledCourses: Course[] }) {
     const router = useRouter();
     const { toast } = useToast();
     const [isCreateOpen, setCreateOpen] = useState(false);
     const [isJoinOpen, setJoinOpen] = useState(false);
     const [roomName, setRoomName] = useState('');
     const [roomTopic, setRoomTopic] = useState('');
+    const [selectedCourse, setSelectedCourse] = useState<{ id: string, name: string} | null>(null);
     const [joinCode, setJoinCode] = useState('');
     const [activeRooms, setActiveRooms] = useState<StudyRoom[]>([]);
 
-    useEffect(() => {
-        const rooms = JSON.parse(localStorage.getItem('study-rooms') || '{}');
-        setActiveRooms(Object.values(rooms));
+     useEffect(() => {
+        const updateRooms = () => {
+            const roomsData = localStorage.getItem('study-rooms');
+            const rooms = roomsData ? JSON.parse(roomsData) : {};
+            setActiveRooms(Object.values(rooms));
+        };
+
+        updateRooms(); // Initial load
+
+        // Listen for storage changes to update the lobby in real-time
+        window.addEventListener('storage', updateRooms);
+        return () => window.removeEventListener('storage', updateRooms);
     }, []);
+
 
     const generateRoomCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -42,11 +56,17 @@ export default function StudyRoomsLobby({ user }: { user: User }) {
             toast({ variant: 'destructive', title: 'Error', description: 'Room name is required.' });
             return;
         }
+        if (!selectedCourse) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Please select a course.' });
+            return;
+        }
         const roomId = generateRoomCode();
         const newRoom: StudyRoom = {
             id: roomId,
             name: roomName,
             topic: roomTopic,
+            courseId: selectedCourse.id,
+            courseName: selectedCourse.name,
             hostId: user.id,
             hostName: user.name,
         };
@@ -86,6 +106,22 @@ export default function StudyRoomsLobby({ user }: { user: User }) {
                                 <DialogTitle>Create a New Study Room</DialogTitle>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="course">Course</Label>
+                                     <Select onValueChange={(value) => {
+                                        const course = enrolledCourses.find(c => c.id === value);
+                                        if (course) setSelectedCourse({ id: course.id, name: course.title });
+                                    }}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a course for this room" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {enrolledCourses.map(course => (
+                                                <SelectItem key={course.id} value={course.id}>{course.title}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="room-name">Room Name</Label>
                                     <Input id="room-name" value={roomName} onChange={(e) => setRoomName(e.target.value)} placeholder="e.g., Mid-term Prep" />
@@ -135,6 +171,7 @@ export default function StudyRoomsLobby({ user }: { user: User }) {
                                         <CardDescription>{room.topic || 'General Discussion'}</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-2 text-sm text-muted-foreground">
+                                        <p>Course: {room.courseName}</p>
                                         <p>Host: {room.hostName}</p>
                                         <p>Code: <span className="font-mono bg-muted px-2 py-1 rounded">{room.id}</span></p>
                                         <Button onClick={() => router.push(`/study-rooms/${room.id}`)} className="w-full mt-2">Join Room</Button>

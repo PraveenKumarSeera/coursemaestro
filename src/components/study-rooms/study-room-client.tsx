@@ -8,12 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { Bold, Italic, List, Send, LogOut, ClipboardCopy, School, Users } from 'lucide-react';
+import { Bold, Italic, List, Send, LogOut, ClipboardCopy, School, Users, Crown, User as UserIcon } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { ThemeToggle } from '../theme-toggle';
+import { cn } from '@/lib/utils';
+import { Badge } from '../ui/badge';
 
 interface Participant extends User {
     isOnline: boolean;
@@ -23,8 +25,10 @@ interface Message {
     id: string;
     userId: string;
     userName: string;
+    userRole: 'student' | 'teacher';
     text: string;
     timestamp: string;
+    isSystemMessage?: boolean;
 }
 
 interface StudyRoomState {
@@ -46,6 +50,26 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
 
     const getStorageKey = (id: string) => `study-room-${id}`;
 
+    const addSystemMessage = useCallback((text: string) => {
+        const systemMessage: Message = {
+            id: Date.now().toString(),
+            userId: 'system',
+            userName: 'System',
+            userRole: 'student', // placeholder
+            text,
+            timestamp: new Date().toISOString(),
+            isSystemMessage: true,
+        };
+        const storageKey = getStorageKey(roomId);
+        const storedData = localStorage.getItem(storageKey);
+        if (!storedData) return;
+        const currentState = JSON.parse(storedData) as StudyRoomState;
+        const newState = {...currentState, messages: [...currentState.messages, systemMessage]};
+        localStorage.setItem(storageKey, JSON.stringify(newState));
+        setRoomState(newState);
+    }, [roomId]);
+
+
     // Function to handle all state updates and persist to localStorage
     const updateRoomState = useCallback((updater: (prevState: StudyRoomState) => StudyRoomState) => {
         const storageKey = getStorageKey(roomId);
@@ -66,7 +90,7 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
         const roomInfo = allRooms[roomId];
         if (!roomInfo) {
             toast({ variant: 'destructive', title: 'Room not found', description: 'This study room no longer exists.' });
-            router.push('/study-rooms');
+            router.push(currentUser.role === 'teacher' ? '/dashboard' : '/study-rooms');
             return;
         }
 
@@ -88,6 +112,8 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
         }
 
         const userInRoom = currentRoomState.participants.find(p => p.id === currentUser.id);
+        const userJustJoined = !userInRoom;
+        
         if (!userInRoom) {
             currentRoomState.participants.push({ ...currentUser, isOnline: true });
         } else {
@@ -95,11 +121,19 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
                 p.id === currentUser.id ? { ...p, isOnline: true } : p
             );
         }
-
+        
         localStorage.setItem(storageKey, JSON.stringify(currentRoomState));
         setRoomState(currentRoomState);
+        
+        if (userJustJoined) {
+            const message = currentUser.role === 'teacher' 
+                ? 'Instructor has joined the room.' 
+                : `${currentUser.name} has joined the room.`;
+            addSystemMessage(message);
+        }
 
-    }, [roomId, currentUser, router, toast]);
+
+    }, [roomId, currentUser, router, toast, addSystemMessage]);
 
     // Listener for storage events to sync state across tabs
     useEffect(() => {
@@ -111,14 +145,14 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
                 const allRooms = JSON.parse(event.newValue);
                 if (!allRooms[roomId]) {
                     toast({ title: 'Room Closed', description: 'The host has ended the session.' });
-                    router.push('/study-rooms');
+                    router.push(currentUser.role === 'teacher' ? '/dashboard' : '/study-rooms');
                 }
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
-    }, [roomId, router, toast]);
+    }, [roomId, router, toast, currentUser.role]);
     
     // Scroll chat to bottom
     useEffect(() => {
@@ -138,6 +172,7 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
             id: Date.now().toString(),
             userId: currentUser.id,
             userName: currentUser.name,
+            userRole: currentUser.role,
             text: messageInput,
             timestamp: new Date().toISOString(),
         };
@@ -180,6 +215,8 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
     };
 
     const handleLeaveRoom = (isHostClosing = false) => {
+        const redirectPath = currentUser.role === 'teacher' ? '/dashboard' : '/study-rooms';
+
         if (isHostClosing) {
             const allRooms = JSON.parse(localStorage.getItem('study-rooms') || '{}');
             delete allRooms[roomId];
@@ -187,13 +224,14 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
             localStorage.removeItem(getStorageKey(roomId));
             toast({ title: 'Room Closed', description: 'You have ended the study session.' });
         } else {
+             addSystemMessage(currentUser.role === 'teacher' ? 'Instructor left the room.' : `${currentUser.name} has left the room.`);
              updateRoomState(prev => ({
                 ...prev,
                 participants: prev.participants.map(p => p.id === currentUser.id ? { ...p, isOnline: false } : p)
             }));
             toast({ title: 'You have left the room' });
         }
-        router.push('/study-rooms');
+        router.push(redirectPath);
     };
     
     const copyRoomCode = () => {
@@ -246,13 +284,14 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
                     </CardHeader>
                     <CardContent className="flex-grow overflow-auto">
                         <ul className="space-y-3">
-                            {roomState.participants.map(p => (
+                            {roomState.participants.filter(p => p.isOnline).map(p => (
                                 <li key={p.id} className="flex items-center gap-3 text-sm">
                                     <Avatar className="h-8 w-8">
                                         <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <span className="font-medium">{p.name} {p.id === roomState.hostId && '(Host)'}</span>
-                                    {p.isOnline && <div className="h-2 w-2 rounded-full bg-green-500 ml-auto" title="Online"></div>}
+                                    <span className="font-medium">{p.name}</span>
+                                    {p.id === roomState.hostId && <Crown className="h-4 w-4 text-amber-500" titleAccess='Host'/>}
+                                    {p.role === 'teacher' && <Badge variant="secondary">Instructor</Badge>}
                                 </li>
                             ))}
                         </ul>
@@ -276,6 +315,7 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
                             onChange={handleNotesChange}
                             placeholder="Start typing your shared notes here..."
                             className="h-full resize-none bg-muted/30"
+                            readOnly={currentUser.role === 'teacher'}
                         />
                     </CardContent>
                 </Card>
@@ -288,13 +328,26 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
                     <ScrollArea className="flex-grow h-0 px-6" ref={chatScrollAreaRef}>
                         <div className="space-y-4">
                             {roomState.messages.map(msg => (
-                                <div key={msg.id} className="flex flex-col">
-                                    <div className="flex items-baseline gap-2 text-xs">
-                                        <span className="font-bold">{msg.userName}</span>
-                                        <span className="text-muted-foreground">{format(new Date(msg.timestamp), 'h:mm a')}</span>
+                                 msg.isSystemMessage ? (
+                                    <div key={msg.id} className="text-center text-xs text-muted-foreground italic py-1">
+                                        {msg.text}
                                     </div>
-                                    <p className="text-sm bg-muted p-2 rounded-md">{msg.text}</p>
-                                </div>
+                                ) : (
+                                    <div key={msg.id} className={cn("flex flex-col", msg.userId === currentUser.id ? "items-end" : "items-start")}>
+                                        <div className="flex items-baseline gap-2 text-xs">
+                                            <span className="font-bold">{msg.userName}</span>
+                                            <span className="text-muted-foreground">{format(new Date(msg.timestamp), 'h:mm a')}</span>
+                                        </div>
+                                        <div className={cn(
+                                            "text-sm p-2 rounded-md max-w-[90%]",
+                                            msg.userId === currentUser.id ? "bg-primary text-primary-foreground" : "bg-muted",
+                                            msg.userRole === 'teacher' && "bg-amber-100 dark:bg-amber-900/50 text-foreground"
+                                        )}>
+                                            {msg.userRole === 'teacher' && <p className="text-xs font-bold text-amber-600 dark:text-amber-400">INSTRUCTOR</p>}
+                                            <p>{msg.text}</p>
+                                        </div>
+                                    </div>
+                                )
                             ))}
                         </div>
                     </ScrollArea>
