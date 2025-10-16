@@ -14,8 +14,6 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
-
 
   // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !sessionCookie) {
@@ -31,7 +29,7 @@ export function middleware(request: NextRequest) {
      return NextResponse.redirect(url);
   }
   
-  // If visiting the root, redirect to dashboard if logged in, otherwise login
+  // If visiting the root, redirect based on session
   if (pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = sessionCookie ? '/dashboard' : '/login';
@@ -44,7 +42,3 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
-
-    
-
-    
