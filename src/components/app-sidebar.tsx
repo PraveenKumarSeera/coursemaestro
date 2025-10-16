@@ -25,6 +25,7 @@ import {
   FolderKanban,
   Rocket,
   HeartHandshake,
+  School,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -51,6 +52,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   ];
 
   const studentRoutes = [
+    { href: '/study-rooms', label: 'Study Rooms', icon: School, isNew: true },
     { href: '/my-projects', label: 'My Projects', icon: FolderKanban },
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },
