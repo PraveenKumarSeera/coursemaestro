@@ -27,6 +27,7 @@ import {
   HeartHandshake,
   School,
   RadioTower,
+  Map,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
@@ -54,6 +55,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   ];
 
   const studentRoutes = [
+    { href: '/my-journey', label: 'My Journey', icon: Map, isNew: true },
     { href: '/my-projects', label: 'My Projects', icon: FolderKanban },
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },

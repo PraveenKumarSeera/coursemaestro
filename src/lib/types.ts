@@ -149,3 +149,15 @@ export type InternshipGrade = {
     overall: number;
     feedback: string;
 }
+
+// Timeline Types
+export type TimelineEvent = {
+  id: string;
+  timestamp: string;
+  type: 'course_enrolled' | 'lesson_completed' | 'assignment_submitted' | 'grade_received';
+  title: string;
+  details: string;
+  icon: string;
+  duration?: string;
+  referenceId?: string; // e.g., submissionId to avoid duplicates
+};

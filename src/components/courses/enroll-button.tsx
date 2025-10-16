@@ -8,6 +8,8 @@ import { enrollInCourseAction } from '@/app/actions/enrollments';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTimeline } from '@/hooks/use-timeline';
+import { getCourseById } from '@/lib/data';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -30,6 +32,7 @@ export default function EnrollButton({ courseId }: { courseId: string }) {
   const [state, formAction] = useActionState(enrollAction, { message: '', success: false });
   const { toast } = useToast();
   const router = useRouter();
+  const { addTimelineEvent } = useTimeline();
 
   useEffect(() => {
     if (state.message) {
@@ -39,10 +42,21 @@ export default function EnrollButton({ courseId }: { courseId: string }) {
         variant: state.success ? 'default' : 'destructive',
       });
       if (state.success) {
+        // Add course enrollment to timeline
+        getCourseById(courseId).then(course => {
+            if (course) {
+                 addTimelineEvent({
+                    type: 'course_enrolled',
+                    title: `Started: ${course.title}`,
+                    details: `You've officially started your journey in ${course.title}.`,
+                    icon: '🎓',
+                });
+            }
+        });
         router.push(`/courses/${courseId}`);
       }
     }
-  }, [state, toast, router, courseId]);
+  }, [state, toast, router, courseId, addTimelineEvent]);
 
   return (
     <form action={formAction}>

@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { useStudentActivityBroadcaster } from '@/hooks/use-live-student-activity';
+import { useTimeline } from '@/hooks/use-timeline';
+import { getAssignmentById } from '@/lib/data';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -33,6 +35,7 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const { broadcastActivity } = useStudentActivityBroadcaster();
+  const { addTimelineEvent } = useTimeline();
   
   const playSuccessSound = () => {
     try {
@@ -70,9 +73,18 @@ export default function SubmitAssignmentForm({ assignmentId, courseId }: SubmitA
         formRef.current?.reset();
         broadcastActivity('idle');
         playSuccessSound();
+
+        // Add to timeline
+        const content = new FormData(formRef.current!).get('content') as string;
+        addTimelineEvent({
+          type: 'assignment_submitted',
+          title: `Submitted Assignment`,
+          details: `Submitted an assignment for course ID ${courseId}.`,
+          icon: '📄',
+        });
       }
     }
-  }, [state, toast, broadcastActivity]);
+  }, [state, toast, broadcastActivity, addTimelineEvent, courseId]);
 
   return (
     <Card className="bg-background">
