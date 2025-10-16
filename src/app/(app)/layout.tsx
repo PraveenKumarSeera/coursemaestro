@@ -13,7 +13,7 @@ import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { useStudentActivityBroadcaster } from '@/hooks/use-live-student-activity';
 import LiveQuizTaker from '@/components/live-progress/live-quiz-taker';
-import { LiveQuizProvider } from '@/hooks/use-live-quiz';
+import { LiveQuizProvider } from '@/hooks/use-live-quiz.tsx';
 
 const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
 const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
