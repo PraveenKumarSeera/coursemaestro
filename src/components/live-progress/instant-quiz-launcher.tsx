@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Plus, Rocket, Send, Trash2 } from 'lucide-react';
-import { useLiveQuiz } from '@/hooks/use-live-quiz';
+import { useLiveQuiz } from '@/hooks/use-live-quiz.tsx';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 export default function InstantQuizLauncher({ studentCount }: { studentCount: number }) {

@@ -78,23 +78,23 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             console.error("Failed to play sound", e);
         }
     };
-
+    
+    // Function to end the quiz for everyone
     const endQuiz = useCallback(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
         const payload: QuizBroadcast = { action: 'end' };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        setQuizState({ isActive: false, question: null, timer: 0 });
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-        }
+        // The storage event handler will set state to inactive
     }, []);
-    
+
+    // Function for the teacher to launch the quiz
     const launchQuiz = useCallback((question: QuizQuestion, duration: number) => {
         const payload: QuizBroadcast = { action: 'start', question, duration };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        setQuizState({ isActive: true, question, timer: duration });
-        setResponses({});
+        // The storage event handler will start the quiz for everyone, including the teacher's tab
     }, []);
 
+    // Function for students to submit answers
     const submitAnswer = useCallback(async (quizId: string, answer: string) => {
         const { user } = await getSession();
         if (!user) return;
@@ -104,45 +104,61 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             userName: user.name,
             answer,
         };
-        localStorage.setItem(`${QUIZ_RESPONSE_KEY}-${user.id}`, JSON.stringify(payload));
+        // Broadcast the answer
+        localStorage.setItem(`${QUIZ_RESPONSE_KEY}-${user.id}-${Date.now()}`, JSON.stringify(payload));
     }, []);
-
+    
+    // Effect for handling storage events (cross-tab communication)
     useEffect(() => {
-        const handleStorageChange = (event: StorageEvent) => {
+        const handleStorageChange = async (event: StorageEvent) => {
+            // Handle quiz start/end broadcasts
             if (event.key === QUIZ_BROADCAST_KEY && event.newValue) {
                 try {
                     const payload: QuizBroadcast = JSON.parse(event.newValue);
                     if (payload.action === 'start' && payload.question && payload.duration) {
+                        setResponses({}); // Clear previous responses
                         setQuizState({ isActive: true, question: payload.question, timer: payload.duration });
-                        playQuizSound();
-                        toast({ title: "Live Quiz Started!", description: "Your teacher has launched a live quiz." });
+                        
+                        const { user } = await getSession();
+                        if(user && user.role === 'student'){
+                            playQuizSound();
+                            toast({ title: "Live Quiz Started!", description: "Your teacher has launched a live quiz." });
+                        }
+
                     } else if (payload.action === 'end') {
+                        if (timerRef.current) clearInterval(timerRef.current);
                         setQuizState({ isActive: false, question: null, timer: 0 });
                     }
                 } catch (e) { console.error(e); }
             }
 
+            // Handle student response broadcasts
             if (event.key?.startsWith(QUIZ_RESPONSE_KEY) && event.newValue) {
                 try {
                     const payload: QuizResponse = JSON.parse(event.newValue);
-                    if (quizState.isActive && payload.quizId === quizState.question?.id) {
-                        setResponses(prev => ({ ...prev, [payload.userId]: payload }));
-                    }
+                    // Only update if the response is for the current active quiz
+                    setResponses(prev => {
+                        if (quizState.isActive && payload.quizId === quizState.question?.id) {
+                            return { ...prev, [payload.userId]: payload };
+                        }
+                        return prev;
+                    });
                 } catch (e) { console.error(e); }
             }
         };
 
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
-    }, [quizState.isActive, quizState.question?.id, toast]);
+    }, [toast, quizState.isActive, quizState.question?.id]);
 
+    // Effect for managing the countdown timer
     useEffect(() => {
         if (quizState.isActive && quizState.timer > 0) {
             timerRef.current = setInterval(() => {
                 setQuizState(prev => {
                     const newTime = prev.timer - 1;
                     if (newTime <= 0) {
-                        endQuiz();
+                        endQuiz(); // End quiz when timer reaches 0
                         return { ...prev, isActive: false, timer: 0 };
                     }
                     return { ...prev, timer: newTime };
