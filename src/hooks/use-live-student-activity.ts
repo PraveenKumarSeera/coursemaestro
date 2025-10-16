@@ -21,6 +21,7 @@ type ActivityBroadcast = {
 
 const BROADCAST_KEY = 'coursemestro-activity-broadcast';
 const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+const PULSE_WINDOW = 15 * 1000; // 15 seconds for pulse calculation
 
 // --- Hook for Student Side ---
 export function useStudentActivityBroadcaster() {
@@ -52,6 +53,9 @@ export function useLiveStudentActivity(initialStudents: User[]) {
       lastActive: new Date(0), // Start with a very old date
     }))
   );
+  
+  const [recentPings, setRecentPings] = useState<number[]>([]);
+  const [pulse, setPulse] = useState(0);
 
   const updateStudent = useCallback((userId: string, name: string, status: ActivityStatus, timestamp: number) => {
     setStudents(prev => {
@@ -63,6 +67,11 @@ export function useLiveStudentActivity(initialStudents: User[]) {
             return [...prev, { id: userId, name: name, email: '', role: 'student', status, lastActive: new Date(timestamp) }];
         }
     });
+
+    // Record the ping for the pulse monitor
+    if (status !== 'idle') {
+        setRecentPings(prev => [...prev, timestamp]);
+    }
   }, []);
 
   useEffect(() => {
@@ -87,13 +96,27 @@ export function useLiveStudentActivity(initialStudents: User[]) {
         }))
     }, 5000); // Check every 5 seconds
 
+    // Calculate pulse periodically
+    const pulseInterval = setInterval(() => {
+        const now = Date.now();
+        const activePings = recentPings.filter(ping => now - ping < PULSE_WINDOW);
+        setRecentPings(activePings);
+        
+        const activeStudents = new Set(students.filter(s => s.status !== 'idle').map(s => s.id)).size;
+        const totalStudents = Math.max(1, students.length);
+        const engagement = Math.min(100, (activeStudents / totalStudents) * 100);
+        
+        setPulse(engagement);
+    }, 2000); // Update pulse every 2 seconds
+
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(idleCheckInterval);
+      clearInterval(pulseInterval);
     };
-  }, [updateStudent]);
+  }, [updateStudent, students]);
 
   const summary = useMemo(() => {
     return students.reduce(
@@ -116,5 +139,5 @@ export function useLiveStudentActivity(initialStudents: User[]) {
   }, []);
 
 
-  return { students, summary, forceRefresh };
+  return { students, summary, forceRefresh, pulse };
 }

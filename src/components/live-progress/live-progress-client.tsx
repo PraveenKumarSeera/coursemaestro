@@ -18,6 +18,7 @@ import { ThemeToggle } from '../theme-toggle';
 import { useLiveStudentActivity, type ActivityStatus } from '@/hooks/use-live-student-activity';
 import type { User } from '@/lib/types';
 import { format } from 'date-fns';
+import FocusPulseMonitor from './focus-pulse-monitor';
 
 const statusConfig: {
   [key in ActivityStatus]: {
@@ -52,7 +53,7 @@ export default function LiveProgressClient({
 }: {
   initialStudents: User[];
 }) {
-  const { students, summary, forceRefresh } = useLiveStudentActivity(initialStudents);
+  const { students, summary, forceRefresh, pulse } = useLiveStudentActivity(initialStudents);
 
   return (
     <div className="space-y-6">
@@ -71,6 +72,8 @@ export default function LiveProgressClient({
             <ThemeToggle />
         </div>
       </div>
+
+      <FocusPulseMonitor pulse={pulse} />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
