@@ -69,9 +69,12 @@ export function useStudyRooms() {
             hostName: user.name,
         };
 
-        const currentRooms = { ...rooms, [roomId]: newRoom };
+        const currentRooms = JSON.parse(localStorage.getItem(STUDY_ROOMS_KEY) || '{}');
+        currentRooms[roomId] = newRoom;
+        
+        // This is the key change: Only write to storage.
+        // The `storage` event listener will handle updating the state for all tabs.
         localStorage.setItem(STUDY_ROOMS_KEY, JSON.stringify(currentRooms));
-        setRooms(currentRooms); // Update state for the current tab
 
         router.push(`/study-rooms/${roomId}`);
     };
