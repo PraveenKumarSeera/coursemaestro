@@ -100,10 +100,12 @@ export function useLiveStudentActivity(initialStudents: User[]) {
       (acc, student) => {
         if(student.status !== 'idle') {
             acc[student.status]++;
+        } else {
+            acc.idle++;
         }
         return acc;
       },
-      { watching: 0, submitting: 0, idle: students.filter(s => s.status === 'idle').length }
+      { watching: 0, submitting: 0, idle: 0 }
     );
   }, [students]);
 
