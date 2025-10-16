@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback, useRef, createContext, useContext, ReactNode } from 'react';
@@ -25,7 +24,7 @@ type QuizBroadcast = {
   action: 'start' | 'end';
   question?: QuizQuestion;
   duration?: number;
-  timestamp: number; // Added timestamp to prevent processing old events
+  timestamp: number;
 };
 
 type QuizState = {
@@ -38,7 +37,6 @@ type Responses = {
   [userId: string]: QuizResponse;
 };
 
-// --- Context for Shared State ---
 interface LiveQuizContextType {
     quizState: QuizState;
     responses: Responses;
@@ -60,28 +58,8 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
     const lastEventTimestamp = useRef<number>(0);
     const { toast } = useToast();
 
-    const playQuizSound = () => {
-        try {
-            const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-            if (!context) return;
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
-
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.setValueAtTime(440, context.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(880, context.currentTime + 0.2);
-            gainNode.gain.setValueAtTime(0.1, context.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.3);
-            oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
-            oscillator.start(context.currentTime);
-            oscillator.stop(context.currentTime + 0.3);
-        } catch (e) {
-            console.error("Failed to play sound", e);
-        }
-    };
-    
     const handleStartQuiz = useCallback((question: QuizQuestion, duration: number) => {
+        playQuizSound();
         setResponses({});
         setQuizState({ isActive: true, question, timer: duration });
     }, []);
@@ -91,21 +69,25 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         setQuizState({ isActive: false, question: null, timer: 0 });
     }, []);
 
+
     const launchQuiz = useCallback((question: QuizQuestion, duration: number) => {
         const timestamp = Date.now();
+        lastEventTimestamp.current = timestamp; // Prevent self-triggering
         const payload: QuizBroadcast = { action: 'start', question, duration, timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        // Manually trigger for the current tab
+        // Manually trigger for the current (teacher's) tab
         handleStartQuiz(question, duration);
     }, [handleStartQuiz]);
 
     const endQuiz = useCallback(() => {
         const timestamp = Date.now();
+        lastEventTimestamp.current = timestamp; // Prevent self-triggering
         const payload: QuizBroadcast = { action: 'end', timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        // Manually trigger for the current tab
+        // Manually trigger for the current (teacher's) tab
         handleEndQuiz();
     }, [handleEndQuiz]);
+
 
     const submitAnswer = useCallback(async (quizId: string, answer: string) => {
         const { user } = await getSession();
@@ -116,46 +98,73 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             userName: user.name,
             answer,
         };
+        // Use a unique key for each submission to ensure the storage event fires
         localStorage.setItem(`${QUIZ_RESPONSE_KEY}-${user.id}-${Date.now()}`, JSON.stringify(payload));
     }, []);
     
-    useEffect(() => {
-        const handleStorageChange = async (event: StorageEvent) => {
-            if (event.key === QUIZ_BROADCAST_KEY && event.newValue) {
-                try {
-                    const payload: QuizBroadcast = JSON.parse(event.newValue);
-                    if (payload.timestamp <= lastEventTimestamp.current) return;
-                    lastEventTimestamp.current = payload.timestamp;
+    const playQuizSound = useCallback(() => {
+        getSession().then(({ user }) => {
+            if (user?.role !== 'student') return;
+            try {
+                const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+                if (!context) return;
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
 
-                    if (payload.action === 'start' && payload.question && payload.duration) {
-                        handleStartQuiz(payload.question, payload.duration);
-                        const { user } = await getSession();
-                        if(user && user.role === 'student'){
-                            playQuizSound();
-                            toast({ title: "Live Quiz Started!", description: "Your teacher has launched a live quiz." });
-                        }
-                    } else if (payload.action === 'end') {
-                        handleEndQuiz();
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(440, context.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, context.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.3);
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.3);
+            } catch (e) {
+                console.error("Failed to play sound", e);
+            }
+        });
+    }, []);
+
+    const handleStorageChange = useCallback(async (event: StorageEvent) => {
+        if (event.key === QUIZ_BROADCAST_KEY && event.newValue) {
+            try {
+                const payload: QuizBroadcast = JSON.parse(event.newValue);
+                // Important: check timestamp to avoid processing old/own events
+                if (payload.timestamp <= lastEventTimestamp.current) return;
+                lastEventTimestamp.current = payload.timestamp;
+
+                if (payload.action === 'start' && payload.question && payload.duration) {
+                    handleStartQuiz(payload.question, payload.duration);
+                    const { user } = await getSession();
+                    if(user && user.role === 'student'){
+                        toast({ title: "Live Quiz Started!", description: "Your teacher has launched a live quiz." });
                     }
-                } catch (e) { console.error(e); }
-            }
+                } else if (payload.action === 'end') {
+                    handleEndQuiz();
+                }
+            } catch (e) { console.error("Error parsing quiz broadcast:", e); }
+        }
 
-            if (event.key?.startsWith(QUIZ_RESPONSE_KEY) && event.newValue) {
-                try {
-                    const payload: QuizResponse = JSON.parse(event.newValue);
-                    setResponses(prev => {
-                        if (quizState.isActive && payload.quizId === quizState.question?.id) {
-                            return { ...prev, [payload.userId]: payload };
-                        }
-                        return prev;
-                    });
-                } catch (e) { console.error(e); }
-            }
-        };
+        if (event.key?.startsWith(QUIZ_RESPONSE_KEY) && event.newValue) {
+             try {
+                const payload: QuizResponse = JSON.parse(event.newValue);
+                // Teacher's view updates with new responses
+                setResponses(prev => {
+                    if (quizState.isActive && payload.quizId === quizState.question?.id) {
+                        return { ...prev, [payload.userId]: payload };
+                    }
+                    return prev;
+                });
+            } catch (e) { console.error("Error parsing quiz response:", e); }
+        }
+    }, [handleStartQuiz, handleEndQuiz, toast, quizState.isActive, quizState.question?.id]);
 
+
+    useEffect(() => {
         window.addEventListener('storage', handleStorageChange);
         return () => window.removeEventListener('storage', handleStorageChange);
-    }, [toast, quizState.isActive, quizState.question?.id, handleStartQuiz, handleEndQuiz]);
+    }, [handleStorageChange]);
 
     useEffect(() => {
         if (quizState.isActive && quizState.timer > 0) {
@@ -163,6 +172,7 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
                 setQuizState(prev => {
                     const newTime = prev.timer - 1;
                     if (newTime <= 0) {
+                        // The endQuiz call will clear the interval
                         endQuiz();
                         return { ...prev, isActive: false, timer: 0 };
                     }
