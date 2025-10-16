@@ -290,7 +290,7 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
                                         <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <span className="font-medium">{p.name}</span>
-                                    {p.id === roomState.hostId && <Crown className="h-4 w-4 text-amber-500" titleAccess='Host'/>}
+                                    {p.id === roomState.hostId && <Crown className="h-4 w-4 text-amber-500" title='Host'/>}
                                     {p.role === 'teacher' && <Badge variant="secondary">Instructor</Badge>}
                                 </li>
                             ))}
@@ -369,3 +369,5 @@ export default function StudyRoomClient({ roomId, currentUser }: { roomId: strin
         </div>
     );
 }
+
+    
