@@ -164,7 +164,7 @@
       "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
       "link": "/dashboard",
       "id": "1760525034735",
-      "isRead": false,
+      "isRead": true,
       "createdAt": "2025-10-15T10:43:54.735Z"
     },
     {

@@ -131,7 +131,7 @@ export default function AuthenticatedLayout({
   }, [user, toast]);
 
 
-  if (pathname.includes('/certificates/')) {
+  if (pathname.includes('/certificates/') || pathname.includes('/classroom-mood')) {
     return <>{children}</>;
   }
 
