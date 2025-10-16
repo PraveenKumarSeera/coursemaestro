@@ -84,6 +84,26 @@ function useUserSession() {
   return { user, notifications, loading };
 }
 
+const empatheticMessages = [
+    {
+        title: '🧠 Feeling a bit distracted?',
+        description: "It happens! A short break can do wonders for focus. We're here when you get back!",
+    },
+    {
+        title: '✨ You seem a bit tired.',
+        description: "Remember to take care of yourself. Your well-being comes first. We'll be ready when you are!",
+    },
+    {
+        title: '🤔 Is something on your mind?',
+        description: "Take a moment if you need to. Your learning journey is a marathon, not a sprint.",
+    },
+    {
+        title: '🙌 Don\'t give up!',
+        description: "Every expert was once a beginner. Keep pushing forward, you're making great progress!",
+    },
+];
+
+
 export default function AuthenticatedLayout({
   children,
 }: {
@@ -98,10 +118,8 @@ export default function AuthenticatedLayout({
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
-        toast({
-          title: '🧠 Stay Focused!',
-          description: "Don't forget your learning goals. We're here when you get back!",
-        });
+        const randomMessage = empatheticMessages[Math.floor(Math.random() * empatheticMessages.length)];
+        toast(randomMessage);
       }
     };
 
