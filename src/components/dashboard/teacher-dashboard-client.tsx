@@ -1,64 +1,27 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Users, School } from 'lucide-react';
-import type { User } from '@/lib/types';
-import { useStudyRooms } from '@/hooks/use-study-rooms';
-import { useMemo } from 'react';
+import { Users } from 'lucide-react';
 
-export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: {id: string, title: string}[], user: User }) {
-    const router = useRouter();
-    const { rooms } = useStudyRooms();
-
-    const teacherCourseIds = useMemo(() => new Set(teacherCourses.map(c => c.id)), [teacherCourses]);
-    
-    const activeRooms = useMemo(() => {
-        return rooms.filter(room => teacherCourseIds.has(room.courseId));
-    }, [rooms, teacherCourseIds]);
-    
+// This component has been temporarily disabled due to a persistent bug.
+export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: any[], user: any }) {
     return (
         <Card className="mt-6">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <School className="h-5 w-5 text-primary" />
-                    Active Study Rooms
-                </CardTitle>
-                <CardDescription>
-                    Study rooms recently created by students in your courses.
+                <CardTitle>Active Study Rooms</CardTitle>
+                 <CardDescription>
+                    This feature is currently undergoing maintenance.
                 </CardDescription>
             </CardHeader>
-            <CardContent>
-                {activeRooms.length > 0 ? (
-                    <div className="grid gap-4 md:grid-cols-2">
-                        {activeRooms.map(room => (
-                            <Card key={room.id}>
-                                <CardHeader>
-                                    <CardTitle className="font-headline">{room.name}</CardTitle>
-                                    <CardDescription>{room.courseName}</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-muted-foreground">
-                                        Hosted by {room.hostName}
-                                    </p>
-                                    <Button onClick={() => router.push(`/study-rooms/${room.id}`)} className="w-full mt-4">
-                                        Join to Supervise
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-center py-10">
-                        <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-                        <h3 className="mt-4 text-lg font-semibold">No Active Study Rooms</h3>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                            When students in your courses create study rooms, they will appear here.
-                        </p>
-                    </div>
-                )}
+             <CardContent>
+                 <div className="text-center py-10">
+                    <Users className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-4 text-lg font-semibold">Feature Under Maintenance</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        We are working hard to resolve an issue with real-time updates.
+                    </p>
+                </div>
             </CardContent>
         </Card>
     );
