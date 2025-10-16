@@ -18,7 +18,6 @@ function useUserSession() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const previousUnreadCount = useRef(0);
-  const router = useRouter();
 
   const playNotificationSound = () => {
     try {
@@ -108,10 +107,8 @@ export default function AuthenticatedLayout({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!user || user.role !== 'student') return;
-
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
+      if (document.visibilityState === 'hidden' && user && user.role === 'student') {
         const randomMessage = empatheticMessages[Math.floor(Math.random() * empatheticMessages.length)];
         toast(randomMessage);
       }
