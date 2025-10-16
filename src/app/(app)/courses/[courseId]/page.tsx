@@ -145,7 +145,7 @@ export default async function CourseDetailPage({
       )}
 
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList className={cn("grid w-full", `grid-cols-${tabCount}`)}>
+        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabCount}, minmax(0, 1fr))`}}>
           <TabsTrigger value="overview">
             <BookText className="mr-2 h-4 w-4" /> Overview
           </TabsTrigger>
