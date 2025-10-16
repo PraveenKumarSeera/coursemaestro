@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { initializeApp } from 'firebase/app';
 import {
   collection,
   doc,
@@ -16,7 +17,6 @@ import {
   getDocs,
   writeBatch,
   serverTimestamp,
-  initializeApp,
   getFirestore,
 } from 'firebase/firestore';
 import { firebaseConfig } from '@/firebase/config';

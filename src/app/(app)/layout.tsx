@@ -11,6 +11,7 @@ import { getNotificationsForUser } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
 import { useToast } from '@/hooks/use-toast';
+import { FirebaseClientProvider } from '@/firebase';
 
 const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
 
@@ -154,17 +155,19 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <ReactFlowProvider>
-      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-        <AppSidebar user={user} />
-        <div className="flex flex-col">
-          <AppHeader user={user} notifications={notifications} />
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
-            {children}
-          </main>
+    <FirebaseClientProvider>
+      <ReactFlowProvider>
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+          <AppSidebar user={user} />
+          <div className="flex flex-col">
+            <AppHeader user={user} notifications={notifications} />
+            <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
+              {children}
+            </main>
+          </div>
+          {user.role === 'student' && <FloatingAIAssistant />}
         </div>
-        {user.role === 'student' && <FloatingAIAssistant />}
-      </div>
-    </ReactFlowProvider>
+      </ReactFlowProvider>
+    </FirebaseClientProvider>
   );
 }
