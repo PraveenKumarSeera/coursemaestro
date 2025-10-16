@@ -62,7 +62,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase, isNew: true },
     { href: '/resume-builder', label: 'Resume Builder', icon: FileDown },
     { href: '/timetable', label: 'Smart Timetable', icon: CalendarClock },
-    { href: '/wellness-check', label: 'Wellness Check-in', icon: HeartHandshake },
+    { href: '/wellness-check', label: 'Wellness Check-in', icon: HeartHandshake, isNew: true },
   ];
   
   const navItems = user.role === 'teacher' 
@@ -92,7 +92,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               >
                 <Icon className="h-4 w-4" />
                 {label}
-                {(isNew || (['Upload Materials', 'Resume Builder', 'Leaderboard', 'Attendance', 'My Certificates', 'Smart Timetable', 'Browse Courses', 'Challenges', 'Internship Sim', 'Brain Stretches', 'Project Showcase', 'My Projects'].includes(label) && !isNew)) && (
+                {(isNew) && (
                     <Badge variant="outline" className="ml-auto bg-accent/10 text-accent border-accent/50">
                         New
                     </Badge>

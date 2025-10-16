@@ -13,6 +13,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
 
   // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !sessionCookie) {

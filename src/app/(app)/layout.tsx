@@ -114,7 +114,7 @@ export default function AuthenticatedLayout({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user?.role !== 'student') return;
+    if (!user || user.role !== 'student') return;
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
