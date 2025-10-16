@@ -1,55 +1,17 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, School } from 'lucide-react';
 import type { User } from '@/lib/types';
-
-interface StudyRoom {
-    id: string;
-    name: string;
-    topic?: string;
-    courseId: string;
-    courseName: string;
-    hostId: string;
-    hostName: string;
-}
+import { useStudyRooms } from '@/hooks/use-study-rooms';
 
 export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: {id: string, title: string}[], user: User }) {
     const router = useRouter();
-    const [activeRooms, setActiveRooms] = useState<StudyRoom[]>([]);
-    
-    const teacherCourseIds = useMemo(() => new Set(teacherCourses.map(c => c.id)), [teacherCourses]);
-
-    const updateRooms = useCallback(() => {
-        const roomsData = localStorage.getItem('study-rooms');
-        const allRooms: Record<string, StudyRoom> = roomsData ? JSON.parse(roomsData) : {};
-        
-        const relevantRooms = Object.values(allRooms).filter(room => 
-            teacherCourseIds.has(room.courseId)
-        );
-        setActiveRooms(relevantRooms);
-    }, [teacherCourseIds]);
-
-    useEffect(() => {
-        // Initial load
-        updateRooms();
-
-        // Listen for changes from other tabs
-        const handleStorageChange = (event: StorageEvent) => {
-            if (event.key === 'study-rooms') {
-                updateRooms();
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        // Cleanup listener on component unmount
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, [updateRooms]);
+    const { getRoomsByTeacherCourses } = useStudyRooms();
+    const activeRooms = getRoomsByTeacherCourses(teacherCourses);
     
     return (
         <Card className="mt-6">

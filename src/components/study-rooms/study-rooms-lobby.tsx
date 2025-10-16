@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,80 +10,27 @@ import { PlusCircle, LogIn, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { User, Course } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-
-interface StudyRoom {
-    id: string;
-    name: string;
-    topic?: string;
-    courseId: string;
-    courseName: string;
-    hostId: string;
-    hostName: string;
-}
+import { useStudyRooms } from '@/hooks/use-study-rooms';
+import { useRouter } from 'next/navigation';
 
 export default function StudyRoomsLobby({ user, enrolledCourses }: { user: User, enrolledCourses: Course[] }) {
     const router = useRouter();
-    const { toast } = useToast();
+    const { rooms: activeRooms, createRoom, joinRoom } = useStudyRooms();
     const [isCreateOpen, setCreateOpen] = useState(false);
     const [isJoinOpen, setJoinOpen] = useState(false);
     const [roomName, setRoomName] = useState('');
     const [roomTopic, setRoomTopic] = useState('');
     const [selectedCourse, setSelectedCourse] = useState<{ id: string, name: string} | null>(null);
     const [joinCode, setJoinCode] = useState('');
-    const [activeRooms, setActiveRooms] = useState<StudyRoom[]>([]);
-
-     useEffect(() => {
-        const updateRooms = () => {
-            const roomsData = localStorage.getItem('study-rooms');
-            const rooms = roomsData ? JSON.parse(roomsData) : {};
-            setActiveRooms(Object.values(rooms));
-        };
-
-        updateRooms(); // Initial load
-
-        // Listen for storage changes to update the lobby in real-time
-        window.addEventListener('storage', updateRooms);
-        return () => window.removeEventListener('storage', updateRooms);
-    }, []);
-
-
-    const generateRoomCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
     const handleCreateRoom = () => {
-        if (!roomName.trim()) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Room name is required.' });
-            return;
+        if (selectedCourse) {
+            createRoom({ roomName, roomTopic, selectedCourse }, user);
         }
-        if (!selectedCourse) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please select a course.' });
-            return;
-        }
-        const roomId = generateRoomCode();
-        const newRoom: StudyRoom = {
-            id: roomId,
-            name: roomName,
-            topic: roomTopic,
-            courseId: selectedCourse.id,
-            courseName: selectedCourse.name,
-            hostId: user.id,
-            hostName: user.name,
-        };
-
-        const rooms = JSON.parse(localStorage.getItem('study-rooms') || '{}');
-        rooms[roomId] = newRoom;
-        localStorage.setItem('study-rooms', JSON.stringify(rooms));
-
-        router.push(`/study-rooms/${roomId}`);
     };
 
     const handleJoinRoom = () => {
-        const rooms = JSON.parse(localStorage.getItem('study-rooms') || '{}');
-        if (rooms[joinCode]) {
-            router.push(`/study-rooms/${joinCode}`);
-        } else {
-            toast({ variant: 'destructive', title: 'Error', description: 'Invalid room code.' });
-        }
+        joinRoom(joinCode);
     };
 
     return (
