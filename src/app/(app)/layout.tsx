@@ -63,15 +63,9 @@ function useUserSession() {
 
         // Poll for notifications
         const notificationInterval = setInterval(() => fetchNotifications(user), 15000); 
-        
-        // Poll for page data
-        const dataRefreshInterval = setInterval(() => {
-            router.refresh();
-        }, 15000);
 
         return () => {
             clearInterval(notificationInterval);
-            clearInterval(dataRefreshInterval);
         };
       } else {
          setLoading(false);
