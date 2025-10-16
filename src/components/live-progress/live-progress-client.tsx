@@ -19,6 +19,7 @@ import { useLiveStudentActivity, type ActivityStatus } from '@/hooks/use-live-st
 import type { User } from '@/lib/types';
 import { format } from 'date-fns';
 import FocusPulseMonitor from './focus-pulse-monitor';
+import InstantQuizLauncher from './instant-quiz-launcher';
 
 const statusConfig: {
   [key in ActivityStatus]: {
@@ -59,9 +60,9 @@ export default function LiveProgressClient({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-3xl font-bold font-headline">Live Progress Tracker</h1>
+          <h1 className="text-3xl font-bold font-headline">Live Session Dashboard</h1>
           <p className="text-muted-foreground">
-            A real-time overview of your students' study activity.
+            A real-time overview of your students' study activity and engagement.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -73,7 +74,11 @@ export default function LiveProgressClient({
         </div>
       </div>
 
-      <FocusPulseMonitor pulse={pulse} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <FocusPulseMonitor pulse={pulse} />
+        <InstantQuizLauncher studentCount={initialStudents.length} />
+      </div>
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

@@ -23,7 +23,7 @@ export default async function LiveProgressPage() {
         <div className="flex items-center justify-center h-full text-center">
             <div className="space-y-2">
                 <h2 className="text-2xl font-bold">No Students Enrolled</h2>
-                <p className="text-muted-foreground">The live progress tracker will be available once students are enrolled in your courses.</p>
+                <p className="text-muted-foreground">The live session tools will be available once students are enrolled in your courses.</p>
             </div>
         </div>
     )

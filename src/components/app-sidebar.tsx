@@ -49,7 +49,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const teacherRoutes = [
     { href: '/students', label: 'My Students', icon: Users },
     { href: '/assignments', label: 'Assignments', icon: ClipboardList },
-    { href: '/live-progress', label: 'Live Progress', icon: RadioTower, isNew: true },
+    { href: '/live-progress', label: 'Live Session', icon: RadioTower, isNew: true },
     { href: '/attendance', label: 'Attendance', icon: CalendarCheck },
     { href: '/materials/upload', label: 'Upload Materials', icon: UploadCloud },
   ];
