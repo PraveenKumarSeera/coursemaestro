@@ -1,12 +1,11 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, School } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
 import type { User } from '@/lib/types';
 
 interface StudyRoom {
@@ -21,27 +20,30 @@ interface StudyRoom {
 
 export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: {id: string, title: string}[], user: User }) {
     const router = useRouter();
-    const pathname = usePathname();
     const [activeRooms, setActiveRooms] = useState<StudyRoom[]>([]);
     
     const teacherCourseIds = useMemo(() => new Set(teacherCourses.map(c => c.id)), [teacherCourses]);
 
-    useEffect(() => {
-        const updateRooms = () => {
-            const roomsData = localStorage.getItem('study-rooms');
-            const allRooms: Record<string, StudyRoom> = roomsData ? JSON.parse(roomsData) : {};
-            
-            const relevantRooms = Object.values(allRooms).filter(room => 
-                teacherCourseIds.has(room.courseId)
-            );
-            setActiveRooms(relevantRooms);
-        };
+    const updateRooms = useCallback(() => {
+        const roomsData = localStorage.getItem('study-rooms');
+        const allRooms: Record<string, StudyRoom> = roomsData ? JSON.parse(roomsData) : {};
+        
+        const relevantRooms = Object.values(allRooms).filter(room => 
+            teacherCourseIds.has(room.courseId)
+        );
+        setActiveRooms(relevantRooms);
+    }, [teacherCourseIds]);
 
+    useEffect(() => {
+        // Initial load
         updateRooms();
+
+        // Listen for changes from other tabs
         window.addEventListener('storage', updateRooms);
 
+        // Cleanup listener on component unmount
         return () => window.removeEventListener('storage', updateRooms);
-    }, [teacherCourseIds, pathname]);
+    }, [updateRooms]);
     
     return (
         <Card className="mt-6">
@@ -60,7 +62,7 @@ export default function TeacherDashboardClient({ teacherCourses, user }: { teach
                         {activeRooms.map(room => (
                             <Card key={room.id}>
                                 <CardHeader>
-                                    <CardTitle>{room.name}</CardTitle>
+                                    <CardTitle className="font-headline">{room.name}</CardTitle>
                                     <CardDescription>{room.courseName}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
