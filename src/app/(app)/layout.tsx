@@ -73,7 +73,7 @@ function useUserSession() {
     }
     
     loadSession();
-  }, [router]);
+  }, []);
 
   return { user, notifications, loading };
 }
