@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,8 @@ interface StudyRoom {
 export default function TeacherDashboardClient({ teacherCourses, user }: { teacherCourses: {id: string, title: string}[], user: User }) {
     const router = useRouter();
     const [activeRooms, setActiveRooms] = useState<StudyRoom[]>([]);
-    const teacherCourseIds = new Set(teacherCourses.map(c => c.id));
+    
+    const teacherCourseIds = useMemo(() => new Set(teacherCourses.map(c => c.id)), [teacherCourses]);
 
     useEffect(() => {
         const updateRooms = () => {
