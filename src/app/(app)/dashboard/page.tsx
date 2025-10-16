@@ -9,7 +9,6 @@ import { getDashboardData, type StudentDashboardStats, type TeacherDashboardStat
 import type { LucideIcon } from 'lucide-react';
 import TeacherPerformanceChart from '@/components/dashboard/teacher-performance-chart';
 import LearningEfficiencyMeter from '@/components/dashboard/learning-efficiency-meter';
-import TeacherDashboardClient from '@/components/dashboard/teacher-dashboard-client';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
@@ -30,7 +29,6 @@ export default async function DashboardPage() {
     }
 
     const dashboardData = await getDashboardData(user.id, user.role);
-    const teacherCourses = user.role === 'teacher' ? await getTeacherCourses(user.id) : [];
 
     return (
         <div>
@@ -100,21 +98,16 @@ export default async function DashboardPage() {
                 )}
             </div>
             
-            {user.role === 'teacher' && (
-                <>
-                    <TeacherDashboardClient user={user} teacherCourses={teacherCourses} />
-                    {'coursePerformances' in dashboardData && dashboardData.coursePerformances && dashboardData.coursePerformances.length > 0 && (
-                        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-                            {(dashboardData as TeacherDashboardStats).coursePerformances.map((performance) => (
-                                <TeacherPerformanceChart 
-                                    key={performance.courseId} 
-                                    data={performance.gradeDistribution} 
-                                    courseTitle={performance.courseTitle}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </>
+            {user.role === 'teacher' && 'coursePerformances' in dashboardData && dashboardData.coursePerformances && dashboardData.coursePerformances.length > 0 && (
+                <div className="mt-6 grid gap-6 lg:grid-cols-2">
+                    {(dashboardData as TeacherDashboardStats).coursePerformances.map((performance) => (
+                        <TeacherPerformanceChart 
+                            key={performance.courseId} 
+                            data={performance.gradeDistribution} 
+                            courseTitle={performance.courseTitle}
+                        />
+                    ))}
+                </div>
             )}
         </div>
     );
