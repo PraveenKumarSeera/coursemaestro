@@ -25,6 +25,7 @@ type QuizBroadcast = {
   action: 'start' | 'end';
   question?: QuizQuestion;
   duration?: number;
+  timestamp: number; // Added timestamp to prevent processing old events
 };
 
 type QuizState = {
@@ -56,6 +57,7 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
     });
     const [responses, setResponses] = useState<Responses>({});
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const lastEventTimestamp = useRef<number>(0);
     const { toast } = useToast();
 
     const playQuizSound = () => {
@@ -79,22 +81,32 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         }
     };
     
-    // Function to end the quiz for everyone
-    const endQuiz = useCallback(() => {
+    const handleStartQuiz = (question: QuizQuestion, duration: number) => {
+        setResponses({});
+        setQuizState({ isActive: true, question, timer: duration });
+    };
+
+    const handleEndQuiz = () => {
         if (timerRef.current) clearInterval(timerRef.current);
-        const payload: QuizBroadcast = { action: 'end' };
-        localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        // The storage event handler will set state to inactive
-    }, []);
+        setQuizState({ isActive: false, question: null, timer: 0 });
+    };
 
-    // Function for the teacher to launch the quiz
     const launchQuiz = useCallback((question: QuizQuestion, duration: number) => {
-        const payload: QuizBroadcast = { action: 'start', question, duration };
+        const timestamp = Date.now();
+        const payload: QuizBroadcast = { action: 'start', question, duration, timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        // The storage event handler will start the quiz for everyone, including the teacher's tab
+        // Manually trigger for the current tab
+        handleStartQuiz(question, duration);
     }, []);
 
-    // Function for students to submit answers
+    const endQuiz = useCallback(() => {
+        const timestamp = Date.now();
+        const payload: QuizBroadcast = { action: 'end', timestamp };
+        localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
+        // Manually trigger for the current tab
+        handleEndQuiz();
+    }, []);
+
     const submitAnswer = useCallback(async (quizId: string, answer: string) => {
         const { user } = await getSession();
         if (!user) return;
@@ -104,39 +116,33 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             userName: user.name,
             answer,
         };
-        // Broadcast the answer
         localStorage.setItem(`${QUIZ_RESPONSE_KEY}-${user.id}-${Date.now()}`, JSON.stringify(payload));
     }, []);
     
-    // Effect for handling storage events (cross-tab communication)
     useEffect(() => {
         const handleStorageChange = async (event: StorageEvent) => {
-            // Handle quiz start/end broadcasts
             if (event.key === QUIZ_BROADCAST_KEY && event.newValue) {
                 try {
                     const payload: QuizBroadcast = JSON.parse(event.newValue);
+                    if (payload.timestamp <= lastEventTimestamp.current) return;
+                    lastEventTimestamp.current = payload.timestamp;
+
                     if (payload.action === 'start' && payload.question && payload.duration) {
-                        setResponses({}); // Clear previous responses
-                        setQuizState({ isActive: true, question: payload.question, timer: payload.duration });
-                        
+                        handleStartQuiz(payload.question, payload.duration);
                         const { user } = await getSession();
                         if(user && user.role === 'student'){
                             playQuizSound();
                             toast({ title: "Live Quiz Started!", description: "Your teacher has launched a live quiz." });
                         }
-
                     } else if (payload.action === 'end') {
-                        if (timerRef.current) clearInterval(timerRef.current);
-                        setQuizState({ isActive: false, question: null, timer: 0 });
+                        handleEndQuiz();
                     }
                 } catch (e) { console.error(e); }
             }
 
-            // Handle student response broadcasts
             if (event.key?.startsWith(QUIZ_RESPONSE_KEY) && event.newValue) {
                 try {
                     const payload: QuizResponse = JSON.parse(event.newValue);
-                    // Only update if the response is for the current active quiz
                     setResponses(prev => {
                         if (quizState.isActive && payload.quizId === quizState.question?.id) {
                             return { ...prev, [payload.userId]: payload };
@@ -151,14 +157,13 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         return () => window.removeEventListener('storage', handleStorageChange);
     }, [toast, quizState.isActive, quizState.question?.id]);
 
-    // Effect for managing the countdown timer
     useEffect(() => {
         if (quizState.isActive && quizState.timer > 0) {
             timerRef.current = setInterval(() => {
                 setQuizState(prev => {
                     const newTime = prev.timer - 1;
                     if (newTime <= 0) {
-                        endQuiz(); // End quiz when timer reaches 0
+                        endQuiz();
                         return { ...prev, isActive: false, timer: 0 };
                     }
                     return { ...prev, timer: newTime };
@@ -177,7 +182,6 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
     );
 }
 
-// Custom hook to use the context
 export function useLiveQuiz() {
     const context = useContext(LiveQuizContext);
     if (!context) {
