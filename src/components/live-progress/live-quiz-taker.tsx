@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -20,52 +19,15 @@ export default function LiveQuizTaker() {
   const { quizState, submitAnswer } = useLiveQuiz();
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const { toast } = useToast();
-
+  
   useEffect(() => {
+    // Reset local component state when the global quiz state becomes inactive
     if (!quizState.isActive) {
-      // Reset state when quiz ends
       setSelectedAnswer(null);
       setIsSubmitted(false);
     }
   }, [quizState.isActive]);
   
-  const playQuizSound = () => {
-    try {
-      const context = new (window.AudioContext || (window as any).webkitAudioContext)();
-      if (!context) return;
-      const oscillator = context.createOscillator();
-      const gainNode = context.createGain();
-
-      oscillator.type = 'sawtooth';
-      oscillator.frequency.setValueAtTime(440, context.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(880, context.currentTime + 0.2);
-
-      gainNode.gain.setValueAtTime(0.1, context.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.00001, context.currentTime + 0.3);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(context.destination);
-
-      oscillator.start(context.currentTime);
-      oscillator.stop(context.currentTime + 0.3);
-    } catch (e) {
-      console.error("Failed to play sound", e);
-    }
-  };
-
-
-  useEffect(() => {
-    if (quizState.isActive) {
-        playQuizSound();
-        toast({
-            title: "Live Quiz Started!",
-            description: "Your teacher has launched a live quiz.",
-        });
-    }
-  }, [quizState.isActive, toast]);
-
-
   const handleSubmit = () => {
     if (selectedAnswer && quizState.question) {
       submitAnswer(quizState.question.id, selectedAnswer);

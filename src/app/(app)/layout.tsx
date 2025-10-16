@@ -13,6 +13,7 @@ import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
 import { useToast } from '@/hooks/use-toast';
 import { useStudentActivityBroadcaster } from '@/hooks/use-live-student-activity';
 import LiveQuizTaker from '@/components/live-progress/live-quiz-taker';
+import { LiveQuizProvider } from '@/hooks/use-live-quiz';
 
 const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
 const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
@@ -182,17 +183,19 @@ export default function AuthenticatedLayout({
 
   return (
     <ReactFlowProvider>
-      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-        <AppSidebar user={user} />
-        <div className="flex flex-col">
-          <AppHeader user={user} notifications={notifications} />
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
-            {children}
-          </main>
-        </div>
-        {user.role === 'student' && <FloatingAIAssistant />}
-        {user.role === 'student' && <LiveQuizTaker />}
-      </div>
+        <LiveQuizProvider>
+            <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+                <AppSidebar user={user} />
+                <div className="flex flex-col">
+                <AppHeader user={user} notifications={notifications} />
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background">
+                    {children}
+                </main>
+                </div>
+                {user.role === 'student' && <FloatingAIAssistant />}
+                {user.role === 'student' && <LiveQuizTaker />}
+            </div>
+        </LiveQuizProvider>
     </ReactFlowProvider>
   );
 }
