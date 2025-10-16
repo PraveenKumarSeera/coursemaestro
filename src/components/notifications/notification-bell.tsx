@@ -19,13 +19,19 @@ import { useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 
+const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
+
+
 export default function NotificationBell({ notifications }: { notifications: Notification[] }) {
   const [isPending, startTransition] = useTransition();
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const handleMarkAsRead = (notificationId: string) => {
     startTransition(() => {
-        markNotificationAsAction(notificationId);
+        markNotificationAsAction(notificationId).then(() => {
+            // This is the key change: trigger a storage event that other tabs can listen to.
+            localStorage.setItem(NOTIFICATION_STORAGE_KEY, Date.now().toString());
+        });
     });
   };
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import AppHeader from '@/components/app-header';
@@ -6,12 +5,14 @@ import AppSidebar from '@/components/app-sidebar';
 import type { User, Notification } from '@/lib/types';
 import { usePathname, useRouter } from 'next/navigation';
 import { ReactFlowProvider } from 'reactflow';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { getSession } from '@/lib/session';
 import { getNotificationsForUser } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import FloatingAIAssistant from '@/components/ai/floating-ai-assistant';
 import { useToast } from '@/hooks/use-toast';
+
+const NOTIFICATION_STORAGE_KEY = 'coursemestro-notifications-update';
 
 function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
@@ -40,9 +41,8 @@ function useUserSession() {
       console.error("Failed to play notification sound", e);
     }
   };
-
-  useEffect(() => {
-    const fetchNotifications = async (currentUser: User) => {
+  
+  const fetchNotifications = useCallback(async (currentUser: User) => {
       const userNotifications = await getNotificationsForUser(currentUser.id);
       setNotifications(userNotifications);
 
@@ -51,28 +51,33 @@ function useUserSession() {
         playNotificationSound();
       }
       previousUnreadCount.current = currentUnreadCount;
-    };
-    
+  }, []);
+
+
+  useEffect(() => {
     async function loadSession() {
       const { user } = await getSession();
       if (user) {
         setUser(user);
-        setLoading(false);
         await fetchNotifications(user); // Initial fetch
-
-        // Poll for notifications
-        const notificationInterval = setInterval(() => fetchNotifications(user), 15000); 
-
-        return () => {
-            clearInterval(notificationInterval);
-        };
-      } else {
-         setLoading(false);
       }
+      setLoading(false);
     }
-    
     loadSession();
-  }, []);
+
+    const handleStorageChange = (event: StorageEvent) => {
+        if (event.key === NOTIFICATION_STORAGE_KEY && user) {
+            fetchNotifications(user);
+        }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    };
+
+  }, [fetchNotifications, user]);
 
   return { user, notifications, loading };
 }
