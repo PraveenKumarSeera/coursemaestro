@@ -4,7 +4,7 @@
 import AppHeader from '@/components/app-header';
 import AppSidebar from '@/components/app-sidebar';
 import type { User, Notification } from '@/lib/types';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { ReactFlowProvider } from 'reactflow';
 import { useEffect, useState, useRef } from 'react';
 import { getSession } from '@/lib/session';
@@ -18,6 +18,7 @@ function useUserSession() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const previousUnreadCount = useRef(0);
+  const router = useRouter();
 
   const playNotificationSound = () => {
     try {
@@ -60,15 +61,25 @@ function useUserSession() {
         setLoading(false);
         await fetchNotifications(user); // Initial fetch
 
-        const intervalId = setInterval(() => fetchNotifications(user), 15000); // Poll every 15 seconds
-        return () => clearInterval(intervalId);
+        // Poll for notifications
+        const notificationInterval = setInterval(() => fetchNotifications(user), 15000); 
+        
+        // Poll for page data
+        const dataRefreshInterval = setInterval(() => {
+            router.refresh();
+        }, 15000);
+
+        return () => {
+            clearInterval(notificationInterval);
+            clearInterval(dataRefreshInterval);
+        };
       } else {
          setLoading(false);
       }
     }
     
     loadSession();
-  }, []);
+  }, [router]);
 
   return { user, notifications, loading };
 }
