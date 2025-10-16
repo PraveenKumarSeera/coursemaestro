@@ -39,10 +39,16 @@ export default function TeacherDashboardClient({ teacherCourses, user }: { teach
         updateRooms();
 
         // Listen for changes from other tabs
-        window.addEventListener('storage', updateRooms);
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === 'study-rooms') {
+                updateRooms();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
 
         // Cleanup listener on component unmount
-        return () => window.removeEventListener('storage', updateRooms);
+        return () => window.removeEventListener('storage', handleStorageChange);
     }, [updateRooms]);
     
     return (
