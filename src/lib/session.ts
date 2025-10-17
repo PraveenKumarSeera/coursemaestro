@@ -1,3 +1,4 @@
+
 // In a real app, use a library like `jose` for proper JWT handling.
 // For this demo, we'll use a simple approach.
 'use server';
@@ -32,7 +33,8 @@ export async function createSession(userId: string) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
   const session = encrypt({ userId, expires });
 
-  cookies().set(SESSION_COOKIE_NAME, session, {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, session, {
     expires,
     maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
     httpOnly: true,
@@ -42,7 +44,8 @@ export async function createSession(userId: string) {
 }
 
 export async function getSession(): Promise<{ user: User | null }> {
-  const cookie = cookies().get(SESSION_COOKIE_NAME)?.value;
+  const cookieStore = await cookies();
+  const cookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
   if (!cookie) return { user: null };
 
   const session = decrypt(cookie);
@@ -63,5 +66,6 @@ export async function getSession(): Promise<{ user: User | null }> {
 }
 
 export async function deleteSession() {
-  cookies().delete(SESSION_COOKIE_NAME);
+  const cookieStore = await cookies();
+  cookieStore.delete(SESSION_COOKIE_NAME);
 }
