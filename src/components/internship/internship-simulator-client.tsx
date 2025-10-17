@@ -5,10 +5,11 @@ import { useState } from 'react';
 import type { InternshipDomain, InternshipTask, InternshipGrade } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Wand2, Building, Bot, ArrowLeft, Tv, Cloud, Code } from 'lucide-react';
+import { Loader2, Wand2, Building, Bot, ArrowLeft, Tv, Cloud, Code, Apple, Server } from 'lucide-react';
 import { gradeInternshipSubmissionAction } from '@/app/actions/internship';
 import { Textarea } from '../ui/textarea';
 import { Progress } from '../ui/progress';
+import { Users } from 'lucide-react';
 
 const iconMap: { [key: string]: React.ElementType } = {
   google: Building,
@@ -16,6 +17,9 @@ const iconMap: { [key: string]: React.ElementType } = {
   netflix: Tv,
   microsoft: Cloud,
   innovate: Code,
+  aws: Server,
+  apple: Apple,
+  meta: Users,
 };
 
 export default function InternshipSimulatorClient({ domains }: { domains: InternshipDomain[] }) {
@@ -72,7 +76,7 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
           <h1 className="text-3xl font-bold font-headline">Virtual Internship Simulator</h1>
           <p className="text-muted-foreground">Choose a company domain to receive a simulated real-world task.</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {domains.map((domain) => {
             const Icon = iconMap[domain.icon] || Building;
             return (
@@ -218,5 +222,3 @@ export default function InternshipSimulatorClient({ domains }: { domains: Intern
     </div>
   );
 }
-
-    
