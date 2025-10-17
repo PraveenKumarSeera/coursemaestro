@@ -1,481 +1,85 @@
+
 {
-  "users": [
-    {
-      "name": "rajesh",
-      "email": "rajesh@gmail.com",
-      "password": "123456",
-      "role": "teacher",
-      "id": "1759816272542"
-    },
-    {
-      "name": "Praveen Kumar",
-      "email": "praveen@mbu.edu",
-      "password": "123456",
-      "role": "student",
-      "id": "1759816290832"
-    },
-    {
-      "name": "Praveen",
-      "email": "boyohe6541@dextrago.com",
-      "password": "123456",
-      "role": "teacher",
-      "id": "1759821661427"
-    },
-    {
-      "name": "charan",
-      "email": "praveenoscar7702@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "id": "1760440561283"
-    }
-  ],
-  "courses": [
-    {
-      "id": "101",
-      "title": "Introduction to Web Development",
-      "description": "Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites. This course covers everything from basic syntax to responsive design and DOM manipulation.",
-      "teacherId": "1",
-      "duration": "8 Weeks",
-      "imageUrl": "https://picsum.photos/seed/1/600/400"
-    },
-    {
-      "id": "102",
-      "title": "Advanced React Patterns",
-      "description": "Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns for building large-scale applications.",
-      "teacherId": "1",
-      "duration": "6 Weeks",
-      "imageUrl": "https://picsum.photos/seed/2/600/400"
-    },
-    {
-      "id": "103",
-      "title": "Data Structures & Algorithms",
-      "description": "Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.",
-      "teacherId": "1",
-      "duration": "10 Weeks",
-      "imageUrl": "https://picsum.photos/seed/3/600/400"
-    },
-    {
-      "title": "DEMO",
-      "description": "this is demo avoid this ",
-      "duration": "2weeks",
-      "id": "1759821872336",
-      "teacherId": "1759816272542",
-      "imageUrl": "https://images.unsplash.com/photo-1723537814964-7e8382aaafb2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkZXNpZ24lMjBza2V0Y2h8ZW58MHx8fHwxNzU5NzY3NzUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "videoUrl": "https://youtu.be/q1unQgP7uaQ?si=h7AsJ7mqZktW_swn"
-    }
-  ],
-  "enrollments": [
-    {
-      "id": "1759821886869",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336"
-    }
-  ],
-  "assignments": [
-    {
-      "courseId": "1759821872336",
-      "title": "dbms",
-      "description": "see the data",
-      "dueDate": "2025-10-08T00:00:00.000Z",
-      "id": "1759826751201"
-    }
-  ],
-  "submissions": [
-    {
-      "assignmentId": "1759826751201",
-      "courseId": "1759821872336",
-      "content": "completed sirr",
-      "studentId": "1759816290832",
-      "id": "1759826852014",
-      "submittedAt": "2025-10-07T08:47:32.014Z",
-      "grade": 90,
-      "feedback": "nice "
-    }
-  ],
-  "discussionThreads": [
-    {
-      "courseId": "1759821872336",
-      "title": "what is html",
-      "authorId": "1759816290832",
-      "id": "1760550313671",
-      "createdAt": "2025-10-15T17:45:13.671Z"
-    }
-  ],
-  "discussionPosts": [
-    {
-      "threadId": "1760550313671",
-      "content": "can any one explain about html",
-      "authorId": "1759816290832",
-      "id": "1760550313692",
-      "createdAt": "2025-10-15T17:45:13.692Z"
-    },
-    {
-      "threadId": "1760550313671",
-      "content": "html is a forntend lang and the full form of html is hyper text markup lang",
-      "authorId": "1759816272542",
-      "id": "1760551128824",
-      "createdAt": "2025-10-15T17:58:48.824Z"
-    }
-  ],
-  "materials": [
-    {
-      "courseId": "1759821872336",
-      "title": "chapter 1",
-      "link": "https://drive.google.com/file/d/1VcHxk3x4vo3ci5YSTGWAePVU8uTmgW22/view?usp=sharing",
-      "id": "1759824600875",
-      "createdAt": "2025-10-07T08:10:00.875Z"
-    }
-  ],
-  "notifications": [
-    {
-      "userId": "1759816290832",
-      "message": "Your submission for \"dbms\" has been graded.",
-      "link": "/my-grades",
-      "id": "1760553888022",
-      "isRead": true,
-      "createdAt": "2025-10-15T18:44:48.022Z"
-    },
-    {
-      "userId": "1760440561283",
-      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
-      "link": "/dashboard",
-      "id": "1760525034846",
-      "isRead": false,
-      "createdAt": "2025-10-15T10:43:54.846Z"
-    },
-    {
-      "userId": "1759821661427",
-      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
-      "link": "/dashboard",
-      "id": "1760525034802",
-      "isRead": false,
-      "createdAt": "2025-10-15T10:43:54.802Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
-      "link": "/dashboard",
-      "id": "1760525034765",
-      "isRead": true,
-      "createdAt": "2025-10-15T10:43:54.765Z"
-    },
-    {
-      "userId": "1759816272542",
-      "message": "Welcome to CourseMaestro! 🎉 We're excited to have you join our learning community. Whether you're here to master new skills, explore fresh ideas, or level up your career, you've come to the right place. Dive into your courses, track your progress, and let your learning journey begin! — Team CourseMaestro",
-      "link": "/dashboard",
-      "id": "1760525034735",
-      "isRead": true,
-      "createdAt": "2025-10-15T10:43:54.735Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "Your submission for \"dbms\" has been graded.",
-      "link": "/my-grades",
-      "id": "1759826977030",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:49:37.030Z"
-    },
-    {
-      "userId": "1759816272542",
-      "message": "Praveen Kumar submitted \"dbms\"",
-      "link": "/assignments/1759826751201",
-      "id": "1759826852056",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:47:32.056Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "New assignment posted: \"dbms\"",
-      "link": "/courses/1759821872336?tab=assignments",
-      "id": "1759826751211",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:45:51.211Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "New assignment posted: \"see\"",
-      "link": "/courses/1759821872336?tab=assignments",
-      "id": "1759825698561",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:28:18.561Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "New assignment posted: \"dbms\"",
-      "link": "/courses/1759821872336?tab=assignments",
-      "id": "1759825522435",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:25:22.435Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "New assignment posted: \"dbms\"",
-      "link": "/courses/1759821872336?tab=assignments",
-      "id": "1759825188681",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:19:48.681Z"
-    },
-    {
-      "userId": "1759816290832",
-      "message": "New assignment posted: \"dbms schema\"",
-      "link": "/courses/1759821872336?tab=assignments",
-      "id": "1759825020942",
-      "isRead": true,
-      "createdAt": "2025-10-07T08:17:00.942Z"
-    }
-  ],
-  "attendance": [
-    {
-      "id": "1759821891302",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "date": "2025-10-07",
-      "isPresent": true
-    },
-    {
-      "id": "1760166325895",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "date": "2025-10-11",
-      "isPresent": true
-    },
-    {
-      "id": "1760265854166",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "date": "2025-10-12",
-      "isPresent": true
-    },
-    {
-      "id": "1760549193310",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "date": "2025-10-15",
-      "isPresent": true
-    },
-    {
-      "id": "1760599574539",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "date": "2025-10-16",
-      "isPresent": true
-    },
-    {
-      "id": "1760669705565",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "date": "2025-10-17",
-      "isPresent": true
-    }
-  ],
-  "certificates": [
-    {
-      "id": "1759986291602",
-      "studentId": "1759816290832",
-      "courseId": "1759821872336",
-      "issuedAt": "2025-10-09T05:04:51.602Z",
-      "verificationId": "b65ec167-e4f7-4533-b076-4fb059bf9138"
-    }
-  ],
-  "challenges": [
-    {
-      "id": "ch1",
-      "title": "E-commerce Search Component",
-      "description": "Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.",
-      "company": "Shopify",
-      "points": 150,
-      "imageUrl": "https://picsum.photos/seed/ch1/600/400"
-    },
-    {
-      "id": "ch2",
-      "title": "Social Media Dashboard UI",
-      "description": "Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.",
-      "company": "Meta",
-      "points": 200,
-      "imageUrl": "https://picsum.photos/seed/ch2/600/400"
-    },
-    {
-      "id": "ch3",
-      "title": "API for a Simple To-Do App",
-      "description": "Develop a RESTful API for a to-do list application. The API should support creating, reading, updating, and deleting tasks, and include user authentication.",
-      "company": "Google",
-      "points": 250,
-      "imageUrl": "https://picsum.photos/seed/ch3/600/400"
-    }
-  ],
-  "challengeSubmissions": [],
-  "challengeVotes": [],
-  "projects": [
-    {
-      "id": "proj1",
-      "studentId": "2",
-      "title": "Personal Portfolio Website",
-      "description": "A responsive personal portfolio website built with Next.js and Tailwind CSS to showcase my projects and skills. Features a clean design, animations, and a contact form.",
-      "imageUrl": "https://picsum.photos/seed/proj1/600/400",
-      "projectUrl": "https://github.com/example/portfolio",
-      "tags": [
-        "Next.js",
-        "React",
-        "Tailwind CSS",
-        "UI/UX"
-      ],
-      "createdAt": "2025-10-11T02:30:10.578Z"
-    },
-    {
-      "id": "proj2",
-      "studentId": "3",
-      "title": "E-commerce Storefront",
-      "description": "A full-featured e-commerce storefront with product browsing, a shopping cart, and a checkout process. Built with React and integrated with a mock API for product data.",
-      "imageUrl": "https://picsum.photos/seed/proj2/600/400",
-      "projectUrl": "https://github.com/example/ecommerce",
-      "tags": [
-        "React",
-        "TypeScript",
-        "E-commerce",
-        "API"
-      ],
-      "createdAt": "2025-10-04T02:30:10.578Z"
-    },
-    {
-      "id": "proj3",
-      "studentId": "4",
-      "title": "AI-Powered Blog Generator",
-      "description": "A web app that uses generative AI to create blog posts from a simple prompt. Users can input a topic, and the app generates a well-structured article. Built with Genkit and Next.js.",
-      "imageUrl": "https://picsum.photos/seed/proj3/600/400",
-      "projectUrl": "https://github.com/example/ai-blog",
-      "tags": [
-        "AI",
-        "Genkit",
-        "Next.js",
-        "Generative AI"
-      ],
-      "createdAt": "2025-10-14T02:30:10.578Z"
-    },
-    {
-      "id": "proj4",
-      "studentId": "5",
-      "title": "Task Management App",
-      "description": "A Kanban-style task management application with drag-and-drop functionality to organize tasks into different stages of completion. Includes features like due dates and priority levels.",
-      "imageUrl": "https://picsum.photos/seed/proj4/600/400",
-      "projectUrl": "https://github.com/example/task-manager",
-      "tags": [
-        "React",
-        "dnd-kit",
-        "Firebase",
-        "Real-time"
-      ],
-      "createdAt": "2025-09-26T02:30:10.578Z"
-    },
-    {
-      "id": "proj5",
-      "studentId": "2",
-      "title": "Weather Forecast App",
-      "description": "A clean and simple weather application that provides current weather conditions and a 5-day forecast for any city. It fetches data from a third-party weather API.",
-      "imageUrl": "https://picsum.photos/seed/proj5/600/400",
-      "projectUrl": "https://github.com/example/weather-app",
-      "tags": [
-        "JavaScript",
-        "API",
-        "HTML/CSS",
-        "Geolocation"
-      ],
-      "createdAt": "2025-10-08T02:30:10.578Z"
-    },
-    {
-      "id": "proj6",
-      "studentId": "3",
-      "title": "Recipe Finder",
-      "description": "A web app that helps users discover new recipes based on ingredients they have on hand. Features a search and filter system to find the perfect meal.",
-      "imageUrl": "https://picsum.photos/seed/proj6/600/400",
-      "projectUrl": "https://github.com/example/recipe-finder",
-      "tags": [
-        "Vue.js",
-        "API Integration",
-        "UI/UX"
-      ],
-      "createdAt": "2025-10-01T02:30:10.578Z"
-    }
-  ],
-  "internshipDomains": [
-    {
+  "users": {
+    "u1": { "id": "u1", "name": "Alice Johnson", "email": "alice@example.com", "password": "password123", "role": "student" },
+    "u2": { "id": "u2", "name": "Bob Williams", "email": "bob@example.com", "password": "password123", "role": "student" },
+    "u3": { "id": "u3", "name": "Charlie Brown", "email": "charlie@example.com", "password": "password123", "role": "student" },
+    "t1": { "id": "t1", "name": "Prof. Davis", "email": "davis@example.com", "password": "password123", "role": "teacher" }
+  },
+  "courses": {
+    "c1": { "id": "c1", "title": "Introduction to Web Development", "description": "Learn the fundamentals of HTML, CSS, and JavaScript.", "duration": "8 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/1/600/400" },
+    "c2": { "id": "c2", "title": "Advanced React", "description": "Dive deep into React hooks, state management, and performance.", "duration": "6 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/2/600/400" },
+    "c3": { "id": "c3", "title": "Data Structures & Algorithms", "description": "Master essential data structures and algorithms for interviews.", "duration": "10 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/3/600/400" }
+  },
+  "enrollments": {
+    "e1": { "id": "e1", "studentId": "u1", "courseId": "c1" },
+    "e2": { "id": "e2", "studentId": "u1", "courseId": "c2" },
+    "e3": { "id": "e3", "studentId": "u2", "courseId": "c1" },
+    "e4": { "id": "e4", "studentId": "u3", "courseId": "c3" }
+  },
+  "assignments": {
+    "as1": { "id": "as1", "courseId": "c1", "title": "HTML & CSS Basics", "description": "Create a simple personal portfolio page.", "dueDate": "2024-06-08T23:59:59.000Z" },
+    "as2": { "id": "as2", "courseId": "c1", "title": "JavaScript Fundamentals", "description": "Build a simple calculator.", "dueDate": "2024-06-15T23:59:59.000Z" },
+    "as3": { "id": "as3", "courseId": "c2", "title": "React Hooks", "description": "Build a todo list app using React Hooks.", "dueDate": "2024-06-06T23:59:59.000Z" },
+    "as4": { "id": "as4", "courseId": "c3", "title": "Big O Notation", "description": "Analyze the time complexity of given algorithms.", "dueDate": "2024-05-29T23:59:59.000Z" }
+  },
+  "submissions": {
+    "sub1": { "id": "sub1", "assignmentId": "as1", "studentId": "u1", "content": "Here is my portfolio. I used Flexbox for the layout.", "submittedAt": "2024-06-01T10:00:00.000Z", "grade": 95, "feedback": "Excellent work! Your CSS is clean and your HTML is semantic." },
+    "sub2": { "id": "sub2", "assignmentId": "as4", "studentId": "u3", "content": "The complexity is O(n^2).", "submittedAt": "2024-05-28T14:30:00.000Z", "grade": 88, "feedback": "Correct analysis. Well done." },
+    "sub3": { "id": "sub3", "assignmentId": "as1", "studentId": "u2", "content": "My submission for the portfolio.", "submittedAt": "2024-06-01T11:00:00.000Z", "grade": null, "feedback": null }
+  },
+  "discussion_threads": {
+    "th1": { "id": "th1", "courseId": "c1", "title": "Question about Flexbox", "authorId": "u1", "createdAt": "2024-05-31T09:00:00.000Z" }
+  },
+  "discussion_posts": {
+    "po1": { "id": "po1", "threadId": "th1", "authorId": "u1", "content": "I'm having trouble centering a div. Can anyone help?", "createdAt": "2024-05-31T09:00:00.000Z" },
+    "po2": { "id": "po2", "threadId": "th1", "authorId": "t1", "content": "Sure! Try using 'display: flex; justify-content: center; align-items: center;' on the parent container.", "createdAt": "2024-06-01T12:00:00.000Z" }
+  },
+  "materials": {
+    "mat1": { "id": "mat1", "courseId": "c1", "title": "MDN Docs for Flexbox", "link": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox", "createdAt": "2024-06-01T12:05:00.000Z" }
+  },
+  "notifications": {},
+  "attendance": {
+      "att1": {"id": "att1", "studentId": "u1", "courseId": "c1", "date": "2024-06-01", "isPresent": true },
+      "att2": {"id": "att2", "studentId": "u2", "courseId": "c1", "date": "2024-06-01", "isPresent": true }
+  },
+  "certificates": {},
+  "challenges": {},
+  "challenge_submissions": {},
+  "challenge_votes": {},
+  "projects": {},
+  "internship_domains": {
+    "google": {
       "id": "google",
       "name": "Google",
-      "description": "A multinational technology company focusing on search engine technology, online advertising, cloud computing, and more.",
-      "icon": "google",
+      "description": "Tackle a problem in large-scale systems, search, or machine learning. Focus on scalability and efficiency.",
+      "icon": "Building",
       "task": {
-        "title": "Design a Scalable Ad-Targeting Algorithm",
-        "scenario": "The Ads team is looking to improve the relevance of ads served on its content network. Your task is to design a high-level algorithm that can personalize ad delivery based on a user's recent search history and the content of the page they are viewing. Performance and privacy are key considerations.",
-        "task": "Propose a system architecture that can process user data in near real-time to select the most relevant ad from a large inventory. Consider how you would balance personalization with user privacy concerns.",
+        "title": "Design a Scalable URL Shortener",
+        "scenario": "You are an intern on the Google Cloud Platform team. A major client needs a highly available and scalable URL shortening service, similar to bit.ly. Your task is to design the system architecture.",
+        "task": "Design the core components of the service. Consider the API for creating and retrieving URLs, the data storage strategy for handling billions of URLs, and how you would handle traffic spikes.",
         "deliverables": [
-          "A high-level system diagram.",
-          "Pseudo-code for your core ad-selection logic.",
-          "A brief (1-2 paragraphs) explanation of your approach to privacy."
+          "A high-level system architecture diagram.",
+          "A description of your chosen database schema (SQL or NoSQL) and why.",
+          "An outline of the API endpoints (e.g., POST /shorten, GET /{shortCode})."
         ]
       }
     },
-    {
+    "openai": {
       "id": "openai",
       "name": "OpenAI",
-      "description": "An AI research and deployment company. Their mission is to ensure that artificial general intelligence benefits all of humanity.",
-      "icon": "openai",
+      "description": "Work on a problem related to large language models, AI safety, or creative AI applications.",
+      "icon": "Bot",
       "task": {
-        "title": "Develop a Safety Filter for a Language Model",
-        "scenario": "As part of the safety alignment team, you are tasked with developing a new pre-processing filter for a large language model. This filter should identify and flag potentially harmful or biased content in user prompts before they are sent to the model.",
-        "task": "Design a multi-layered approach to detect harmful content. This could involve keyword matching, sentiment analysis, and even a smaller, specialized classification model. How would you handle ambiguous cases?",
+        "title": "Develop a Content Moderation Filter",
+        "scenario": "As part of the AI Safety team at OpenAI, you've been tasked with improving the content filter for a new generative AI model. The goal is to prevent the model from generating harmful or inappropriate content.",
+        "task": "Propose a multi-layered filter system. Think about how you would classify different types of harmful content (e.g., hate speech, violence, misinformation) and what actions to take when a potential violation is detected.",
         "deliverables": [
           "A description of at least three layers of your filter.",
           "An example of a prompt that would be flagged and one that would pass, with explanations.",
           "A strategy for minimizing false positives (flagging safe content)."
         ]
       }
-    },
-    {
-      "id": "netflix",
-      "name": "Netflix",
-      "description": "A leading streaming service offering a wide variety of award-winning TV shows, movies, anime, documentaries, and more.",
-      "icon": "netflix",
-      "task": {
-        "title": "Architect a \"Skip Intro\" Detection System",
-        "scenario": "The content delivery team wants to automatically identify the \"Skip Intro\" timestamp for all new shows added to the platform. Manually finding this point is time-consuming and inefficient.",
-        "task": "Propose a system that can analyze video and audio data to automatically detect the end of an opening title sequence. Consider audio cues (like a recurring theme song) and visual cues (like recurring title cards or credits).",
-        "deliverables": [
-          "A flowchart of the proposed system.",
-          "A list of key features to extract from video and audio frames.",
-          "An explanation of how you would train and validate your model."
-        ]
-      }
-    },
-    {
-      "id": "microsoft",
-      "name": "Microsoft",
-      "description": "A technology corporation that produces computer software, consumer electronics, personal computers, and related services.",
-      "icon": "microsoft",
-      "task": {
-        "title": "Design a Cloud Cost-Saving Feature",
-        "scenario": "The Azure cloud team has noticed that many customers over-provision their resources, leading to wasted spending. You are asked to design a feature for the Azure portal that proactively suggests cost-saving measures.",
-        "task": "Design a system that analyzes a customer's resource usage patterns over time (e.g., CPU, memory, network). Based on this analysis, it should generate specific, actionable recommendations, such as downsizing a VM, using a different storage tier, or scheduling resources to turn off during non-peak hours.",
-        "deliverables": [
-          "A mock-up of the UI for the recommendation dashboard.",
-          "A list of the key metrics your system would need to track.",
-          "An example recommendation with a calculated potential cost saving."
-        ]
-      }
-    },
-    {
-      "id": "innovate",
-      "name": "Innovate Inc.",
-      "description": "A fast-growing startup focused on developer tools and productivity software.",
-      "icon": "innovate",
-      "task": {
-        "title": "Create a Code Review Assistant Bot",
-        "scenario": "To improve code quality and speed up the review process, your team wants to build a GitHub bot that automatically comments on pull requests with suggestions for improvement.",
-        "task": "Design a bot that checks for common issues in new code submissions. It should flag things like missing documentation, functions that are too long (high cyclomatic complexity), and potential security vulnerabilities (e.g., hardcoded secrets).",
-        "deliverables": [
-          "A list of at least five specific rules the bot would check for.",
-          "An example of a code snippet that would trigger a bot comment.",
-          "The text of the comment the bot would post on the pull request."
-        ]
-      }
     }
-  ]
+  }
 }

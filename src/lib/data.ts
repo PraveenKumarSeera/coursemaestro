@@ -2,7 +2,7 @@
 
 'use server';
 
-import { placeholderImages } from './placeholder-images.json';
+import dbData from './db.json';
 import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote, Project, InternshipDomain } from './types';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
@@ -12,135 +12,60 @@ import { getSession } from './session';
 
 const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student' };
 
-
-// In a real app, this would be a database. For this demo, we'll use a simple in-memory store.
-// To make this work across server requests in a development environment, we'll attach it to the global object.
 type Db = {
-    users: User[];
-    courses: Course[];
-    enrollments: Enrollment[];
-    assignments: Assignment[];
-    submissions: Submission[];
-    discussion_threads: DiscussionThread[];
-    discussion_posts: DiscussionPost[];
-    materials: Material[];
-    notifications: Notification[];
-    attendance: Attendance[];
-    certificates: Certificate[];
-    challenges: Challenge[];
-    challenge_submissions: ChallengeSubmission[];
-    challenge_votes: ChallengeVote[];
-    projects: Project[];
-    internship_domains: InternshipDomain[];
+    users: Record<string, User>;
+    courses: Record<string, Course>;
+    enrollments: Record<string, Enrollment>;
+    assignments: Record<string, Assignment>;
+    submissions: Record<string, Submission>;
+    discussion_threads: Record<string, DiscussionThread>;
+    discussion_posts: Record<string, DiscussionPost>;
+    materials: Record<string, Material>;
+    notifications: Record<string, Notification>;
+    attendance: Record<string, Attendance>;
+    certificates: Record<string, Certificate>;
+    challenges: Record<string, Challenge>;
+    challenge_submissions: Record<string, ChallengeSubmission>;
+    challenge_votes: Record<string, ChallengeVote>;
+    projects: Record<string, Project>;
+    internship_domains: Record<string, InternshipDomain>;
 };
 
 declare global {
   var __db: Db | undefined;
 }
 
-const db: Db = global.__db || {
-    users: [
-        { id: '1', name: 'Albus Dumbledore', email: 'teacher@school.com', password: 'password', role: 'teacher' },
-        { id: '2', name: 'Harry Potter', email: 'student@school.com', password: 'password', role: 'student' },
-        { id: '3', name: 'Hermione Granger', email: 'student2@school.com', password: 'password', role: 'student' },
-        { id: '4', name: 'Ron Weasley', email: 'student3@school.com', password: 'password', role: 'student' },
-    ],
-    courses: [
-        { id: '101', title: 'Introduction to Web Development', description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites.', teacherId: '1', duration: '8 Weeks', imageUrl: 'https://picsum.photos/seed/1/600/400' },
-        { id: '102', title: 'Advanced React Patterns', description: 'Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns.', teacherId: '1', duration: '6 Weeks', imageUrl: 'https://picsum.photos/seed/2/600/400' },
-        { id: '103', title: 'Data Structures & Algorithms', description: 'Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.', teacherId: '1', duration: '10 Weeks', imageUrl: 'https://picsum.photos/seed/3/600/400' },
-    ],
-    enrollments: [
-        { id: 'en1', studentId: '2', courseId: '101' },
-        { id: 'en2', studentId: '2', courseId: '102' },
-        { id: 'en3', studentId: '3', courseId: '101' },
-        { id: 'en4', studentId: '3', courseId: '103' },
-        { id: 'en5', studentId: '4', courseId: '101' },
-    ],
-    assignments: [
-        { id: 'as1', courseId: '101', title: 'HTML & CSS Basics', description: 'Create a simple personal portfolio page.', dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: 'as2', courseId: '101', title: 'JavaScript Fundamentals', description: 'Build a simple calculator application.', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: 'as3', courseId: '102', title: 'React Hooks', description: 'Refactor a class component to use functional components and hooks.', dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: 'as4', courseId: '103', title: 'Big O Notation', description: 'Analyze the time complexity of three different sorting algorithms.', dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-    ],
-    submissions: [
-        { id: 'sub1', assignmentId: 'as1', studentId: '2', content: 'Here is my submission for the portfolio page.', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), grade: 92, feedback: 'Great job on the structure and styling! Consider adding a bit more content.' },
-        { id: 'sub2', assignmentId: 'as4', studentId: '2', content: 'Here is my analysis of the sorting algorithms.', submittedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), grade: 78, feedback: 'Good start, but your analysis of bubble sort could be more detailed.' },
-        { id: 'sub3', assignmentId: 'as1', studentId: '3', content: 'My portfolio page submission.', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), grade: 98, feedback: 'Excellent work! Very clean code and a beautiful design.' },
-    ],
-    discussion_threads: [
-        { id: 'th1', courseId: '101', title: 'Question about Flexbox', authorId: '2', createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-    ],
-    discussion_posts: [
-        { id: 'po1', threadId: 'th1', authorId: '2', content: 'I\'m having trouble centering a div. Can anyone help?', createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: 'po2', threadId: 'th1', authorId: '1', content: 'Sure! Have you tried using `display: flex; justify-content: center; align-items: center;` on the parent container?', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-    ],
-    materials: [
-        { id: 'mat1', courseId: '101', title: 'MDN Web Docs', link: 'https://developer.mozilla.org', createdAt: new Date().toISOString() },
-    ],
-    notifications: [],
-    attendance: [
-        { id: 'att1', studentId: '2', courseId: '101', date: new Date().toISOString().split('T')[0], isPresent: true },
-        { id: 'att2', studentId: '3', courseId: '101', date: new Date().toISOString().split('T')[0], isPresent: true },
-    ],
-    certificates: [],
-    challenges: [
-      { id: 'ch1', title: 'E-commerce Search Component', description: 'Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.', company: 'Shopify', points: 150, icon: 'ShoppingCart' },
-      { id: 'ch2', title: 'Social Media Dashboard UI', description: 'Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.', company: 'Meta', points: 200, icon: 'Users' },
-    ],
-    challenge_submissions: [],
-    challenge_votes: [],
-    projects: [],
-    internship_domains: [
-        {
-            id: 'google',
-            name: 'Google',
-            description: 'A multinational technology company focusing on search engine technology, online advertising, cloud computing, and more.',
-            icon: 'google',
-            task: {
-                title: 'Design a Scalable Ad-Targeting Algorithm',
-                scenario: 'The Ads team is looking to improve the relevance of ads served on its content network. Your task is to design a high-level algorithm that can personalize ad delivery based on a user\'s recent search history and the content of the page they are viewing. Performance and privacy are key considerations.',
-                task: 'Propose a system architecture that can process user data in near real-time to select the most relevant ad from a large inventory. Consider how you would balance personalization with user privacy concerns.',
-                deliverables: [
-                    'A high-level system diagram.',
-                    'Pseudo-code for your core ad-selection logic.',
-                    'A brief (1-2 paragraphs) explanation of your approach to privacy.'
-                ]
-            }
-        },
-        {
-            id: 'openai',
-            name: 'OpenAI',
-            description: 'An AI research and deployment company. Their mission is to ensure that artificial general intelligence benefits all of humanity.',
-            icon: 'openai',
-            task: {
-                title: 'Develop a Safety Filter for a Language Model',
-                scenario: 'As part of the safety alignment team, you are tasked with developing a new pre-processing filter for a large language model. This filter should identify and flag potentially harmful or biased content in user prompts before they are sent to the model.',
-                task: 'Design a multi-layered approach to detect harmful content. This could involve keyword matching, sentiment analysis, and even a smaller, specialized classification model. How would you handle ambiguous cases?',
-                deliverables: [
-                    'A description of at least three layers of your filter.',
-                    'An example of a prompt that would be flagged and one that would pass, with explanations.',
-                    'A strategy for minimizing false positives (flagging safe content).',
-                ]
-            }
-        },
-    ]
-};
+// Initialize due dates relative to the current date
+const now = new Date();
+dbData.assignments['as1'].dueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+dbData.assignments['as2'].dueDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
+dbData.assignments['as3'].dueDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString();
+dbData.assignments['as4'].dueDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
+dbData.submissions['sub1'].submittedAt = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
+dbData.submissions['sub2'].submittedAt = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString();
+dbData.submissions['sub3'].submittedAt = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
+dbData.discussion_threads['th1'].createdAt = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
+dbData.discussion_posts['po1'].createdAt = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
+dbData.discussion_posts['po2'].createdAt = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
+dbData.materials['mat1'].createdAt = now.toISOString();
+dbData.attendance['att1'].date = now.toISOString().split('T')[0];
+dbData.attendance['att2'].date = now.toISOString().split('T')[0];
+
+const db: Db = global.__db || dbData;
 
 if (process.env.NODE_ENV !== 'production') {
   global.__db = db;
 }
 
-
 // --- User Functions ---
 export async function findUserByEmail(email: string): Promise<User | undefined> {
-    return db.users.find(user => user.email === email);
+    return Object.values(db.users).find(user => user.email === email);
 }
 
 export const findUserById = unstable_cache(
     async (id: string): Promise<User> => {
         if (!id || id === '0') return unknownUser;
-        return db.users.find(user => user.id === id) || unknownUser;
+        return db.users[id] || unknownUser;
     },
     ['user'],
     { tags: ['users'], revalidate: 3600 }
@@ -148,17 +73,17 @@ export const findUserById = unstable_cache(
 
 
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
-    const newUser = { id: randomUUID(), ...data };
-    db.users.push(newUser);
+    const id = randomUUID();
+    const newUser = { id, ...data };
+    db.users[id] = newUser;
     return newUser;
 }
 
 export async function updateUser(id: string, data: Partial<Omit<User, 'id' | 'email' | 'role'>>): Promise<User | undefined> {
-    const userIndex = db.users.findIndex(u => u.id === id);
-    if (userIndex === -1) return undefined;
+    if (!db.users[id]) return undefined;
 
-    db.users[userIndex] = { ...db.users[userIndex], ...data };
-    return db.users[userIndex];
+    db.users[id] = { ...db.users[id], ...data };
+    return db.users[id];
 }
 
 export async function getAuthenticatedUser(): Promise<User | null> {
@@ -168,19 +93,20 @@ export async function getAuthenticatedUser(): Promise<User | null> {
 
 // --- Course Functions ---
 export async function getAllCourses(query?: string): Promise<Course[]> {
+    let courses = Object.values(db.courses);
     if (query) {
         const lowercasedQuery = query.toLowerCase();
-        return db.courses.filter(course =>
+        courses = courses.filter(course =>
             course.title.toLowerCase().includes(lowercasedQuery) ||
             course.description.toLowerCase().includes(lowercasedQuery)
         );
     }
-    return db.courses;
+    return courses;
 }
 
 export const getCourseById = unstable_cache(
     async (id: string): Promise<(Course & { teacher: User }) | undefined> => {
-        const course = db.courses.find(c => c.id === id);
+        const course = db.courses[id];
         if (!course) return undefined;
         
         const teacher = await findUserById(course.teacherId);
@@ -194,28 +120,36 @@ export const getCourseById = unstable_cache(
 
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
+    const id = randomUUID();
     const newCourse: Course = {
         ...data,
-        id: randomUUID(),
+        id: id,
         teacherId,
-        imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
+        imageUrl: `https://picsum.photos/seed/${id}/600/400`,
     };
-    db.courses.push(newCourse);
+    db.courses[id] = newCourse;
     return newCourse;
 }
 
 export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' | 'teacherId' | 'imageUrl'>>): Promise<Course | undefined> {
-    const courseIndex = db.courses.findIndex(c => c.id === id);
-    if (courseIndex === -1) return undefined;
+    if (!db.courses[id]) return undefined;
 
-    db.courses[courseIndex] = { ...db.courses[courseIndex], ...data };
-    return db.courses[courseIndex];
+    db.courses[id] = { ...db.courses[id], ...data };
+    return db.courses[id];
 }
 
 export async function deleteCourse(id: string): Promise<boolean> {
-     db.courses = db.courses.filter(c => c.id !== id);
-     db.enrollments = db.enrollments.filter(e => e.courseId !== id);
-     db.assignments = db.assignments.filter(a => a.courseId !== id);
+     delete db.courses[id];
+     for (const enrollmentId in db.enrollments) {
+        if (db.enrollments[enrollmentId].courseId === id) {
+            delete db.enrollments[enrollmentId];
+        }
+     }
+     for (const assignmentId in db.assignments) {
+         if (db.assignments[assignmentId].courseId === id) {
+             delete db.assignments[assignmentId];
+         }
+     }
     return true;
 }
 
@@ -225,7 +159,7 @@ export async function getTeacherById(id: string): Promise<User> {
 }
 
 export async function getTeacherCourses(teacherId: string, query?: string): Promise<Course[]> {
-    const courses = db.courses.filter(course => course.teacherId === teacherId);
+    let courses = Object.values(db.courses).filter(course => course.teacherId === teacherId);
     if (query) {
         const lowercasedQuery = query.toLowerCase();
         return courses.filter(course =>
@@ -239,42 +173,43 @@ export async function getTeacherCourses(teacherId: string, query?: string): Prom
 
 // --- Enrollment Functions ---
 export async function getStudentEnrollments(studentId: string): Promise<Enrollment[]> {
-    return db.enrollments.filter(e => e.studentId === studentId);
+    return Object.values(db.enrollments).filter(e => e.studentId === studentId);
 }
 
 export async function getStudentsByCourse(courseId: string): Promise<User[]> {
-    const studentIds = db.enrollments.filter(e => e.courseId === courseId).map(e => e.studentId);
-    return db.users.filter(u => studentIds.includes(u.id));
+    const studentIds = Object.values(db.enrollments).filter(e => e.courseId === courseId).map(e => e.studentId);
+    return Object.values(db.users).filter(u => studentIds.includes(u.id));
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
-    const alreadyEnrolled = db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+    const alreadyEnrolled = Object.values(db.enrollments).some(e => e.studentId === studentId && e.courseId === courseId);
     if (alreadyEnrolled) return null;
 
-    const newEnrollment: Enrollment = { id: randomUUID(), studentId, courseId };
-    db.enrollments.push(newEnrollment);
+    const id = randomUUID();
+    const newEnrollment: Enrollment = { id, studentId, courseId };
+    db.enrollments[id] = newEnrollment;
     return newEnrollment;
 }
 
 export async function isEnrolled(studentId: string, courseId: string): Promise<boolean> {
-    return db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+    return Object.values(db.enrollments).some(e => e.studentId === studentId && e.courseId === courseId);
 }
 
 export async function getTeacherStudents(teacherId: string) {
-    const teacherCourseIds = new Set(db.courses.filter(c => c.teacherId === teacherId).map(c => c.id));
-    const studentIds = new Set(db.enrollments.filter(e => teacherCourseIds.has(e.courseId)).map(e => e.studentId));
+    const teacherCourseIds = new Set(Object.values(db.courses).filter(c => c.teacherId === teacherId).map(c => c.id));
+    const studentIds = new Set(Object.values(db.enrollments).filter(e => teacherCourseIds.has(e.courseId)).map(e => e.studentId));
     
     return Promise.all(Array.from(studentIds).map(async (studentId) => {
         const student = await findUserById(studentId);
-        const enrolledCourseIds = db.enrollments
+        const enrolledCourseIds = Object.values(db.enrollments)
             .filter(e => e.studentId === studentId && teacherCourseIds.has(e.courseId))
             .map(e => e.courseId);
         
-        const courses = db.courses
+        const courses = Object.values(db.courses)
             .filter(c => enrolledCourseIds.includes(c.id))
             .map(c => c.title);
 
-        const submissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
+        const submissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
         const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
         const averageGrade = submissions.length > 0 ? Math.round(totalGrade / submissions.length) : 0;
 
@@ -301,18 +236,18 @@ export async function getTeacherStudents(teacherId: string) {
 
 // --- Assignment Functions ---
 export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
-    return db.assignments.filter(a => a.courseId === courseId);
+    return Object.values(db.assignments).filter(a => a.courseId === courseId);
 }
 
 export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> {
-    const teacherCourses = db.courses.filter(c => c.teacherId === teacherId);
+    const teacherCourses = Object.values(db.courses).filter(c => c.teacherId === teacherId);
     const teacherCourseIds = teacherCourses.map(c => c.id);
     
-    const assignments = db.assignments.filter(a => teacherCourseIds.includes(a.courseId));
+    const assignments = Object.values(db.assignments).filter(a => teacherCourseIds.includes(a.courseId));
 
     return assignments.map(assignment => {
         const course = teacherCourses.find(c => c.id === assignment.courseId);
-        const submissions = db.submissions.filter(s => s.assignmentId === assignment.id).length;
+        const submissions = Object.values(db.submissions).filter(s => s.assignmentId === assignment.id).length;
         return {
             ...assignment,
             courseTitle: course?.title || 'Unknown Course',
@@ -322,17 +257,18 @@ export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assig
 }
 
 export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<Assignment> {
-    const newAssignment = { id: randomUUID(), ...data };
-    db.assignments.push(newAssignment);
+    const id = randomUUID();
+    const newAssignment = { id, ...data };
+    db.assignments[id] = newAssignment;
     return newAssignment;
 }
 
 export async function getAssignmentById(id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> {
-    const assignment = db.assignments.find(a => a.id === id);
+    const assignment = db.assignments[id];
     if (!assignment) return undefined;
 
     const submissions = await Promise.all(
-        db.submissions
+        Object.values(db.submissions)
         .filter(s => s.assignmentId === id)
         .map(async (sub) => {
             const student = await findUserById(sub.studentId);
@@ -346,39 +282,39 @@ export async function getAssignmentById(id: string): Promise<(Assignment & { sub
 
 // --- Submission Functions ---
 export async function getSubmissionById(id: string): Promise<Submission | undefined> {
-    return db.submissions.find(s => s.id === id);
+    return db.submissions[id];
 }
 
 export async function getStudentSubmission(studentId: string, assignmentId: string): Promise<Submission | undefined> {
-    return db.submissions.find(s => s.studentId === studentId && s.assignmentId === assignmentId);
+    return Object.values(db.submissions).find(s => s.studentId === studentId && s.assignmentId === assignmentId);
 }
 
 export async function createSubmission(data: Omit<Submission, 'id' | 'submittedAt' | 'grade' | 'feedback'>): Promise<Submission> {
+    const id = randomUUID();
     const newSubmission: Submission = { 
         ...data, 
-        id: randomUUID(), 
+        id, 
         submittedAt: new Date().toISOString(),
         grade: null,
         feedback: null
     };
-    db.submissions.push(newSubmission);
+    db.submissions[id] = newSubmission;
     return newSubmission;
 }
 
 export async function gradeSubmission(submissionId: string, grade: number, feedback: string): Promise<Submission | undefined> {
-    const subIndex = db.submissions.findIndex(s => s.id === submissionId);
-    if (subIndex === -1) return undefined;
+    if (!db.submissions[submissionId]) return undefined;
 
-    db.submissions[subIndex] = { ...db.submissions[subIndex], grade, feedback };
-    return db.submissions[subIndex];
+    db.submissions[submissionId] = { ...db.submissions[submissionId], grade, feedback };
+    return db.submissions[submissionId];
 }
 
 export async function getStudentGrades(studentId: string): Promise<GradedSubmission[]> {
-    const studentSubmissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
+    const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
     
     return studentSubmissions.map(sub => {
-        const assignment = db.assignments.find(a => a.id === sub.assignmentId);
-        const course = db.courses.find(c => c.id === assignment?.courseId);
+        const assignment = db.assignments[sub.assignmentId];
+        const course = db.courses[assignment?.courseId];
         return {
             ...sub,
             assignment: assignment!,
@@ -390,23 +326,23 @@ export async function getStudentGrades(studentId: string): Promise<GradedSubmiss
 
 // --- Discussion Functions ---
 export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
-    const threads = db.discussion_threads.filter(t => t.courseId === courseId);
+    const threads = Object.values(db.discussion_threads).filter(t => t.courseId === courseId);
     return Promise.all(threads.map(async (thread) => {
         const author = await findUserById(thread.authorId);
-        const postCount = db.discussion_posts.filter(p => p.threadId === thread.id).length;
+        const postCount = Object.values(db.discussion_posts).filter(p => p.threadId === thread.id).length;
         return { ...thread, author, postCount };
     }));
 }
 
 export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
-    const thread = db.discussion_threads.find(t => t.id === threadId);
+    const thread = db.discussion_threads[threadId];
     if (!thread) return undefined;
     const author = await findUserById(thread.authorId);
     return { ...thread, author };
 }
 
 export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
-    const posts = db.discussion_posts.filter(p => p.threadId === threadId).sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    const posts = Object.values(db.discussion_posts).filter(p => p.threadId === threadId).sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     return Promise.all(posts.map(async (post) => {
         const author = await findUserById(post.authorId);
         return { ...post, author };
@@ -414,69 +350,72 @@ export async function getPostsByThread(threadId: string): Promise<(DiscussionPos
 }
 
 export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
-    const newThread: DiscussionThread = { ...data, id: randomUUID(), createdAt: new Date().toISOString() };
-    db.discussion_threads.push(newThread);
+    const id = randomUUID();
+    const newThread: DiscussionThread = { ...data, id, createdAt: new Date().toISOString() };
+    db.discussion_threads[id] = newThread;
     return newThread;
 }
 
 export async function createPost(data: Omit<DiscussionPost, 'id' | 'createdAt'>): Promise<DiscussionPost> {
-    const newPost: DiscussionPost = { ...data, id: randomUUID(), createdAt: new Date().toISOString() };
-    db.discussion_posts.push(newPost);
+    const id = randomUUID();
+    const newPost: DiscussionPost = { ...data, id, createdAt: new Date().toISOString() };
+    db.discussion_posts[id] = newPost;
     return newPost;
 }
 
 // --- Material Functions ---
 export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Promise<Material> {
+  const id = randomUUID();
   const newMaterial: Material = {
     ...data,
-    id: randomUUID(),
+    id,
     createdAt: new Date().toISOString(),
   };
-  db.materials.push(newMaterial);
+  db.materials[id] = newMaterial;
   return newMaterial;
 }
 
 export async function getMaterialsByCourse(courseId: string): Promise<Material[]> {
-    return db.materials.filter(m => m.courseId === courseId);
+    return Object.values(db.materials).filter(m => m.courseId === courseId);
 }
 
 // --- Notification Functions ---
 export async function createNotification(data: Omit<Notification, 'id' | 'isRead' | 'createdAt'>): Promise<Notification> {
+    const id = randomUUID();
     const newNotification: Notification = {
         ...data,
-        id: randomUUID(),
+        id,
         isRead: false,
         createdAt: new Date().toISOString(),
     };
-    db.notifications.push(newNotification);
+    db.notifications[id] = newNotification;
     return newNotification;
 }
 
 export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
-    return db.notifications.filter(n => n.userId === userId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return Object.values(db.notifications).filter(n => n.userId === userId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
-    const notification = db.notifications.find(n => n.id === notificationId);
-    if (!notification) return false;
-    notification.isRead = true;
+    if (!db.notifications[notificationId]) return false;
+    db.notifications[notificationId].isRead = true;
     return true;
 }
 
 // --- Leaderboard Functions ---
 export async function getStudentRankings(): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number, credibilityPoints: number }[]> {
-    const students = db.users.filter(u => u.role === 'student');
+    const students = Object.values(db.users).filter(u => u.role === 'student');
     
     return Promise.all(students.map(async (student) => {
-        const submissions = db.submissions.filter(s => s.studentId === student.id && s.grade !== null);
+        const submissions = Object.values(db.submissions).filter(s => s.studentId === student.id && s.grade !== null);
         const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
         const averageGrade = submissions.length > 0 ? totalGrade / submissions.length : 0;
         
-        const challengeSubmissions = db.challenge_submissions.filter(cs => cs.studentId === student.id);
+        const challengeSubmissions = Object.values(db.challenge_submissions).filter(cs => cs.studentId === student.id);
         const credibilityPoints = await challengeSubmissions.reduce(async (accPromise, cs) => {
             const acc = await accPromise;
-            const challenge = db.challenges.find(c => c.id === cs.challengeId);
-            const votes = db.challenge_votes.filter(v => v.submissionId === cs.id).length;
+            const challenge = db.challenges[cs.challengeId];
+            const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === cs.id).length;
             return acc + (votes * 10) + (challenge?.points || 0);
         }, Promise.resolve(0));
         
@@ -492,19 +431,20 @@ export async function getStudentRankings(): Promise<{ user: User, averageGrade: 
 // --- Attendance Functions ---
 export async function markAttendance(studentId: string, courseId: string): Promise<Attendance | null> {
     const today = new Date().toISOString().split('T')[0];
-    const existing = db.attendance.find(a => a.studentId === studentId && a.courseId === courseId && a.date === today);
+    const existing = Object.values(db.attendance).find(a => a.studentId === studentId && a.courseId === courseId && a.date === today);
     if (existing) return null;
 
-    const newRecord: Attendance = { id: randomUUID(), studentId, courseId, date: today, isPresent: true };
-    db.attendance.push(newRecord);
+    const id = randomUUID();
+    const newRecord: Attendance = { id, studentId, courseId, date: today, isPresent: true };
+    db.attendance[id] = newRecord;
     return newRecord;
 }
 
 export async function getAllAttendance(): Promise<(Attendance & { student: User, course: Course })[]> {
-    return db.attendance
+    return Object.values(db.attendance)
         .map(att => {
-            const student = db.users.find(u => u.id === att.studentId);
-            const course = db.courses.find(c => c.id === att.courseId);
+            const student = db.users[att.studentId];
+            const course = db.courses[att.courseId];
             if (!student || !course) return null;
             return { ...att, student, course };
         })
@@ -515,21 +455,21 @@ export async function getAllAttendance(): Promise<(Attendance & { student: User,
 const PASSING_GRADE = 70;
 
 export async function getCompletedCoursesForStudent(studentId: string): Promise<Course[]> {
-    const enrollments = db.enrollments.filter(e => e.studentId === studentId);
+    const enrollments = Object.values(db.enrollments).filter(e => e.studentId === studentId);
     const completedCourses: Course[] = [];
 
     for (const enrollment of enrollments) {
         const courseId = enrollment.courseId;
-        const assignments = db.assignments.filter(a => a.courseId === courseId);
+        const assignments = Object.values(db.assignments).filter(a => a.courseId === courseId);
         if (assignments.length === 0) continue;
 
         const allPassed = assignments.every(a => {
-            const sub = db.submissions.find(s => s.studentId === studentId && s.assignmentId === a.id);
+            const sub = Object.values(db.submissions).find(s => s.studentId === studentId && s.assignmentId === a.id);
             return sub && sub.grade !== null && sub.grade >= PASSING_GRADE;
         });
 
         if (allPassed) {
-            const course = db.courses.find(c => c.id === courseId);
+            const course = db.courses[courseId];
             if (course) completedCourses.push(course);
         }
     }
@@ -537,17 +477,17 @@ export async function getCompletedCoursesForStudent(studentId: string): Promise<
 }
 
 export async function getStudentCertificates(studentId: string): Promise<(Certificate & { course: Course })[]> {
-    return db.certificates
+    return Object.values(db.certificates)
         .filter(c => c.studentId === studentId)
         .map(cert => {
-            const course = db.courses.find(c => c.id === cert.courseId);
+            const course = db.courses[cert.courseId];
             return { ...cert, course: course! };
         })
         .filter(c => c.course);
 }
 
 export async function getCertificateById(id: string): Promise<(Certificate & { student: User; course: Course & { teacher: User } }) | undefined> {
-    const certificate = db.certificates.find(c => c.id === id);
+    const certificate = db.certificates[id];
     if (!certificate) return undefined;
 
     const student = await findUserById(certificate.studentId);
@@ -561,69 +501,73 @@ export async function getCertificateById(id: string): Promise<(Certificate & { s
 
 
 export async function generateCertificate(studentId: string, courseId: string): Promise<Certificate | null> {
-    const existing = db.certificates.find(c => c.studentId === studentId && c.courseId === courseId);
+    const existing = Object.values(db.certificates).find(c => c.studentId === studentId && c.courseId === courseId);
     if (existing) return null;
 
-    const newCertificate: Certificate = { id: randomUUID(), studentId, courseId, issuedAt: new Date().toISOString(), verificationId: randomUUID() };
-    db.certificates.push(newCertificate);
+    const id = randomUUID();
+    const newCertificate: Certificate = { id, studentId, courseId, issuedAt: new Date().toISOString(), verificationId: randomUUID() };
+    db.certificates[id] = newCertificate;
     return newCertificate;
 }
 
 // --- Challenge Functions ---
 export async function getAllChallenges(): Promise<Challenge[]> {
-    return db.challenges;
+    return Object.values(db.challenges);
 }
 
 export async function getChallengeById(id: string): Promise<Challenge | undefined> {
-    return db.challenges.find(c => c.id === id);
+    return db.challenges[id];
 }
 
 export async function getSubmissionsForChallenge(challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> {
-    const submissions = db.challenge_submissions.filter(cs => cs.challengeId === challengeId);
+    const submissions = Object.values(db.challenge_submissions).filter(cs => cs.challengeId === challengeId);
     return Promise.all(submissions.map(async (sub) => {
         const student = await findUserById(sub.studentId);
-        const votes = db.challenge_votes.filter(v => v.submissionId === sub.id).length;
+        const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
         return { ...sub, student, votes };
     }));
 }
 
 export async function createChallengeSubmission(data: Omit<ChallengeSubmission, 'id' | 'submittedAt'>): Promise<ChallengeSubmission> {
-    const newSubmission: ChallengeSubmission = { ...data, id: randomUUID(), submittedAt: new Date().toISOString() };
-    db.challenge_submissions.push(newSubmission);
+    const id = randomUUID();
+    const newSubmission: ChallengeSubmission = { ...data, id, submittedAt: new Date().toISOString() };
+    db.challenge_submissions[id] = newSubmission;
     return newSubmission;
 }
 
 export async function voteOnSubmission(submissionId: string, voterId: string): Promise<ChallengeVote | null> {
-    const sub = db.challenge_submissions.find(cs => cs.id === submissionId);
+    const sub = db.challenge_submissions[submissionId];
     if (!sub || sub.studentId === voterId) return null;
 
-    const existingVote = db.challenge_votes.find(v => v.submissionId === submissionId && v.voterId === voterId);
+    const existingVote = Object.values(db.challenge_votes).find(v => v.submissionId === submissionId && v.voterId === voterId);
     if (existingVote) return null;
-
-    const newVote: ChallengeVote = { id: randomUUID(), submissionId, voterId };
-    db.challenge_votes.push(newVote);
+    
+    const id = randomUUID();
+    const newVote: ChallengeVote = { id, submissionId, voterId };
+    db.challenge_votes[id] = newVote;
     return newVote;
 }
 
 export async function getVotesForSubmission(submissionId: string): Promise<number> {
-    return db.challenge_votes.filter(v => v.submissionId === submissionId).length;
+    return Object.values(db.challenge_votes).filter(v => v.submissionId === submissionId).length;
 }
 
 // --- Project Showcase Functions ---
 export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl'>): Promise<Project> {
+    const id = randomUUID();
     const newProject: Project = {
         ...data,
-        id: randomUUID(),
+        id,
         imageUrl: `https://picsum.photos/seed/proj${Date.now()}/600/400`,
         createdAt: new Date().toISOString(),
     };
-    db.projects.push(newProject);
+    db.projects[id] = newProject;
     return newProject;
 }
 
 export async function getAllProjects(): Promise<(Project & { student: User })[]> {
     return Promise.all(
-        db.projects.map(async p => {
+        Object.values(db.projects).map(async p => {
             const student = await findUserById(p.studentId);
             return { ...p, student };
         })
@@ -631,12 +575,12 @@ export async function getAllProjects(): Promise<(Project & { student: User })[]>
 }
 
 export async function getProjectsByStudent(studentId: string): Promise<Project[]> {
-    return db.projects.filter(p => p.studentId === studentId);
+    return Object.values(db.projects).filter(p => p.studentId === studentId);
 }
 
 // --- Internship Functions ---
 export async function getInternshipDomains(): Promise<InternshipDomain[]> {
-    return db.internship_domains;
+    return Object.values(db.internship_domains);
 }
 
 
@@ -690,20 +634,20 @@ export type DashboardStats = StudentDashboardStats | TeacherDashboardStats;
 
 export async function getDashboardData(userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> {
     if (role === 'teacher') {
-        const courses = db.courses.filter(c => c.teacherId === userId);
+        const courses = Object.values(db.courses).filter(c => c.teacherId === userId);
         const courseIds = courses.map(c => c.id);
         
-        const studentIds = new Set(db.enrollments.filter(e => courseIds.includes(e.courseId)).map(e => e.studentId));
+        const studentIds = new Set(Object.values(db.enrollments).filter(e => courseIds.includes(e.courseId)).map(e => e.studentId));
 
-        const assignments = db.assignments.filter(a => courseIds.includes(a.courseId));
+        const assignments = Object.values(db.assignments).filter(a => courseIds.includes(a.courseId));
         const assignmentIds = assignments.map(a => a.id);
 
-        const pendingSubmissions = db.submissions.filter(s => assignmentIds.includes(s.assignmentId) && s.grade === null).length;
+        const pendingSubmissions = Object.values(db.submissions).filter(s => assignmentIds.includes(s.assignmentId) && s.grade === null).length;
 
         const coursePerformances: CoursePerformance[] = await Promise.all(courses.map(async (course) => {
-            const courseAssignments = db.assignments.filter(a => a.courseId === course.id);
+            const courseAssignments = Object.values(db.assignments).filter(a => a.courseId === course.id);
             const courseAssignmentIds = courseAssignments.map(a => a.id);
-            const courseSubmissions = db.submissions.filter(s => courseAssignmentIds.includes(s.assignmentId) && s.grade !== null);
+            const courseSubmissions = Object.values(db.submissions).filter(s => courseAssignmentIds.includes(s.assignmentId) && s.grade !== null);
             
             const gradeDistribution = [
                 { name: 'A (90+)', students: 0 }, { name: 'B (80-89)', students: 0 },
@@ -726,7 +670,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
             for (const studentId of Array.from(studentIds)) {
                 const student = await findUserById(studentId);
-                const studentSubmissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
+                const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
                 if (studentSubmissions.length > 0) {
                     const totalGrade = studentSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
                     const averageGrade = totalGrade / studentSubmissions.length;
@@ -750,14 +694,14 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             studentOfTheWeek
         };
     } else { // Student role
-        const enrollments = db.enrollments.filter(e => e.studentId === userId);
+        const enrollments = Object.values(db.enrollments).filter(e => e.studentId === userId);
         const enrolledCourseIds = enrollments.map(e => e.courseId);
 
-        const allAssignments = db.assignments.filter(a => enrolledCourseIds.includes(a.courseId));
+        const allAssignments = Object.values(db.assignments).filter(a => enrolledCourseIds.includes(a.courseId));
         
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-        const studentSubmissions = db.submissions.filter(s => s.studentId === userId);
+        const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === userId);
         const submittedAssignmentIds = new Set(studentSubmissions.map(s => s.assignmentId));
         const assignmentsDueSoon = allAssignments.filter(a => new Date(a.dueDate) > new Date() && new Date(a.dueDate) <= sevenDaysFromNow && !submittedAssignmentIds.has(a.id)).length;
         
@@ -769,7 +713,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             if (grade >= 90) return 'A'; if (grade >= 80) return 'B'; if (grade >= 70) return 'C'; if (grade >= 60) return 'D'; return grade > 0 ? 'F' : 'N/A';
         };
 
-        const attendanceRows = db.attendance.filter(a => a.studentId === userId);
+        const attendanceRows = Object.values(db.attendance).filter(a => a.studentId === userId);
         let totalAttention = 0, totalCompletion = 0;
         for (const enrollment of enrollments) {
             const firstAttendance = attendanceRows.find(a => a.courseId === enrollment.courseId);
@@ -790,7 +734,7 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 0;
         const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (averageGrade * 0.35);
 
-        const sortedAttendance = db.attendance.filter(a => a.studentId === userId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        const sortedAttendance = Object.values(db.attendance).filter(a => a.studentId === userId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         let streak = 0;
         if (sortedAttendance.length > 0) {
             const uniqueDates = [...new Set(sortedAttendance.map(d => d.date))].map(d => parseISO(d)).sort((a,b) => b.getTime() - a.getTime());
