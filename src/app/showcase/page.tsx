@@ -93,7 +93,7 @@ export default async function ShowcasePage() {
                                 </div>
                                 <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{project.description}</p>
                                 <div className="flex flex-wrap gap-2">
-                                    {project.tags.map(tag => (
+                                    {project.tags && project.tags.map(tag => (
                                     <Badge key={tag} variant="secondary">{tag}</Badge>
                                     ))}
                                 </div>
