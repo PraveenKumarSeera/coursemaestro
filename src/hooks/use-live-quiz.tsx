@@ -97,10 +97,9 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
 
     const launchQuiz = useCallback((question: QuizQuestion, duration: number) => {
         const timestamp = Date.now();
-        lastEventTimestamp.current = timestamp; 
+        lastEventTimestamp.current = timestamp;
         const payload: QuizBroadcast = { action: 'start', question, duration, timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        // Manually trigger for the current (teacher's) tab
         handleStartQuiz(question, duration);
     }, [handleStartQuiz]);
 
@@ -109,7 +108,6 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
         lastEventTimestamp.current = timestamp;
         const payload: QuizBroadcast = { action: 'end', timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
-        // Manually trigger for the current (teacher's) tab
         handleEndQuiz();
     }, [handleEndQuiz]);
 
@@ -123,8 +121,8 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             userName: user.name,
             answer,
         };
-        // Use a unique key for each submission to ensure the storage event fires
-        localStorage.setItem(`${QUIZ_RESPONSE_KEY}-${user.id}-${Date.now()}`, JSON.stringify(payload));
+        // Use a consistent key but unique value to trigger the event
+        localStorage.setItem(QUIZ_RESPONSE_KEY, JSON.stringify({ ...payload, timestamp: Date.now() }));
     }, []);
 
     // Effect for handling storage events from other tabs
@@ -144,7 +142,7 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
                 } catch (e) { console.error("Error parsing quiz broadcast:", e); }
             }
 
-            if (event.key?.startsWith(QUIZ_RESPONSE_KEY) && event.newValue) {
+            if (event.key === QUIZ_RESPONSE_KEY && event.newValue) {
                  try {
                     const payload: QuizResponse = JSON.parse(event.newValue);
                     if (quizState.isActive && payload.quizId === quizState.question?.id) {

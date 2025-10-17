@@ -21,20 +21,74 @@
     {
       "id": "course-ui-ux-design",
       "description": "A course on UI/UX design principles.",
-      "imageUrl": "https://images.unsplash.com/photo-1723537814964-7e8382aaafb2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkZXNpZ24lMjBza2V0Y2h8ZW58MHx8fHwxNzU5NzY3NzUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://picsum.photos/seed/4/600/400",
       "imageHint": "design sketch"
     },
     {
       "id": "course-machine-learning",
       "description": "An introduction to machine learning.",
-      "imageUrl": "https://images.unsplash.com/photo-1549925245-f20a1bac6454?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyb2JvdCUyMGJyYWlufGVufDB8fHx8MTc1OTczMDQxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://picsum.photos/seed/5/600/400",
       "imageHint": "robot brain"
     },
     {
       "id": "course-digital-marketing",
       "description": "A course on digital marketing strategies.",
-      "imageUrl": "https://images.unsplash.com/photo-1603145733146-ae562a55031e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxzb2NpYWwlMjBtZWRpYXxlbnwwfHx8fDE3NTk3Njc1ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://picsum.photos/seed/6/600/400",
       "imageHint": "social media"
+    },
+    {
+      "id": "project-portfolio",
+      "description": "A personal portfolio website project.",
+      "imageUrl": "https://picsum.photos/seed/proj1/600/400",
+      "imageHint": "project screenshot"
+    },
+    {
+      "id": "project-ecommerce",
+      "description": "An e-commerce storefront project.",
+      "imageUrl": "https://picsum.photos/seed/proj2/600/400",
+      "imageHint": "online store"
+    },
+    {
+      "id": "project-ai-blog",
+      "description": "An AI-powered blog generator project.",
+      "imageUrl": "https://picsum.photos/seed/proj3/600/400",
+      "imageHint": "robot writing"
+    },
+    {
+      "id": "project-task-manager",
+      "description": "A Kanban-style task management app.",
+      "imageUrl": "https://picsum.photos/seed/proj4/600/400",
+      "imageHint": "task board"
+    },
+    {
+      "id": "project-weather-app",
+      "description": "A weather forecast application.",
+      "imageUrl": "https://picsum.photos/seed/proj5/600/400",
+      "imageHint": "weather map"
+    },
+    {
+      "id": "project-recipe-finder",
+      "description": "A recipe discovery application.",
+      "imageUrl": "https://picsum.photos/seed/proj6/600/400",
+      "imageHint": "food ingredients"
+    },
+    {
+      "id": "project-data-viz",
+      "description": "A data visualization dashboard.",
+      "imageUrl": "https://picsum.photos/seed/proj7/600/400",
+      "imageHint": "charts graphs"
+    },
+    {
+      "id": "project-social-clone",
+      "description": "A social media platform clone.",
+      "imageUrl": "https://picsum.photos/seed/proj8/600/400",
+      "imageHint": "social network"
+    },
+    {
+      "id": "project-markdown-editor",
+      "description": "An online markdown editor.",
+      "imageUrl": "https://picsum.photos/seed/proj9/600/400",
+      "imageHint": "text editor"
     }
   ]
 }
