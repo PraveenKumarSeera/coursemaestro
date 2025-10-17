@@ -53,7 +53,8 @@ export default function EnrollButton({ courseId }: { courseId: string }) {
                 });
             }
         });
-        router.push(`/courses/${courseId}`);
+        // Force a client-side refresh to show the updated state
+        router.refresh();
       }
     }
   }, [state, toast, router, courseId, addTimelineEvent]);

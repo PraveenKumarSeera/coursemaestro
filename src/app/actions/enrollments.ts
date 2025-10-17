@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -26,6 +27,7 @@ export async function enrollInCourseAction(
       return { message: 'You are already enrolled in this course.', success: false };
     }
     revalidatePath('/courses');
+    revalidatePath(`/courses/${courseId}`); // Revalidate the specific course page
     return { message: 'Successfully enrolled!', success: true };
   } catch (error) {
     return { message: 'Failed to enroll in course.', success: false };
