@@ -189,23 +189,6 @@ export const InternshipTaskGeneratorOutputSchema = z.object({
 });
 export type InternshipTaskGeneratorOutput = z.infer<typeof InternshipTaskGeneratorOutputSchema>;
 
-// Internship Simulator - Grader
-export const InternshipGraderInputSchema = z.object({
-  taskTitle: z.string().describe('The title of the task being graded.'),
-  taskDescription: z.string().describe('The description of the task being graded.'),
-  submissionText: z.string().describe('The student\'s submission text.'),
-});
-export type InternshipGraderInput = z.infer<typeof InternshipGraderInputSchema>;
-
-export const InternshipGraderOutputSchema = z.object({
-    problemSolving: z.number().min(0).max(100).describe('A score from 0-100 for problem-solving skills.'),
-    creativity: z.number().min(0).max(100).describe('A score from 0-100 for creativity.'),
-    overall: z.number().min(0).max(100).describe('An overall weighted score for the submission.'),
-    feedback: z.string().describe('Constructive, paragraph-form feedback on the submission, highlighting strengths and areas for improvement.'),
-});
-export type InternshipGraderOutput = z.infer<typeof InternshipGraderOutputSchema>;
-
-
 // Brain Stretch Generator
 export const BrainStretchGeneratorInputSchema = z.object({
     courseMaterial: z.string().describe('The course material to generate puzzles from.'),
