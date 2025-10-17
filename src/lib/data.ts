@@ -35,21 +35,6 @@ declare global {
   var __db: Db | undefined;
 }
 
-const now = new Date();
-dbData.assignments['as1'].dueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
-dbData.assignments['as2'].dueDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
-dbData.assignments['as3'].dueDate = new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString();
-dbData.assignments['as4'].dueDate = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
-dbData.submissions['sub1'].submittedAt = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
-dbData.submissions['sub2'].submittedAt = new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString();
-dbData.submissions['sub3'].submittedAt = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
-dbData.discussion_threads['th1'].createdAt = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
-dbData.discussion_posts['po1'].createdAt = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString();
-dbData.discussion_posts['po2'].createdAt = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
-dbData.materials['mat1'].createdAt = now.toISOString();
-dbData.attendance['att1'].date = now.toISOString().split('T')[0];
-dbData.attendance['att2'].date = now.toISOString().split('T')[0];
-
 const db: Db = global.__db || dbData;
 
 if (process.env.NODE_ENV !== 'production') {

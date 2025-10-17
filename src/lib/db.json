@@ -1,170 +1,179 @@
+
 {
-  "users": {
-    "u1": { "id": "u1", "name": "Alice Johnson", "email": "alice@example.com", "password": "password123", "role": "student" },
-    "u2": { "id": "u2", "name": "Bob Williams", "email": "bob@example.com", "password": "password123", "role": "student" },
-    "u3": { "id": "u3", "name": "Charlie Brown", "email": "charlie@example.com", "password": "password123", "role": "student" },
-    "t1": { "id": "t1", "name": "Prof. Davis", "email": "davis@example.com", "password": "password123", "role": "teacher" },
-    "t2": { "id": "t2", "name": "Dr. Miller", "email": "miller@example.com", "password": "password123", "role": "teacher" }
-  },
-  "courses": {
-    "c1": { "id": "c1", "title": "Intro to Web Development", "description": "Learn the fundamentals of HTML, CSS, and JavaScript.", "duration": "8 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/1/600/400", "videoUrl": "https://www.youtube.com/watch?v=G3e-cpL7ofc" },
-    "c2": { "id": "c2", "title": "Advanced React", "description": "Master React hooks, state management, and performance.", "duration": "6 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/2/600/400" },
-    "c3": { "id": "c3", "title": "Data Structures & Algorithms", "description": "Understand fundamental data structures and algorithms.", "duration": "10 Weeks", "teacherId": "t2", "imageUrl": "https://picsum.photos/seed/3/600/400" }
-  },
-  "enrollments": {
-    "e1": { "id": "e1", "studentId": "u1", "courseId": "c1" },
-    "e2": { "id": "e2", "studentId": "u1", "courseId": "c2" },
-    "e3": { "id": "e3", "studentId": "u2", "courseId": "c1" },
-    "e4": { "id": "e4", "studentId": "u3", "courseId": "c3" }
-  },
-  "assignments": {
-    "as1": { "id": "as1", "courseId": "c1", "title": "HTML & CSS Basics", "description": "Create a simple personal portfolio page.", "dueDate": "2024-06-08T23:59:59.000Z" },
-    "as2": { "id": "as2", "courseId": "c1", "title": "JavaScript Fundamentals", "description": "Build a simple calculator.", "dueDate": "2024-06-15T23:59:59.000Z" },
-    "as3": { "id": "as3", "courseId": "c2", "title": "React Hooks", "description": "Build a todo list app using React Hooks.", "dueDate": "2024-06-06T23:59:59.000Z" },
-    "as4": { "id": "as4", "courseId": "c3", "title": "Big O Notation", "description": "Analyze the time complexity of given algorithms.", "dueDate": "2024-05-29T23:59:59.000Z" }
-  },
-  "submissions": {
-    "sub1": { "id": "sub1", "assignmentId": "as1", "studentId": "u1", "content": "Here is my portfolio. I used flexbox for the layout.", "submittedAt": "2024-06-01T10:00:00.000Z", "grade": 95, "feedback": "Excellent work! Your CSS is clean and your HTML is semantic." },
-    "sub2": { "id": "sub2", "assignmentId": "as4", "studentId": "u3", "content": "I believe the time complexity is O(n log n).", "submittedAt": "2024-05-28T14:30:00.000Z", "grade": 88, "feedback": "Correct analysis. Well done." },
-    "sub3": { "id": "sub3", "assignmentId": "as2", "studentId": "u1", "content": "My calculator app is complete.", "submittedAt": "2024-06-14T10:00:00.000Z", "grade": 72, "feedback": "Functionality is there, but the UI could be improved. Also, consider edge cases like division by zero." }
-  },
-  "discussion_threads": {
-    "th1": { "id": "th1", "courseId": "c1", "title": "Question about CSS Flexbox", "authorId": "u2", "createdAt": "2024-06-02T11:00:00.000Z" }
-  },
-  "discussion_posts": {
-    "po1": { "id": "po1", "threadId": "th1", "authorId": "u2", "content": "I'm having trouble centering a div. Can anyone help?", "createdAt": "2024-06-02T11:00:00.000Z" },
-    "po2": { "id": "po2", "threadId": "th1", "authorId": "t1", "content": "Sure! Try using `display: flex; justify-content: center; align-items: center;` on the parent container.", "createdAt": "2024-06-02T12:30:00.000Z" }
-  },
-  "materials": {
-    "mat1": { "id": "mat1", "courseId": "c1", "title": "MDN Web Docs", "link": "https://developer.mozilla.org/", "createdAt": "2024-06-01T09:00:00.000Z" }
-  },
+  "users": {},
+  "courses": {},
+  "enrollments": {},
+  "assignments": {},
+  "submissions": {},
+  "discussion_threads": {},
+  "discussion_posts": {},
+  "materials": {},
   "notifications": {},
-  "attendance": {
-    "att1": { "id": "att1", "studentId": "u1", "courseId": "c1", "date": "2024-06-03", "isPresent": true },
-    "att2": { "id": "att2", "studentId": "u2", "courseId": "c1", "date": "2024-06-03", "isPresent": true }
-  },
+  "attendance": {},
   "certificates": {},
   "challenges": {
-      "chal1": { "id": "chal1", "title": "E-commerce Search API", "description": "Design and document a RESTful API for an e-commerce platform that allows users to search for products with filters and sorting. Focus on the API contract, not the implementation.", "company": "Innovate Inc.", "points": 100, "icon": "Code" },
-      "chal2": { "id": "chal2", "title": "Social Media Feed Algorithm", "description": "Propose an algorithm for a social media feed that prioritizes user engagement. Consider factors like recency, user interactions, and content type. Write a whitepaper explaining your approach.", "company": "ConnectSphere", "points": 150, "icon": "Users" },
-      "chal3": { "id": "chal3", "title": "Database Schema for a Booking App", "description": "Design a normalized database schema for a hotel booking application. The schema should handle users, hotels, rooms, and bookings. Provide an ERD (Entity-Relationship Diagram).", "company": "TravelPro", "points": 120, "icon": "Database"}
+    "ch1": {
+      "id": "ch1",
+      "title": "E-commerce Recommendation Engine",
+      "description": "Design a system that recommends products to users based on their browsing history and past purchases. The solution should be scalable and handle real-time user behavior.",
+      "company": "Innovate Inc.",
+      "points": 100,
+      "icon": "ShoppingCart"
+    },
+    "ch2": {
+      "id": "ch2",
+      "title": "Social Media Feed Algorithm",
+      "description": "Develop an algorithm to create a personalized social media feed. The algorithm should balance content from friends, followed pages, and new discoveries to maximize user engagement.",
+      "company": "ConnectSphere",
+      "points": 120,
+      "icon": "Users"
+    },
+    "ch3": {
+      "id": "ch3",
+      "title": "Live Code Collaboration Tool",
+      "description": "Architect a real-time code editor that allows multiple users to edit the same file simultaneously, showing each other's cursors and selections, similar to VS Code Live Share.",
+      "company": "DevSync",
+      "points": 150,
+      "icon": "Code"
+    },
+    "ch4": {
+      "id": "ch4",
+      "title": "Real-Time Chat Moderation AI",
+      "description": "Create a service that automatically detects and flags toxic or inappropriate messages in a live chat stream using natural language processing. The system must be fast and accurate.",
+      "company": "SafeTalk",
+      "points": 130,
+      "icon": "MessageSquare"
+    },
+    "ch5": {
+      "id": "ch5",
+      "title": "CI/CD Pipeline Optimization",
+      "description": "Analyze a complex CI/CD pipeline and propose a strategy to reduce build times by 30%. Your proposal should include changes to caching, parallelization, and testing strategies.",
+      "company": "QuantumLeap",
+      "points": 110,
+      "icon": "GitMerge"
+    },
+    "ch6": {
+      "id": "ch6",
+      "title": "Database Sharding Strategy",
+      "description": "Design a sharding strategy for a rapidly growing monolithic database to improve performance and scalability. Justify your choice of sharding key and explain the data migration process.",
+      "company": "DataScale",
+      "points": 140,
+      "icon": "Database"
+    }
   },
   "challenge_submissions": {},
   "challenge_votes": {},
-  "projects": {
-      "proj1": {"id": "proj1", "studentId": "u1", "title": "My Personal Portfolio", "description": "A responsive portfolio website built with React and Tailwind CSS to showcase my projects and skills. Features a dark mode toggle and a contact form.", "imageUrl": "https://picsum.photos/seed/proj1/600/400", "projectUrl": "https://github.com", "tags": ["React", "Tailwind CSS", "Next.js"], "createdAt": "2024-06-01T10:00:00.000Z"},
-      "proj2": {"id": "proj2", "studentId": "u2", "title": "Data Visualization Dashboard", "description": "A dashboard for visualizing sales data using D3.js. It includes interactive charts and filters to explore trends over time.", "imageUrl": "https://picsum.photos/seed/proj7/600/400", "projectUrl": "https://github.com", "tags": ["D3.js", "JavaScript", "Data Viz"], "createdAt": "2024-05-28T14:30:00.000Z"}
-  },
+  "projects": {},
   "internship_domains": {
-    "d1": {
-      "id": "d1",
+    "google": {
+      "id": "google",
       "name": "Google",
-      "description": "Tackle a challenge in large-scale systems, search, or cloud computing.",
+      "description": "Tackle a large-scale data processing challenge inspired by the systems that power Google Search.",
       "icon": "google",
       "task": {
-        "title": "Design a Scalable URL Shortener",
-        "scenario": "You're an intern on the Google Cloud Platform team. A major client needs to create a highly scalable URL shortening service, similar to bit.ly, that can handle billions of requests per month. They need a high-level technical design proposal before they commit resources.",
-        "task": "Design the system architecture for this service. Consider how you would handle generating unique short URLs, redirecting users, and storing the mapping. Think about scalability, reliability, and analytics.",
+        "title": "Design a Web Crawler",
+        "scenario": "The Search Infrastructure team wants to improve the freshness of its index. Your task is to design a new, highly-efficient web crawler that can discover and fetch billions of pages while being respectful to web servers.",
+        "task": "Propose a high-level architecture for this distributed web crawling system. Consider aspects like URL frontier management, politeness policies (robots.txt, crawl-delay), duplicate detection, and scalability.",
         "deliverables": [
-          "A high-level system diagram showing the main components (e.g., Load Balancer, Web Servers, Database, Caching Layer).",
-          "A brief (1-2 paragraphs) explanation of your choice of database (e.g., SQL vs. NoSQL) and why.",
-          "Pseudo-code for the function that would generate a unique short code from a long URL."
+          "A high-level system diagram.",
+          "A 1-page document explaining the core components and data flow.",
+          "Pseudo-code for the URL frontier management logic."
         ]
       }
     },
-    "d2": {
-      "id": "d2",
+    "openai": {
+      "id": "openai",
       "name": "OpenAI",
-      "description": "Explore the frontiers of AI by designing an application that leverages large language models.",
+      "description": "Explore the ethical and technical challenges of deploying cutting-edge AI models.",
       "icon": "openai",
       "task": {
-        "title": "Develop a Concept for an AI-Powered Code Review Tool",
-        "scenario": "You're interning with the applied engineering team at OpenAI. Your manager wants to explore new applications for GPT-4. You've been tasked with creating a concept proposal for a tool that automates parts of the code review process.",
-        "task": "Conceptualize a tool that integrates with GitHub and uses an LLM to analyze pull requests. The tool should identify potential bugs, suggest improvements for clarity and style, and summarize the changes for the human reviewer. Your focus is on the product features and user experience, not the underlying model.",
+        "title": "AI Safety and Alignment Strategy",
+        "scenario": "A new, powerful language model is ready for public release. The Safety & Alignment team needs a comprehensive strategy to minimize potential misuse and ensure the model's behavior remains helpful and harmless.",
+        "task": "Develop a multi-layered safety strategy for the new language model. Your proposal should cover pre-deployment testing, real-time input/output filtering, and a plan for post-deployment monitoring and continuous improvement.",
         "deliverables": [
-          "A 1-page proposal outlining the tool's key features and user benefits.",
-          "A mock-up or wireframe (can be described in text) of how the tool's feedback would appear in a GitHub pull request.",
-          "A sample prompt that you might send to the LLM to analyze a piece of code."
+          "A 2-page strategy document outlining your proposed safety layers.",
+          "A flowchart illustrating the decision-making process for flagging or blocking a user prompt.",
+          "A list of 5 challenging 'red-teaming' prompts designed to test the model's safety boundaries."
         ]
       }
     },
-    "d3": {
-      "id": "d3",
+    "netflix": {
+      "id": "netflix",
       "name": "Netflix",
-      "description": "Work on a problem related to content delivery, recommendation systems, or streaming media.",
+      "description": "Work on a challenge related to video streaming, content delivery, or recommendation systems.",
       "icon": "netflix",
       "task": {
-        "title": "Algorithm for 'Continue Watching' List",
-        "scenario": "You are on the personalization team at Netflix. The current 'Continue Watching' list is purely chronological. Your team wants to make it smarter by prioritizing content the user is more likely to want to finish.",
-        "task": "Propose a new algorithm for ordering the 'Continue Watching' list. Consider factors like how recently the item was watched, how much of it is left, the type of content (movie vs. series), and user interaction patterns.",
+        "title": "Adaptive Bitrate Streaming Algorithm",
+        "scenario": "The video playback team is looking to improve the user experience by reducing buffering events, especially on unstable network connections. They need a smarter algorithm for adaptive bitrate (ABR) streaming.",
+        "task": "Design a new ABR algorithm that goes beyond simple bandwidth estimation. Your algorithm should consider factors like network latency, buffer health, and recent bandwidth volatility to make more intelligent decisions about when to switch video quality levels.",
         "deliverables": [
-          "A list of at least 5 factors (signals) you would use in your algorithm, with a weight or priority for each.",
-          "A high-level description of the logic (e.g., a scoring function) that would use these signals to rank the list.",
-          "An explanation of one edge case your algorithm handles (e.g., a movie watched 99% of the way through)."
+          "A document explaining the logic and key heuristics of your algorithm.",
+          "Pseudo-code for the core decision-making function.",
+          "A description of 3 key metrics you would use to evaluate the performance of your algorithm against the current one."
         ]
       }
     },
-    "d4": {
-      "id": "d4",
+    "microsoft": {
+      "id": "microsoft",
       "name": "Microsoft",
-      "description": "Solve a complex problem in enterprise software, cloud services, or developer tools.",
+      "description": "Engage with a problem in cloud computing, developer tools, or enterprise software.",
       "icon": "microsoft",
       "task": {
-        "title": "Feature Proposal for VS Code",
-        "scenario": "You're an intern on the Visual Studio Code team. Your task is to propose a new, innovative feature that would significantly improve developer productivity.",
-        "task": "Identify a common pain point for developers that isn't perfectly solved by existing VS Code features or extensions. Propose a new feature to address it. Your proposal should be convincing enough to be considered for the product roadmap.",
+        "title": "Cloud Cost Optimization Service",
+        "scenario": "Azure customers are struggling to manage their cloud spending. The Azure cost management team wants to build a new advisory service that proactively identifies potential cost savings in a customer's account.",
+        "task": "Design a service that analyzes a customer's Azure resource usage (e.g., VMs, storage, databases) and provides a prioritized list of actionable cost-saving recommendations. For example, it could suggest resizing underutilized VMs or moving data to cheaper storage tiers.",
         "deliverables": [
-          "A short 'press release' (1-2 paragraphs) announcing the new feature and its benefits.",
-          "A list of the key user stories this feature would enable.",
-          "A description of how you would measure the success or adoption of this feature after launch."
+          "A high-level architecture diagram for the service.",
+          "An example of the JSON data structure for a recommendation.",
+          "A list of 5 different types of cost-saving recommendations the service would detect."
         ]
       }
     },
-    "d5": {
-      "id": "d5",
-      "name": "AWS",
-      "description": "Design a cloud-native solution for a common business problem using AWS services.",
+    "aws": {
+      "id": "aws",
+      "name": "Amazon Web Services",
+      "description": "Solve a complex cloud infrastructure problem related to scalability, reliability, or security.",
       "icon": "aws",
       "task": {
-        "title": "Serverless Architecture for Image Processing",
-        "scenario": "A social media startup needs to process user-uploaded images to create thumbnails of different sizes. They want a cost-effective, highly scalable solution on AWS without managing any servers.",
-        "task": "Design a serverless architecture using AWS services to handle this workflow. The process should trigger automatically whenever a new image is uploaded.",
+        "title": "Serverless Architecture for a High-Traffic Event",
+        "scenario": "A major online retailer is planning a flash sale that is expected to generate millions of requests per minute. Their current server-based infrastructure can't handle this spike. They want to use a serverless architecture on AWS.",
+        "task": "Design a serverless architecture using AWS services (like Lambda, API Gateway, DynamoDB, SQS) to handle the flash sale's massive, spiky traffic. Your design should be highly scalable, resilient, and cost-effective.",
         "deliverables": [
-          "An architecture diagram showing the flow of data between the chosen AWS services (e.g., S3, Lambda, etc.).",
-          "A numbered list explaining the role of each service in the architecture.",
-          "A brief explanation of why this serverless approach is better than a traditional server-based one for this use case."
+          "A system architecture diagram showing the flow of requests and the AWS services involved.",
+          "A brief explanation of why you chose each service and its role in the system.",
+          "A discussion of potential bottlenecks and how your design mitigates them."
         ]
       }
     },
-    "d6": {
-      "id": "d6",
+    "apple": {
+      "id": "apple",
       "name": "Apple",
-      "description": "Design an intuitive and elegant user experience for a new mobile application feature.",
+      "description": "Focus on user experience, hardware-software integration, or privacy-preserving features.",
       "icon": "apple",
       "task": {
-        "title": "UX Design for a Collaborative 'Memories' Feature",
-        "scenario": "You are a UX design intern on the Photos app team at Apple. You are tasked with designing a new feature that allows multiple users to contribute photos and videos to a shared 'Memory' album from an event, like a wedding or a vacation.",
-        "task": "Describe the user experience for creating, contributing to, and viewing a collaborative Memory. Focus on making the process seamless, private, and delightful, in line with Apple's design philosophy.",
+        "title": "Privacy-Preserving Contact Tracing Feature",
+        "scenario": "In response to public health needs, the iOS team is tasked with creating a feature that allows users to know if they've been in close proximity to someone who later reports a positive health status, without compromising anyone's identity or location data.",
+        "task": "Design a system that uses Bluetooth to exchange anonymous, rotating identifiers between devices. Explain how this system can notify a user of potential exposure without a central server ever knowing who was exposed or where it happened.",
         "deliverables": [
-          "A step-by-step user flow for how a user would invite others to a collaborative Memory.",
-          "A description of the main screen for viewing a collaborative Memory, highlighting key UI elements.",
-          "An explanation of how you would handle privacy and permissions (e.g., who can add photos, who can view)."
+          "A document detailing the cryptographic protocol for generating and exchanging anonymous keys.",
+          "A sequence diagram showing how a user reports a positive status and how others are notified.",
+          "An explanation of the privacy guarantees your system provides."
         ]
       }
     },
-    "d7": {
-      "id": "d7",
+    "meta": {
+      "id": "meta",
       "name": "Meta",
-      "description": "Explore new ways to connect people through social technology or the metaverse.",
+      "description": "Work on a problem related to social networking, virtual reality, or large-scale infrastructure.",
       "icon": "meta",
       "task": {
-        "title": "Concept for a Hyper-Local Community Feature",
-        "scenario": "You're an intern on the Facebook Groups team. Your group is brainstorming ways to help people connect with their immediate neighbors (e.g., on their street or in their apartment building) more effectively.",
-        "task": "Propose a new feature concept for the Facebook app that facilitates hyper-local community building. Consider features for sharing information, organizing local events, or offering help to neighbors. The key is to balance usefulness with user privacy.",
+        "title": "News Feed Content Ranking Strategy",
+        "scenario": "The News Feed team wants to improve user satisfaction by showing more relevant and meaningful content. The goal is to move beyond simple engagement metrics (likes, clicks) and incorporate signals that indicate high-quality content.",
+        "task": "Propose a new ranking strategy for the News Feed. Your strategy should define what 'high-quality content' means (e.g., informative, from close friends, sparks conversation) and describe how you would use machine learning to predict these qualities and rank posts accordingly.",
         "deliverables": [
-          "A name and a one-sentence tagline for your proposed feature.",
-          "A list of the top 3-5 functionalities the feature would offer.",
-          "A brief discussion on how you would address potential safety and privacy concerns."
+          "A 1-page document defining your ranking philosophy and the signals you would use.",
+          "A list of 5 features you would engineer for your machine learning model.",
+          "A description of an A/B test you would run to validate that your new ranking strategy improves user satisfaction."
         ]
       }
     }
