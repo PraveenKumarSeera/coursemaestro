@@ -837,13 +837,20 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
 
 export const getAllProjects = unstable_cache(
     async (): Promise<(Project & { student: User })[]> => {
-        const projects = Object.values(db.projects).map(p => ({
-            ...p,
-            tags: Array.isArray(p.tags) ? p.tags : [], // Ensure tags is always an array
-        }));
-        projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const allProjects = Object.values(db.projects);
+
+        const sanitizedProjects = allProjects.map(p => {
+            if (!p) return null;
+            return {
+                ...p,
+                tags: Array.isArray(p.tags) ? p.tags : [],
+            };
+        }).filter((p): p is Project => p !== null);
+
+        sanitizedProjects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
         return Promise.all(
-            projects.map(async p => {
+            sanitizedProjects.map(async p => {
                 const student = await findUserById(p.studentId);
                 return { ...p, student };
             })
@@ -855,14 +862,15 @@ export const getAllProjects = unstable_cache(
 
 export const getProjectsByStudent = unstable_cache(
     async (studentId: string): Promise<Project[]> => {
-        const projects = Object.values(db.projects)
-            .filter(p => p.studentId === studentId)
-            .map(p => ({
-                ...p,
-                tags: Array.isArray(p.tags) ? p.tags : [], // Ensure tags is always an array
-            }));
-        projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        return projects;
+        const studentProjects = Object.values(db.projects).filter(p => p && p.studentId === studentId);
+
+        const sanitizedProjects = studentProjects.map(p => ({
+            ...p,
+            tags: Array.isArray(p.tags) ? p.tags : [],
+        }));
+
+        sanitizedProjects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return sanitizedProjects;
     },
     ['projects-by-student'],
     { tags: ['projects'] }
