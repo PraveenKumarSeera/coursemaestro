@@ -34,6 +34,7 @@ export async function createSession(userId: string) {
 
   cookies().set(SESSION_COOKIE_NAME, session, {
     expires,
+    maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     path: '/',

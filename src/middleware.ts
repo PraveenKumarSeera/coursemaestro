@@ -1,5 +1,3 @@
-'use server';
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -12,30 +10,26 @@ export function middleware(request: NextRequest) {
 
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
 
-  // If user has a session and tries to access a public auth page (login/signup), redirect to dashboard
-  if (sessionCookie && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  // If user is on a public route, let them proceed
-  if (isPublicRoute) {
+  // If user has a session cookie
+  if (sessionCookie) {
+    // And is trying to access a public-only page like login/signup, redirect to dashboard
+    if (pathname.startsWith('/login') || pathname.startsWith('/signup')) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    // Otherwise, let them proceed
     return NextResponse.next();
   }
 
-  // Handle root path redirection
-  if (pathname === '/') {
-    const destination = sessionCookie ? '/dashboard' : '/login';
-    return NextResponse.redirect(new URL(destination, request.url));
-  }
-
-  // For all other routes, they are protected. If no session, redirect to login.
+  // If user does not have a session cookie
   if (!sessionCookie) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('next', pathname); // Pass the original path for redirection after login
-    return NextResponse.redirect(loginUrl);
+    // And is trying to access a protected route (i.e., not a public one)
+    if (!isPublicRoute && pathname !== '/') {
+      // Redirect them to the login page
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
 
-  // If user has a session and is accessing a protected route, let them proceed
+  // Allow access to public routes for users without a session
   return NextResponse.next();
 }
 
