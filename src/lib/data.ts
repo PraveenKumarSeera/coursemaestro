@@ -35,7 +35,6 @@ declare global {
   var __db: Db | undefined;
 }
 
-// Initialize due dates relative to the current date
 const now = new Date();
 dbData.assignments['as1'].dueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 dbData.assignments['as2'].dueDate = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString();
@@ -58,9 +57,13 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // --- User Functions ---
-export async function findUserByEmail(email: string): Promise<User | undefined> {
-    return Object.values(db.users).find(user => user.email === email);
-}
+export const findUserByEmail = unstable_cache(
+    async (email: string): Promise<User | undefined> => {
+        return Object.values(db.users).find(user => user.email === email);
+    },
+    ['user-by-email'],
+    { tags: ['users'] }
+);
 
 export const findUserById = unstable_cache(
     async (id: string): Promise<User> => {
@@ -70,7 +73,6 @@ export const findUserById = unstable_cache(
     ['user'],
     { tags: ['users'], revalidate: 3600 }
 );
-
 
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
     const id = randomUUID();
@@ -92,17 +94,21 @@ export async function getAuthenticatedUser(): Promise<User | null> {
 }
 
 // --- Course Functions ---
-export async function getAllCourses(query?: string): Promise<Course[]> {
-    let courses = Object.values(db.courses);
-    if (query) {
-        const lowercasedQuery = query.toLowerCase();
-        courses = courses.filter(course =>
-            course.title.toLowerCase().includes(lowercasedQuery) ||
-            course.description.toLowerCase().includes(lowercasedQuery)
-        );
-    }
-    return courses;
-}
+export const getAllCourses = unstable_cache(
+    async (query?: string): Promise<Course[]> => {
+        let courses = Object.values(db.courses);
+        if (query) {
+            const lowercasedQuery = query.toLowerCase();
+            courses = courses.filter(course =>
+                course.title.toLowerCase().includes(lowercasedQuery) ||
+                course.description.toLowerCase().includes(lowercasedQuery)
+            );
+        }
+        return courses;
+    },
+    ['all-courses'],
+    { tags: ['courses'] }
+);
 
 export const getCourseById = unstable_cache(
     async (id: string): Promise<(Course & { teacher: User }) | undefined> => {
@@ -115,13 +121,12 @@ export const getCourseById = unstable_cache(
         return { ...course, teacher };
     },
     ['course'],
-    { tags: ['courses'], revalidate: 3600 }
+    { tags: ['courses'] }
 );
-
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
     const id = randomUUID();
-    const placeholder = PlaceHolderImages.find(p => p.id === 'course-intro-to-web-dev') || PlaceHolderImages[0];
+    const placeholder = PlaceHolderImages.find(p => p.imageHint.includes('course')) || PlaceHolderImages[0];
     const newCourse: Course = {
         ...data,
         id,
@@ -134,7 +139,6 @@ export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imag
 
 export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' | 'teacherId' | 'imageUrl'>>): Promise<Course | undefined> {
     if (!db.courses[id]) return undefined;
-
     db.courses[id] = { ...db.courses[id], ...data };
     return db.courses[id];
 }
@@ -158,33 +162,48 @@ export async function deleteCourse(id: string): Promise<boolean> {
     return true;
 }
 
+export const getTeacherById = unstable_cache(
+    async (id: string): Promise<User> => {
+        return findUserById(id);
+    },
+    ['teacher-by-id'],
+    { tags: ['users'] }
+);
 
-export async function getTeacherById(id: string): Promise<User> {
-    return findUserById(id);
-}
-
-export async function getTeacherCourses(teacherId: string, query?: string): Promise<Course[]> {
-    let courses = Object.values(db.courses).filter(course => course.teacherId === teacherId);
-    if (query) {
-        const lowercasedQuery = query.toLowerCase();
-        return courses.filter(course =>
-            course.title.toLowerCase().includes(lowercasedQuery) ||
-            course.description.toLowerCase().includes(lowercasedQuery)
-        );
-    }
-    return courses;
-}
+export const getTeacherCourses = unstable_cache(
+    async (teacherId: string, query?: string): Promise<Course[]> => {
+        let courses = Object.values(db.courses).filter(course => course.teacherId === teacherId);
+        if (query) {
+            const lowercasedQuery = query.toLowerCase();
+            return courses.filter(course =>
+                course.title.toLowerCase().includes(lowercasedQuery) ||
+                course.description.toLowerCase().includes(lowercasedQuery)
+            );
+        }
+        return courses;
+    },
+    ['teacher-courses'],
+    { tags: ['courses'] }
+);
 
 
 // --- Enrollment Functions ---
-export async function getStudentEnrollments(studentId: string): Promise<Enrollment[]> {
-    return Object.values(db.enrollments).filter(e => e.studentId === studentId);
-}
+export const getStudentEnrollments = unstable_cache(
+    async (studentId: string): Promise<Enrollment[]> => {
+        return Object.values(db.enrollments).filter(e => e.studentId === studentId);
+    },
+    ['student-enrollments'],
+    { tags: ['enrollments'] }
+);
 
-export async function getStudentsByCourse(courseId: string): Promise<User[]> {
-    const studentIds = Object.values(db.enrollments).filter(e => e.courseId === courseId).map(e => e.studentId);
-    return studentIds.map(id => db.users[id]).filter(Boolean);
-}
+export const getStudentsByCourse = unstable_cache(
+    async (courseId: string): Promise<User[]> => {
+        const studentIds = Object.values(db.enrollments).filter(e => e.courseId === courseId).map(e => e.studentId);
+        return studentIds.map(id => db.users[id]).filter(Boolean);
+    },
+    ['students-by-course'],
+    { tags: ['enrollments', 'users'] }
+);
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
     const alreadyEnrolled = Object.values(db.enrollments).some(e => e.studentId === studentId && e.courseId === courseId);
@@ -196,70 +215,85 @@ export async function enrollInCourse(studentId: string, courseId: string): Promi
     return newEnrollment;
 }
 
-export async function isEnrolled(studentId: string, courseId: string): Promise<boolean> {
-    return Object.values(db.enrollments).some(e => e.studentId === studentId && e.courseId === courseId);
-}
+export const isEnrolled = unstable_cache(
+    async (studentId: string, courseId: string): Promise<boolean> => {
+        return Object.values(db.enrollments).some(e => e.studentId === studentId && e.courseId === courseId);
+    },
+    ['is-enrolled'],
+    { tags: ['enrollments'] }
+);
 
-export async function getTeacherStudents(teacherId: string) {
-    const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
-    
-    const studentIds = new Set(
-        Object.values(db.enrollments)
-            .filter(e => teacherCourseIds.has(e.courseId))
-            .map(e => e.studentId)
-    );
-    
-    return Promise.all(Array.from(studentIds).map(async (studentId) => {
-        const student = await findUserById(studentId);
-        const enrolledCourseIds = Object.keys(db.enrollments).filter(id => db.enrollments[id].studentId === studentId && teacherCourseIds.has(db.enrollments[id].courseId)).map(id => db.enrollments[id].courseId);
+export const getTeacherStudents = unstable_cache(
+    async (teacherId: string) => {
+        const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
         
-        const courses = enrolledCourseIds.map(id => db.courses[id]?.title).filter(Boolean);
+        const studentIds = new Set(
+            Object.values(db.enrollments)
+                .filter(e => teacherCourseIds.has(e.courseId))
+                .map(e => e.studentId)
+        );
+        
+        return Promise.all(Array.from(studentIds).map(async (studentId) => {
+            const student = await findUserById(studentId);
+            const enrolledCourseIds = Object.keys(db.enrollments).filter(id => db.enrollments[id].studentId === studentId && teacherCourseIds.has(db.enrollments[id].courseId)).map(id => db.enrollments[id].courseId);
+            
+            const courses = enrolledCourseIds.map(id => db.courses[id]?.title).filter(Boolean);
 
-        const submissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
-        const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
-        const averageGrade = submissions.length > 0 ? Math.round(totalGrade / submissions.length) : 0;
+            const submissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
+            const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+            const averageGrade = submissions.length > 0 ? Math.round(totalGrade / submissions.length) : 0;
 
-        let trend: 'improving' | 'declining' | 'stable' = 'stable';
-        if (submissions.length >= 3) {
-            const lastThreeGrades = submissions.slice(-3).map(s => s.grade || 0);
-            const lastThreeAverage = lastThreeGrades.reduce((acc, grade) => acc + grade, 0) / 3;
-            if (lastThreeAverage > averageGrade + 5) trend = 'improving';
-            else if (lastThreeAverage < averageGrade - 5) trend = 'declining';
-        }
+            let trend: 'improving' | 'declining' | 'stable' = 'stable';
+            if (submissions.length >= 3) {
+                const lastThreeGrades = submissions.slice(-3).map(s => s.grade || 0);
+                const lastThreeAverage = lastThreeGrades.reduce((acc, grade) => acc + grade, 0) / 3;
+                if (lastThreeAverage > averageGrade + 5) trend = 'improving';
+                else if (lastThreeAverage < averageGrade - 5) trend = 'declining';
+            }
 
-        return {
-            id: student.id,
-            name: student.name,
-            email: student.email,
-            courses,
-            averageGrade,
-            assignmentsCompleted: submissions.length,
-            trend,
-        };
-    }));
-}
-
+            return {
+                id: student.id,
+                name: student.name,
+                email: student.email,
+                courses,
+                averageGrade,
+                assignmentsCompleted: submissions.length,
+                trend,
+            };
+        }));
+    },
+    ['teacher-students'],
+    { tags: ['users', 'enrollments', 'courses', 'submissions'] }
+);
 
 // --- Assignment Functions ---
-export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
-    return Object.values(db.assignments).filter(a => a.courseId === courseId);
-}
+export const getAssignmentsByCourse = unstable_cache(
+    async (courseId: string): Promise<Assignment[]> => {
+        return Object.values(db.assignments).filter(a => a.courseId === courseId);
+    },
+    ['assignments-by-course'],
+    { tags: ['assignments'] }
+);
 
-export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> {
-    const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
-    
-    const assignments = Object.values(db.assignments).filter(a => teacherCourseIds.has(a.courseId));
+export const getAssignmentsByTeacher = unstable_cache(
+    async (teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> => {
+        const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
+        
+        const assignments = Object.values(db.assignments).filter(a => teacherCourseIds.has(a.courseId));
 
-    return assignments.map(assignment => {
-        const course = db.courses[assignment.courseId];
-        const submissions = Object.values(db.submissions).filter(s => s.assignmentId === assignment.id).length;
-        return {
-            ...assignment,
-            courseTitle: course?.title || 'Unknown Course',
-            submissions
-        }
-    });
-}
+        return assignments.map(assignment => {
+            const course = db.courses[assignment.courseId];
+            const submissions = Object.values(db.submissions).filter(s => s.assignmentId === assignment.id).length;
+            return {
+                ...assignment,
+                courseTitle: course?.title || 'Unknown Course',
+                submissions
+            }
+        });
+    },
+    ['assignments-by-teacher'],
+    { tags: ['assignments', 'courses', 'submissions'] }
+);
 
 export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<Assignment> {
     const id = randomUUID();
@@ -268,31 +302,42 @@ export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<As
     return newAssignment;
 }
 
-export async function getAssignmentById(id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> {
-    const assignment = db.assignments[id];
-    if (!assignment) return undefined;
+export const getAssignmentById = unstable_cache(
+    async (id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> => {
+        const assignment = db.assignments[id];
+        if (!assignment) return undefined;
 
-    const submissions = await Promise.all(
-        Object.values(db.submissions)
-        .filter(s => s.assignmentId === id)
-        .map(async (sub) => {
-            const student = await findUserById(sub.studentId);
-            return { ...sub, student };
-        })
-    );
+        const submissions = await Promise.all(
+            Object.values(db.submissions)
+            .filter(s => s.assignmentId === id)
+            .map(async (sub) => {
+                const student = await findUserById(sub.studentId);
+                return { ...sub, student };
+            })
+        );
 
-    return { ...assignment, submissions };
-}
-
+        return { ...assignment, submissions };
+    },
+    ['assignment-by-id'],
+    { tags: ['assignments', 'submissions', 'users'] }
+);
 
 // --- Submission Functions ---
-export async function getSubmissionById(id: string): Promise<Submission | undefined> {
-    return db.submissions[id];
-}
+export const getSubmissionById = unstable_cache(
+    async (id: string): Promise<Submission | undefined> => {
+        return db.submissions[id];
+    },
+    ['submission-by-id'],
+    { tags: ['submissions'] }
+);
 
-export async function getStudentSubmission(studentId: string, assignmentId: string): Promise<Submission | undefined> {
-    return Object.values(db.submissions).find(s => s.studentId === studentId && s.assignmentId === assignmentId);
-}
+export const getStudentSubmission = unstable_cache(
+    async (studentId: string, assignmentId: string): Promise<Submission | undefined> => {
+        return Object.values(db.submissions).find(s => s.studentId === studentId && s.assignmentId === assignmentId);
+    },
+    ['student-submission'],
+    { tags: ['submissions'] }
+);
 
 export async function createSubmission(data: Omit<Submission, 'id' | 'submittedAt' | 'grade' | 'feedback'>): Promise<Submission> {
     const id = randomUUID();
@@ -309,50 +354,64 @@ export async function createSubmission(data: Omit<Submission, 'id' | 'submittedA
 
 export async function gradeSubmission(submissionId: string, grade: number, feedback: string): Promise<Submission | undefined> {
     if (!db.submissions[submissionId]) return undefined;
-
     db.submissions[submissionId] = { ...db.submissions[submissionId], grade, feedback };
     return db.submissions[submissionId];
 }
 
-export async function getStudentGrades(studentId: string): Promise<GradedSubmission[]> {
-    const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
-    
-    return studentSubmissions.map(sub => {
-        const assignment = db.assignments[sub.assignmentId];
-        const course = db.courses[assignment?.courseId];
-        return {
-            ...sub,
-            assignment: assignment!,
-            course: course!
-        }
-    }).filter(s => s.assignment && s.course) as GradedSubmission[];
-}
-
+export const getStudentGrades = unstable_cache(
+    async (studentId: string): Promise<GradedSubmission[]> => {
+        const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
+        
+        return studentSubmissions.map(sub => {
+            const assignment = db.assignments[sub.assignmentId];
+            const course = db.courses[assignment?.courseId];
+            return {
+                ...sub,
+                assignment: assignment!,
+                course: course!
+            }
+        }).filter(s => s.assignment && s.course) as GradedSubmission[];
+    },
+    ['student-grades'],
+    { tags: ['submissions', 'assignments', 'courses'] }
+);
 
 // --- Discussion Functions ---
-export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
-    const threads = Object.values(db.discussion_threads).filter(t => t.courseId === courseId);
-    return Promise.all(threads.map(async (thread) => {
+export const getThreadsByCourse = unstable_cache(
+    async (courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> => {
+        const threads = Object.values(db.discussion_threads).filter(t => t.courseId === courseId);
+        return Promise.all(threads.map(async (thread) => {
+            const author = await findUserById(thread.authorId);
+            const postCount = Object.values(db.discussion_posts).filter(p => p.threadId === thread.id).length;
+            return { ...thread, author, postCount };
+        }));
+    },
+    ['threads-by-course'],
+    { tags: ['discussions'] }
+);
+
+export const getThreadById = unstable_cache(
+    async (threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> => {
+        const thread = db.discussion_threads[threadId];
+        if (!thread) return undefined;
         const author = await findUserById(thread.authorId);
-        const postCount = Object.values(db.discussion_posts).filter(p => p.threadId === thread.id).length;
-        return { ...thread, author, postCount };
-    }));
-}
+        return { ...thread, author };
+    },
+    ['thread-by-id'],
+    { tags: ['discussions', 'users'] }
+);
 
-export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
-    const thread = db.discussion_threads[threadId];
-    if (!thread) return undefined;
-    const author = await findUserById(thread.authorId);
-    return { ...thread, author };
-}
-
-export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
-    const posts = Object.values(db.discussion_posts).filter(p => p.threadId === threadId).sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    return Promise.all(posts.map(async (post) => {
-        const author = await findUserById(post.authorId);
-        return { ...post, author };
-    }));
-}
+export const getPostsByThread = unstable_cache(
+    async (threadId: string): Promise<(DiscussionPost & { author: User })[]> => {
+        const posts = Object.values(db.discussion_posts).filter(p => p.threadId === threadId).sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        return Promise.all(posts.map(async (post) => {
+            const author = await findUserById(post.authorId);
+            return { ...post, author };
+        }));
+    },
+    ['posts-by-thread'],
+    { tags: ['discussions', 'users'] }
+);
 
 export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
     const id = randomUUID();
@@ -380,9 +439,13 @@ export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Pro
   return newMaterial;
 }
 
-export async function getMaterialsByCourse(courseId: string): Promise<Material[]> {
-    return Object.values(db.materials).filter(m => m.courseId === courseId);
-}
+export const getMaterialsByCourse = unstable_cache(
+    async (courseId: string): Promise<Material[]> => {
+        return Object.values(db.materials).filter(m => m.courseId === courseId);
+    },
+    ['materials-by-course'],
+    { tags: ['materials'] }
+);
 
 // --- Notification Functions ---
 export async function createNotification(data: Omit<Notification, 'id' | 'isRead' | 'createdAt'>): Promise<Notification> {
@@ -397,9 +460,13 @@ export async function createNotification(data: Omit<Notification, 'id' | 'isRead
     return newNotification;
 }
 
-export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
-    return Object.values(db.notifications).filter(n => n.userId === userId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-}
+export const getNotificationsForUser = unstable_cache(
+    async (userId: string): Promise<Notification[]> => {
+        return Object.values(db.notifications).filter(n => n.userId === userId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    },
+    ['notifications-for-user'],
+    { tags: ['notifications'] }
+);
 
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
     if (!db.notifications[notificationId]) return false;
@@ -408,30 +475,34 @@ export async function markNotificationAsRead(notificationId: string): Promise<bo
 }
 
 // --- Leaderboard Functions ---
-export async function getStudentRankings(): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number, credibilityPoints: number }[]> {
-    const students = Object.values(db.users).filter(u => u.role === 'student');
-    
-    return Promise.all(students.map(async (student) => {
-        const submissions = Object.values(db.submissions).filter(s => s.studentId === student.id && s.grade !== null);
-        const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
-        const averageGrade = submissions.length > 0 ? totalGrade / submissions.length : 0;
+export const getStudentRankings = unstable_cache(
+    async (): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number, credibilityPoints: number }[]> => {
+        const students = Object.values(db.users).filter(u => u.role === 'student');
         
-        const challengeSubmissions = Object.values(db.challenge_submissions).filter(cs => cs.studentId === student.id);
-        let credibilityPoints = 0;
-        for (const cs of challengeSubmissions) {
-            const challenge = db.challenges[cs.challengeId];
-            const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === cs.id).length;
-            credibilityPoints += (votes * 10) + (challenge?.points || 0);
-        }
-        
-        return {
-            user: student,
-            averageGrade: Math.round(averageGrade),
-            assignmentsCompleted: submissions.length,
-            credibilityPoints
-        };
-    }));
-}
+        return Promise.all(students.map(async (student) => {
+            const submissions = Object.values(db.submissions).filter(s => s.studentId === student.id && s.grade !== null);
+            const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+            const averageGrade = submissions.length > 0 ? totalGrade / submissions.length : 0;
+            
+            const challengeSubmissions = Object.values(db.challenge_submissions).filter(cs => cs.studentId === student.id);
+            let credibilityPoints = 0;
+            for (const cs of challengeSubmissions) {
+                const challenge = db.challenges[cs.challengeId];
+                const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === cs.id).length;
+                credibilityPoints += (votes * 10) + (challenge?.points || 0);
+            }
+            
+            return {
+                user: student,
+                averageGrade: Math.round(averageGrade),
+                assignmentsCompleted: submissions.length,
+                credibilityPoints
+            };
+        }));
+    },
+    ['student-rankings'],
+    { tags: ['users', 'submissions', 'challenges'] }
+);
 
 // --- Attendance Functions ---
 export async function markAttendance(studentId: string, courseId: string): Promise<Attendance | null> {
@@ -445,65 +516,80 @@ export async function markAttendance(studentId: string, courseId: string): Promi
     return newRecord;
 }
 
-export async function getAllAttendance(): Promise<(Attendance & { student: User, course: Course })[]> {
-    return Object.values(db.attendance)
-        .map(att => {
-            const student = db.users[att.studentId];
-            const course = db.courses[att.courseId];
-            if (!student || !course) return null;
-            return { ...att, student, course };
-        })
-        .filter(Boolean) as (Attendance & { student: User, course: Course })[];
-}
+export const getAllAttendance = unstable_cache(
+    async (): Promise<(Attendance & { student: User, course: Course })[]> => {
+        return Object.values(db.attendance)
+            .map(att => {
+                const student = db.users[att.studentId];
+                const course = db.courses[att.courseId];
+                if (!student || !course) return null;
+                return { ...att, student, course };
+            })
+            .filter(Boolean) as (Attendance & { student: User, course: Course })[];
+    },
+    ['all-attendance'],
+    { tags: ['attendance', 'users', 'courses'] }
+);
 
 // --- Certificate Functions ---
 const PASSING_GRADE = 70;
 
-export async function getCompletedCoursesForStudent(studentId: string): Promise<Course[]> {
-    const enrollments = Object.values(db.enrollments).filter(e => e.studentId === studentId);
-    const completedCourses: Course[] = [];
+export const getCompletedCoursesForStudent = unstable_cache(
+    async (studentId: string): Promise<Course[]> => {
+        const enrollments = Object.values(db.enrollments).filter(e => e.studentId === studentId);
+        const completedCourses: Course[] = [];
 
-    for (const enrollment of enrollments) {
-        const courseId = enrollment.courseId;
-        const assignments = Object.values(db.assignments).filter(a => a.courseId === courseId);
-        if (assignments.length === 0) continue;
+        for (const enrollment of enrollments) {
+            const courseId = enrollment.courseId;
+            const assignments = Object.values(db.assignments).filter(a => a.courseId === courseId);
+            if (assignments.length === 0) continue;
 
-        const allPassed = assignments.every(a => {
-            const sub = Object.values(db.submissions).find(s => s.studentId === studentId && s.assignmentId === a.id);
-            return sub && sub.grade !== null && sub.grade >= PASSING_GRADE;
-        });
+            const allPassed = assignments.every(a => {
+                const sub = Object.values(db.submissions).find(s => s.studentId === studentId && s.assignmentId === a.id);
+                return sub && sub.grade !== null && sub.grade >= PASSING_GRADE;
+            });
 
-        if (allPassed) {
-            const course = db.courses[courseId];
-            if (course) completedCourses.push(course);
+            if (allPassed) {
+                const course = db.courses[courseId];
+                if (course) completedCourses.push(course);
+            }
         }
-    }
-    return completedCourses;
-}
+        return completedCourses;
+    },
+    ['completed-courses'],
+    { tags: ['enrollments', 'assignments', 'submissions'] }
+);
 
-export async function getStudentCertificates(studentId: string): Promise<(Certificate & { course: Course })[]> {
-    return Object.values(db.certificates)
-        .filter(c => c.studentId === studentId)
-        .map(cert => {
-            const course = db.courses[cert.courseId];
-            return { ...cert, course: course! };
-        })
-        .filter(c => c.course);
-}
+export const getStudentCertificates = unstable_cache(
+    async (studentId: string): Promise<(Certificate & { course: Course })[]> => {
+        return Object.values(db.certificates)
+            .filter(c => c.studentId === studentId)
+            .map(cert => {
+                const course = db.courses[cert.courseId];
+                return { ...cert, course: course! };
+            })
+            .filter(c => c.course);
+    },
+    ['student-certificates'],
+    { tags: ['certificates', 'courses'] }
+);
 
-export async function getCertificateById(id: string): Promise<(Certificate & { student: User; course: Course & { teacher: User } }) | undefined> {
-    const certificate = db.certificates[id];
-    if (!certificate) return undefined;
+export const getCertificateById = unstable_cache(
+    async (id: string): Promise<(Certificate & { student: User; course: Course & { teacher: User } }) | undefined> => {
+        const certificate = db.certificates[id];
+        if (!certificate) return undefined;
 
-    const student = await findUserById(certificate.studentId);
-    if (student.id === '0') return undefined;
+        const student = await findUserById(certificate.studentId);
+        if (student.id === '0') return undefined;
 
-    const course = await getCourseById(certificate.courseId);
-    if (!course || course.teacher.id === '0') return undefined;
+        const course = await getCourseById(certificate.courseId);
+        if (!course || course.teacher.id === '0') return undefined;
 
-    return { ...certificate, student, course };
-}
-
+        return { ...certificate, student, course };
+    },
+    ['certificate-by-id'],
+    { tags: ['certificates', 'users', 'courses'] }
+);
 
 export async function generateCertificate(studentId: string, courseId: string): Promise<Certificate | null> {
     const existing = Object.values(db.certificates).find(c => c.studentId === studentId && c.courseId === courseId);
@@ -516,22 +602,34 @@ export async function generateCertificate(studentId: string, courseId: string): 
 }
 
 // --- Challenge Functions ---
-export async function getAllChallenges(): Promise<Challenge[]> {
-    return Object.values(db.challenges);
-}
+export const getAllChallenges = unstable_cache(
+    async (): Promise<Challenge[]> => {
+        return Object.values(db.challenges);
+    },
+    ['all-challenges'],
+    { tags: ['challenges'] }
+);
 
-export async function getChallengeById(id: string): Promise<Challenge | undefined> {
-    return db.challenges[id];
-}
+export const getChallengeById = unstable_cache(
+    async (id: string): Promise<Challenge | undefined> => {
+        return db.challenges[id];
+    },
+    ['challenge-by-id'],
+    { tags: ['challenges'] }
+);
 
-export async function getSubmissionsForChallenge(challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> {
-    const submissions = Object.values(db.challenge_submissions).filter(cs => cs.challengeId === challengeId);
-    return Promise.all(submissions.map(async (sub) => {
-        const student = await findUserById(sub.studentId);
-        const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
-        return { ...sub, student, votes };
-    }));
-}
+export const getSubmissionsForChallenge = unstable_cache(
+    async (challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> => {
+        const submissions = Object.values(db.challenge_submissions).filter(cs => cs.challengeId === challengeId);
+        return Promise.all(submissions.map(async (sub) => {
+            const student = await findUserById(sub.studentId);
+            const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
+            return { ...sub, student, votes };
+        }));
+    },
+    ['submissions-for-challenge'],
+    { tags: ['challenges', 'users'] }
+);
 
 export async function createChallengeSubmission(data: Omit<ChallengeSubmission, 'id' | 'submittedAt'>): Promise<ChallengeSubmission> {
     const id = randomUUID();
@@ -553,9 +651,13 @@ export async function voteOnSubmission(submissionId: string, voterId: string): P
     return newVote;
 }
 
-export async function getVotesForSubmission(submissionId: string): Promise<number> {
-    return Object.values(db.challenge_votes).filter(v => v.submissionId === submissionId).length;
-}
+export const getVotesForSubmission = unstable_cache(
+    async (submissionId: string): Promise<number> => {
+        return Object.values(db.challenge_votes).filter(v => v.submissionId === submissionId).length;
+    },
+    ['votes-for-submission'],
+    { tags: ['challenges'] }
+);
 
 // --- Project Showcase Functions ---
 export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl'>): Promise<Project> {
@@ -571,27 +673,39 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
     return newProject;
 }
 
-export async function getAllProjects(): Promise<(Project & { student: User })[]> {
-    const projects = Object.values(db.projects);
-    projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return Promise.all(
-        projects.map(async p => {
-            const student = await findUserById(p.studentId);
-            return { ...p, student };
-        })
-    );
-}
+export const getAllProjects = unstable_cache(
+    async (): Promise<(Project & { student: User })[]> => {
+        const projects = Object.values(db.projects);
+        projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return Promise.all(
+            projects.map(async p => {
+                const student = await findUserById(p.studentId);
+                return { ...p, student };
+            })
+        );
+    },
+    ['all-projects'],
+    { tags: ['projects', 'users'] }
+);
 
-export async function getProjectsByStudent(studentId: string): Promise<Project[]> {
-    const projects = Object.values(db.projects).filter(p => p.studentId === studentId);
-    projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    return projects;
-}
+export const getProjectsByStudent = unstable_cache(
+    async (studentId: string): Promise<Project[]> => {
+        const projects = Object.values(db.projects).filter(p => p.studentId === studentId);
+        projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        return projects;
+    },
+    ['projects-by-student'],
+    { tags: ['projects'] }
+);
 
 // --- Internship Functions ---
-export async function getInternshipDomains(): Promise<InternshipDomain[]> {
-    return Object.values(db.internship_domains);
-}
+export const getInternshipDomains = unstable_cache(
+    async (): Promise<InternshipDomain[]> => {
+        return Object.values(db.internship_domains);
+    },
+    ['internship-domains'],
+    { tags: ['internships'] }
+);
 
 
 // --- Dashboard Functions ---
@@ -642,140 +756,143 @@ export type TeacherDashboardStats = {
 export type DashboardStats = StudentDashboardStats | TeacherDashboardStats;
 
 
-export async function getDashboardData(userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> {
-    if (role === 'teacher') {
-        const courses = Object.values(db.courses).filter(c => c.teacherId === userId);
-        const courseIds = courses.map(c => c.id);
-        
-        const studentIds = new Set(Object.values(db.enrollments).filter(e => courseIds.includes(e.courseId)).map(e => e.studentId));
-
-        const assignments = Object.values(db.assignments).filter(a => courseIds.includes(a.courseId));
-        const assignmentIds = assignments.map(a => a.id);
-
-        const pendingSubmissions = Object.values(db.submissions).filter(s => assignmentIds.includes(s.assignmentId) && s.grade === null).length;
-
-        const coursePerformances: CoursePerformance[] = await Promise.all(courses.map(async (course) => {
-            const courseAssignments = Object.values(db.assignments).filter(a => a.courseId === course.id);
-            const courseAssignmentIds = courseAssignments.map(a => a.id);
-            const courseSubmissions = Object.values(db.submissions).filter(s => courseAssignmentIds.includes(s.assignmentId) && s.grade !== null);
+export const getDashboardData = unstable_cache(
+    async (userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> => {
+        if (role === 'teacher') {
+            const courses = Object.values(db.courses).filter(c => c.teacherId === userId);
+            const courseIds = courses.map(c => c.id);
             
-            const gradeDistribution = [
-                { name: 'A (90+)', students: 0 }, { name: 'B (80-89)', students: 0 },
-                { name: 'C (70-79)', students: 0 }, { name: 'D (60-69)', students: 0 }, { name: 'F (<60)', students: 0 },
-            ];
-            
-            // This logic is simplified; it counts submissions, not unique students per grade bucket
-            courseSubmissions.forEach(sub => {
-                if (sub.grade! >= 90) gradeDistribution[0].students++;
-                else if (sub.grade! >= 80) gradeDistribution[1].students++;
-                else if (sub.grade! >= 70) gradeDistribution[2].students++;
-                else if (sub.grade! >= 60) gradeDistribution[3].students++;
-                else gradeDistribution[4].students++;
-            });
-            return { courseId: course.id, courseTitle: course.title, gradeDistribution };
-        }));
+            const studentIds = new Set(Object.values(db.enrollments).filter(e => courseIds.includes(e.courseId)).map(e => e.studentId));
 
-        let studentOfTheWeek: StudentOfTheWeek = null;
-        if (studentIds.size > 0) {
-            const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
-            for (const studentId of Array.from(studentIds)) {
-                const student = await findUserById(studentId);
-                const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
-                if (studentSubmissions.length > 0) {
-                    const totalGrade = studentSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
-                    const averageGrade = totalGrade / studentSubmissions.length;
-                    studentScores.push({ studentId, name: student.name, score: averageGrade + (studentSubmissions.length * 2), grade: Math.round(averageGrade) });
+            const assignments = Object.values(db.assignments).filter(a => courseIds.includes(a.courseId));
+            const assignmentIds = assignments.map(a => a.id);
+
+            const pendingSubmissions = Object.values(db.submissions).filter(s => assignmentIds.includes(s.assignmentId) && s.grade === null).length;
+
+            const coursePerformances: CoursePerformance[] = await Promise.all(courses.map(async (course) => {
+                const courseAssignments = Object.values(db.assignments).filter(a => a.courseId === course.id);
+                const courseAssignmentIds = courseAssignments.map(a => a.id);
+                const courseSubmissions = Object.values(db.submissions).filter(s => courseAssignmentIds.includes(s.assignmentId) && s.grade !== null);
+                
+                const gradeDistribution = [
+                    { name: 'A (90+)', students: 0 }, { name: 'B (80-89)', students: 0 },
+                    { name: 'C (70-79)', students: 0 }, { name: 'D (60-69)', students: 0 }, { name: 'F (<60)', students: 0 },
+                ];
+                
+                courseSubmissions.forEach(sub => {
+                    if (sub.grade! >= 90) gradeDistribution[0].students++;
+                    else if (sub.grade! >= 80) gradeDistribution[1].students++;
+                    else if (sub.grade! >= 70) gradeDistribution[2].students++;
+                    else if (sub.grade! >= 60) gradeDistribution[3].students++;
+                    else gradeDistribution[4].students++;
+                });
+                return { courseId: course.id, courseTitle: course.title, gradeDistribution };
+            }));
+
+            let studentOfTheWeek: StudentOfTheWeek = null;
+            if (studentIds.size > 0) {
+                const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
+                for (const studentId of Array.from(studentIds)) {
+                    const student = await findUserById(studentId);
+                    const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
+                    if (studentSubmissions.length > 0) {
+                        const totalGrade = studentSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
+                        const averageGrade = totalGrade / studentSubmissions.length;
+                        studentScores.push({ studentId, name: student.name, score: averageGrade + (studentSubmissions.length * 2), grade: Math.round(averageGrade) });
+                    }
+                }
+                if (studentScores.length > 0) {
+                    studentScores.sort((a, b) => b.score - a.score);
+                    const topStudent = studentScores[0];
+                    studentOfTheWeek = { studentId: topStudent.studentId, studentName: topStudent.name, averageGrade: topStudent.grade, reason: 'Top Performer This Week' };
                 }
             }
-            if (studentScores.length > 0) {
-                studentScores.sort((a, b) => b.score - a.score);
-                const topStudent = studentScores[0];
-                studentOfTheWeek = { studentId: topStudent.studentId, studentName: topStudent.name, averageGrade: topStudent.grade, reason: 'Top Performer This Week' };
+
+            return {
+                stats: [
+                    { title: 'Courses Taught', value: courses.length, subtitle: 'Total active courses', icon: 'BookOpen', link: { href: "/courses", text: "Manage Courses"} },
+                    { title: 'Total Students', value: studentIds.size, subtitle: 'Across all courses', icon: 'Users', link: { href: "/students", text: "View Students"} },
+                    { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
+                ],
+                coursePerformances,
+                studentOfTheWeek
+            };
+        } else { // Student role
+            const enrollments = Object.values(db.enrollments).filter(e => e.studentId === userId);
+            const enrolledCourseIds = enrollments.map(e => e.courseId);
+
+            const allAssignments = Object.values(db.assignments).filter(a => enrolledCourseIds.includes(a.courseId));
+            
+            const sevenDaysFromNow = new Date();
+            sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+            const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === userId);
+            const submittedAssignmentIds = new Set(studentSubmissions.map(s => s.assignmentId));
+            const assignmentsDueSoon = allAssignments.filter(a => new Date(a.dueDate) > new Date() && new Date(a.dueDate) <= sevenDaysFromNow && !submittedAssignmentIds.has(a.id)).length;
+            
+            const gradedSubmissions = studentSubmissions.filter(s => s.grade !== null);
+            const totalGrade = gradedSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
+            const averageGrade = gradedSubmissions.length > 0 ? Math.round(totalGrade / gradedSubmissions.length) : 0;
+            
+            const gradeToLetter = (grade: number) => {
+                if (grade >= 90) return 'A'; if (grade >= 80) return 'B'; if (grade >= 70) return 'C'; if (grade >= 60) return 'D'; return grade > 0 ? 'F' : 'N/A';
+            };
+
+            const attendanceRows = Object.values(db.attendance).filter(a => a.studentId === userId);
+            let totalAttention = 0, totalCompletion = 0;
+            for (const enrollment of enrollments) {
+                const firstAttendance = attendanceRows.find(a => a.courseId === enrollment.courseId);
+                if (!firstAttendance) continue;
+
+                const daysSinceEnrollment = differenceInDays(new Date(), new Date(firstAttendance.date)) + 1;
+                const attendanceDays = new Set(attendanceRows.filter(a => a.courseId === enrollment.courseId).map(a => a.date)).size;
+                totalAttention += (attendanceDays / daysSinceEnrollment);
+
+                const courseAssignments = allAssignments.filter(a => a.courseId === enrollment.courseId);
+                if (courseAssignments.length > 0) {
+                     const courseSubmissions = studentSubmissions.filter(s => courseAssignments.some(a => a.id === s.assignmentId));
+                     totalCompletion += (courseSubmissions.length / courseAssignments.length);
+                }
             }
-        }
+            
+            const attentionScore = enrollments.length > 0 ? (totalAttention / enrollments.length) * 100 : 0;
+            const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 0;
+            const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (averageGrade * 0.35);
 
-        return {
-            stats: [
-                { title: 'Courses Taught', value: courses.length, subtitle: 'Total active courses', icon: 'BookOpen', link: { href: "/courses", text: "Manage Courses"} },
-                { title: 'Total Students', value: studentIds.size, subtitle: 'Across all courses', icon: 'Users', link: { href: "/students", text: "View Students"} },
-                { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
-            ],
-            coursePerformances,
-            studentOfTheWeek
-        };
-    } else { // Student role
-        const enrollments = Object.values(db.enrollments).filter(e => e.studentId === userId);
-        const enrolledCourseIds = enrollments.map(e => e.courseId);
-
-        const allAssignments = Object.values(db.assignments).filter(a => enrolledCourseIds.includes(a.courseId));
-        
-        const sevenDaysFromNow = new Date();
-        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-        const studentSubmissions = Object.values(db.submissions).filter(s => s.studentId === userId);
-        const submittedAssignmentIds = new Set(studentSubmissions.map(s => s.assignmentId));
-        const assignmentsDueSoon = allAssignments.filter(a => new Date(a.dueDate) > new Date() && new Date(a.dueDate) <= sevenDaysFromNow && !submittedAssignmentIds.has(a.id)).length;
-        
-        const gradedSubmissions = studentSubmissions.filter(s => s.grade !== null);
-        const totalGrade = gradedSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
-        const averageGrade = gradedSubmissions.length > 0 ? Math.round(totalGrade / gradedSubmissions.length) : 0;
-        
-        const gradeToLetter = (grade: number) => {
-            if (grade >= 90) return 'A'; if (grade >= 80) return 'B'; if (grade >= 70) return 'C'; if (grade >= 60) return 'D'; return grade > 0 ? 'F' : 'N/A';
-        };
-
-        const attendanceRows = Object.values(db.attendance).filter(a => a.studentId === userId);
-        let totalAttention = 0, totalCompletion = 0;
-        for (const enrollment of enrollments) {
-            const firstAttendance = attendanceRows.find(a => a.courseId === enrollment.courseId);
-            if (!firstAttendance) continue;
-
-            const daysSinceEnrollment = differenceInDays(new Date(), new Date(firstAttendance.date)) + 1;
-            const attendanceDays = new Set(attendanceRows.filter(a => a.courseId === enrollment.courseId).map(a => a.date)).size;
-            totalAttention += (attendanceDays / daysSinceEnrollment);
-
-            const courseAssignments = allAssignments.filter(a => a.courseId === enrollment.courseId);
-            if (courseAssignments.length > 0) {
-                 const courseSubmissions = studentSubmissions.filter(s => courseAssignments.some(a => a.id === s.assignmentId));
-                 totalCompletion += (courseSubmissions.length / courseAssignments.length);
-            }
-        }
-        
-        const attentionScore = enrollments.length > 0 ? (totalAttention / enrollments.length) * 100 : 0;
-        const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 0;
-        const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (averageGrade * 0.35);
-
-        const sortedAttendance = Object.values(db.attendance).filter(a => a.studentId === userId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        let streak = 0;
-        if (sortedAttendance.length > 0) {
-            const uniqueDates = [...new Set(sortedAttendance.map(d => d.date))].map(d => parseISO(d)).sort((a,b) => b.getTime() - a.getTime());
-            if (uniqueDates.length > 0) {
-                 const lastDay = uniqueDates[0];
-                 const today = new Date();
-                 const yesterday = subDays(today, 1);
-                 if (isSameDay(lastDay, today) || isSameDay(lastDay, yesterday)) {
-                    let currentStreak = 1;
-                    let expectedDate = isSameDay(lastDay, today) ? yesterday : subDays(yesterday, 1);
-                    for (let i = 1; i < uniqueDates.length; i++) {
-                        if (isSameDay(uniqueDates[i], expectedDate)) {
-                            currentStreak++;
-                            expectedDate = subDays(expectedDate, 1);
-                        } else {
-                            break;
+            const sortedAttendance = Object.values(db.attendance).filter(a => a.studentId === userId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            let streak = 0;
+            if (sortedAttendance.length > 0) {
+                const uniqueDates = [...new Set(sortedAttendance.map(d => d.date))].map(d => parseISO(d)).sort((a,b) => b.getTime() - a.getTime());
+                if (uniqueDates.length > 0) {
+                     const lastDay = uniqueDates[0];
+                     const today = new Date();
+                     const yesterday = subDays(today, 1);
+                     if (isSameDay(lastDay, today) || isSameDay(lastDay, yesterday)) {
+                        let currentStreak = 1;
+                        let expectedDate = isSameDay(lastDay, today) ? yesterday : subDays(yesterday, 1);
+                        for (let i = 1; i < uniqueDates.length; i++) {
+                            if (isSameDay(uniqueDates[i], expectedDate)) {
+                                currentStreak++;
+                                expectedDate = subDays(expectedDate, 1);
+                            } else {
+                                break;
+                            }
                         }
-                    }
-                    streak = currentStreak;
-                 }
+                        streak = currentStreak;
+                     }
+                }
             }
-        }
 
-        return {
-            stats: [
-                { title: 'Enrolled Courses', value: enrollments.length, subtitle: 'Ready to learn', icon: 'BookOpen', link: { href: "/courses", text: "View Courses"} },
-                { title: 'Assignments Due', value: assignmentsDueSoon, subtitle: 'In the next 7 days', icon: 'ClipboardList' },
-                { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Keep it up!', icon: 'GraduationCap' },
-            ],
-            learningEfficiency: { score: Math.round(efficiencyScore), components: { attention: Math.round(attentionScore), completion: Math.round(completionScore), accuracy: Math.round(averageGrade) } },
-            streak,
-        };
-    }
-}
+            return {
+                stats: [
+                    { title: 'Enrolled Courses', value: enrollments.length, subtitle: 'Ready to learn', icon: 'BookOpen', link: { href: "/courses", text: "View Courses"} },
+                    { title: 'Assignments Due', value: assignmentsDueSoon, subtitle: 'In the next 7 days', icon: 'ClipboardList' },
+                    { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Keep it up!', icon: 'GraduationCap' },
+                ],
+                learningEfficiency: { score: Math.round(efficiencyScore), components: { attention: Math.round(attentionScore), completion: Math.round(completionScore), accuracy: Math.round(averageGrade) } },
+                streak,
+            };
+        }
+    },
+    ['dashboard-data'],
+    { tags: ['users', 'courses', 'enrollments', 'assignments', 'submissions', 'attendance'] }
+);
