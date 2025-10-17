@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'coursepilot_session';
-const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/my-grades', '/my-certificates', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/my-projects', '/wellness-check', '/live-progress'];
+const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/my-grades', '/my-certificates', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/my-projects', '/wellness-check', '/live-progress', '/instant-quiz', '/my-journey'];
 const PUBLIC_ROUTES = ['/login', '/signup', '/showcase'];
 
 export function middleware(request: NextRequest) {
@@ -13,12 +13,12 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname.startsWith(route));
-
+  
   // If trying to access a protected route without a session, redirect to login
   if (isProtectedRoute && !sessionCookie) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
+    url.searchParams.set('next', pathname); // Pass the original path for redirection after login
     return NextResponse.redirect(url);
   }
 

@@ -20,9 +20,9 @@ export default async function ShowcasePage() {
                 <GraduationCap className="h-6 w-6 text-primary" />
                 <span className="font-headline text-lg">CoursePilot</span>
             </Link>
-            <nav className="flex items-center space-x-4 ml-auto">
+             <nav className="flex items-center space-x-4 ml-auto">
                  <Button asChild>
-                    <Link href="/login">Login</Link>
+                    <Link href="/login">Student or Teacher Login</Link>
                  </Button>
             </nav>
         </div>
@@ -91,5 +91,3 @@ export default async function ShowcasePage() {
     </div>
   );
 }
-
-    
