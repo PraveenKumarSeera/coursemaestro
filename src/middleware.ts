@@ -12,11 +12,16 @@ export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
 
-  // Allow access to public routes
-  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
-    // If logged in and trying to access login/signup, redirect to dashboard
-    if (sessionCookie && (pathname === '/login' || pathname === '/signup')) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+  // Allow direct access to the public showcase page
+  if (pathname.startsWith('/showcase')) {
+    return NextResponse.next();
+  }
+
+  // Allow access to login/signup pages
+  if (pathname.startsWith('/login') || pathname.startsWith('/signup')) {
+    // If a logged-in user tries to access login/signup, redirect them to the dashboard
+    if (sessionCookie) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     return NextResponse.next();
   }
