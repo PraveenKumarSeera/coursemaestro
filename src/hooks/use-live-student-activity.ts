@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { User } from '@/lib/types';
 import { getSession } from '@/lib/session';
 
@@ -60,22 +60,19 @@ export function useLiveStudentActivity(initialStudents: User[]) {
   const updateStudent = useCallback((userId: string, name: string, status: ActivityStatus, timestamp: number) => {
     setStudents(prev => {
         const studentExists = prev.some(s => s.id === userId);
-        if (studentExists) {
-            return prev.map(s => s.id === userId ? { ...s, status, lastActive: new Date(timestamp) } : s);
-        } else {
-            // This could happen if a student enrolls while teacher is watching
-            return [...prev, { id: userId, name: name, email: '', role: 'student', status, lastActive: new Date(timestamp) }];
-        }
+        const newStudentList = studentExists
+            ? prev.map(s => s.id === userId ? { ...s, status, lastActive: new Date(timestamp) } : s)
+            : [...prev, { id: userId, name: name, email: '', role: 'student', status, lastActive: new Date(timestamp) }];
+        
+        return newStudentList;
     });
 
-    // Record the ping for the pulse monitor
     if (status !== 'idle') {
         setRecentPings(prev => [...prev, timestamp]);
     }
   }, []);
 
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
+  const handleStorageChange = useCallback((event: StorageEvent) => {
       if (event.key === BROADCAST_KEY && event.newValue) {
         try {
             const payload: ActivityBroadcast = JSON.parse(event.newValue);
@@ -84,48 +81,44 @@ export function useLiveStudentActivity(initialStudents: User[]) {
             console.error("Failed to parse activity broadcast", e);
         }
       }
-    };
+    }, [updateStudent]);
+
+  useEffect(() => {
+    window.addEventListener('storage', handleStorageChange);
     
-    // Check for idle students periodically
     const idleCheckInterval = setInterval(() => {
         setStudents(prev => prev.map(s => {
-            if (s.status !== 'idle' && (Date.now() - s.lastActive.getTime() > IDLE_TIMEOUT)) {
+            const isIdle = Date.now() - s.lastActive.getTime() > IDLE_TIMEOUT;
+            if (s.status !== 'idle' && isIdle) {
                 return { ...s, status: 'idle' };
             }
             return s;
         }))
-    }, 5000); // Check every 5 seconds
+    }, 5000);
 
-    // Calculate pulse periodically
     const pulseInterval = setInterval(() => {
         const now = Date.now();
-        const activePings = recentPings.filter(ping => now - ping < PULSE_WINDOW);
-        setRecentPings(activePings);
-        
-        const activeStudents = new Set(students.filter(s => s.status !== 'idle').map(s => s.id)).size;
-        const totalStudents = Math.max(1, students.length);
-        const engagement = Math.min(100, (activeStudents / totalStudents) * 100);
-        
-        setPulse(engagement);
-    }, 2000); // Update pulse every 2 seconds
-
-    window.addEventListener('storage', handleStorageChange);
+        setRecentPings(currentPings => {
+            const activePings = currentPings.filter(ping => now - ping < PULSE_WINDOW);
+            const activeStudents = new Set(students.filter(s => s.status !== 'idle').map(s => s.id)).size;
+            const totalStudents = Math.max(1, students.length);
+            const engagement = Math.min(100, (activeStudents / totalStudents) * 100);
+            setPulse(engagement);
+            return activePings;
+        });
+    }, 2000);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(idleCheckInterval);
       clearInterval(pulseInterval);
     };
-  }, [updateStudent, students]);
+  }, [handleStorageChange, students.length]);
 
   const summary = useMemo(() => {
     return students.reduce(
       (acc, student) => {
-        if(student.status !== 'idle') {
-            acc[student.status]++;
-        } else {
-            acc.idle++;
-        }
+        acc[student.status]++;
         return acc;
       },
       { watching: 0, submitting: 0, idle: 0 }
@@ -133,8 +126,6 @@ export function useLiveStudentActivity(initialStudents: User[]) {
   }, [students]);
 
   const forceRefresh = useCallback(() => {
-    // This is less meaningful in a real-time setup, but we can keep it
-    // to manually re-evaluate idle status if needed.
     setStudents(prev => [...prev]);
   }, []);
 
