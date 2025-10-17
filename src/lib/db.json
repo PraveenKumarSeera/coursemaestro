@@ -1,15 +1,15 @@
-
 {
   "users": {
     "u1": { "id": "u1", "name": "Alice Johnson", "email": "alice@example.com", "password": "password123", "role": "student" },
     "u2": { "id": "u2", "name": "Bob Williams", "email": "bob@example.com", "password": "password123", "role": "student" },
     "u3": { "id": "u3", "name": "Charlie Brown", "email": "charlie@example.com", "password": "password123", "role": "student" },
-    "t1": { "id": "t1", "name": "Prof. Davis", "email": "davis@example.com", "password": "password123", "role": "teacher" }
+    "t1": { "id": "t1", "name": "Professor Davis", "email": "davis@example.com", "password": "password123", "role": "teacher" }
   },
   "courses": {
     "c1": { "id": "c1", "title": "Introduction to Web Development", "description": "Learn the fundamentals of HTML, CSS, and JavaScript.", "duration": "8 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/1/600/400" },
-    "c2": { "id": "c2", "title": "Advanced React", "description": "Dive deep into React hooks, state management, and performance.", "duration": "6 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/2/600/400" },
-    "c3": { "id": "c3", "title": "Data Structures & Algorithms", "description": "Master essential data structures and algorithms for interviews.", "duration": "10 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/3/600/400" }
+    "c2": { "id": "c2", "title": "Advanced React", "description": "Master advanced concepts in React, including hooks, context, and performance.", "duration": "6 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/2/600/400" },
+    "c3": { "id": "c3", "title": "Data Structures & Algorithms", "description": "Understand common data structures and algorithms.", "duration": "10 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/3/600/400" },
+    "c4": { "id": "c4", "title": "UI/UX Design Fundamentals", "description": "Learn the principles of user-centric design and prototyping.", "duration": "4 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/4/600/400" }
   },
   "enrollments": {
     "e1": { "id": "e1", "studentId": "u1", "courseId": "c1" },
@@ -24,60 +24,100 @@
     "as4": { "id": "as4", "courseId": "c3", "title": "Big O Notation", "description": "Analyze the time complexity of given algorithms.", "dueDate": "2024-05-29T23:59:59.000Z" }
   },
   "submissions": {
-    "sub1": { "id": "sub1", "assignmentId": "as1", "studentId": "u1", "content": "Here is my portfolio. I used Flexbox for the layout.", "submittedAt": "2024-06-01T10:00:00.000Z", "grade": 95, "feedback": "Excellent work! Your CSS is clean and your HTML is semantic." },
-    "sub2": { "id": "sub2", "assignmentId": "as4", "studentId": "u3", "content": "The complexity is O(n^2).", "submittedAt": "2024-05-28T14:30:00.000Z", "grade": 88, "feedback": "Correct analysis. Well done." },
-    "sub3": { "id": "sub3", "assignmentId": "as1", "studentId": "u2", "content": "My submission for the portfolio.", "submittedAt": "2024-06-01T11:00:00.000Z", "grade": null, "feedback": null }
+    "sub1": { "id": "sub1", "assignmentId": "as1", "studentId": "u1", "content": "Here is my portfolio. It's built with HTML and CSS Grid.", "submittedAt": "2024-05-30T10:00:00.000Z", "grade": 95, "feedback": "Excellent work! Your CSS is clean and your HTML is semantic." },
+    "sub2": { "id": "sub2", "assignmentId": "as4", "studentId": "u3", "content": "The time complexity is O(n^2).", "submittedAt": "2024-05-28T14:30:00.000Z", "grade": 75, "feedback": "Your analysis is correct, but could use more detailed explanation." },
+    "sub3": { "id": "sub3", "assignmentId": "as1", "studentId": "u2", "content": "My submission for the portfolio assignment.", "submittedAt": "2024-05-30T11:00:00.000Z", "grade": 88, "feedback": "Good job. The layout is responsive, but could be improved on mobile." }
   },
   "discussion_threads": {
-    "th1": { "id": "th1", "courseId": "c1", "title": "Question about Flexbox", "authorId": "u1", "createdAt": "2024-05-31T09:00:00.000Z" }
+    "th1": { "id": "th1", "courseId": "c1", "title": "How to center a div?", "authorId": "u2", "createdAt": "2024-05-29T09:00:00.000Z" }
   },
   "discussion_posts": {
-    "po1": { "id": "po1", "threadId": "th1", "authorId": "u1", "content": "I'm having trouble centering a div. Can anyone help?", "createdAt": "2024-05-31T09:00:00.000Z" },
-    "po2": { "id": "po2", "threadId": "th1", "authorId": "t1", "content": "Sure! Try using 'display: flex; justify-content: center; align-items: center;' on the parent container.", "createdAt": "2024-06-01T12:00:00.000Z" }
+    "po1": { "id": "po1", "threadId": "th1", "authorId": "u2", "content": "I'm having trouble centering a div. Can anyone help?", "createdAt": "2024-05-29T09:00:00.000Z" },
+    "po2": { "id": "po2", "threadId": "th1", "authorId": "u1", "content": "You can use Flexbox! `display: flex; justify-content: center; align-items: center;` on the parent container works great.", "createdAt": "2024-05-30T12:00:00.000Z" }
   },
   "materials": {
-    "mat1": { "id": "mat1", "courseId": "c1", "title": "MDN Docs for Flexbox", "link": "https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox", "createdAt": "2024-06-01T12:05:00.000Z" }
+    "mat1": { "id": "mat1", "courseId": "c1", "title": "MDN Web Docs", "link": "https://developer.mozilla.org/", "createdAt": "2024-06-01T14:45:00.000Z" }
   },
   "notifications": {},
   "attendance": {
-      "att1": {"id": "att1", "studentId": "u1", "courseId": "c1", "date": "2024-06-01", "isPresent": true },
-      "att2": {"id": "att2", "studentId": "u2", "courseId": "c1", "date": "2024-06-01", "isPresent": true }
+    "att1": { "id": "att1", "studentId": "u1", "courseId": "c1", "date": "2024-06-01", "isPresent": true },
+    "att2": { "id": "att2", "studentId": "u1", "courseId": "c2", "date": "2024-06-01", "isPresent": true }
   },
   "certificates": {},
-  "challenges": {},
+  "challenges": {
+    "ch1": { "id": "ch1", "title": "E-commerce Wishlist Feature", "description": "Design the data model and API endpoints for a new wishlist feature in an e-commerce platform. Consider scalability and user experience.", "company": "Amazon", "points": 150, "icon": "ShoppingCart" },
+    "ch2": { "id": "ch2", "title": "Social Media Feed Algorithm", "description": "Propose an algorithm for a social media feed that balances recency, user engagement, and content diversity. Explain your trade-offs.", "company": "Meta", "points": 200, "icon": "Users" },
+    "ch3": { "id": "ch3", "title": "Live Code Collaboration Tool", "description": "Outline the architecture for a real-time code collaboration tool like VS Code Live Share. Focus on conflict resolution and state synchronization.", "company": "Microsoft", "points": 250, "icon": "Code" },
+    "ch4": { "id": "ch4", "title": "CI/CD Pipeline Optimization", "description": "Your team's CI/CD pipeline is slow. Propose three concrete optimizations to reduce build times and improve developer experience.", "company": "GitLab", "points": 180, "icon": "GitMerge" }
+  },
   "challenge_submissions": {},
   "challenge_votes": {},
-  "projects": {},
+  "projects": {
+    "proj1": { "id": "proj1", "studentId": "u1", "title": "Personal Portfolio Website", "description": "A fully responsive portfolio site built with Next.js and Tailwind CSS to showcase my skills and projects. Features a blog and a contact form.", "imageUrl": "https://picsum.photos/seed/proj1/600/400", "projectUrl": "https://github.com", "tags": ["Next.js", "React", "Tailwind CSS"], "createdAt": "2024-05-20T10:00:00.000Z" },
+    "proj2": { "id": "proj2", "studentId": "u2", "title": "Kanban Task Manager", "description": "A drag-and-drop task management application inspired by Trello. Built with React and uses the browser's local storage to persist state.", "imageUrl": "https://picsum.photos/seed/proj4/600/400", "projectUrl": "https://github.com", "tags": ["React", "State Management", "Local Storage"], "createdAt": "2024-05-15T18:00:00.000Z" }
+  },
   "internship_domains": {
     "google": {
       "id": "google",
       "name": "Google",
-      "description": "Tackle a problem in large-scale systems, search, or machine learning. Focus on scalability and efficiency.",
-      "icon": "Building",
+      "description": "Tackle a problem in large-scale systems, data processing, or algorithm design, inspired by the challenges faced at Google.",
+      "icon": "google",
       "task": {
         "title": "Design a Scalable URL Shortener",
-        "scenario": "You are an intern on the Google Cloud Platform team. A major client needs a highly available and scalable URL shortening service, similar to bit.ly. Your task is to design the system architecture.",
-        "task": "Design the core components of the service. Consider the API for creating and retrieving URLs, the data storage strategy for handling billions of URLs, and how you would handle traffic spikes.",
+        "scenario": "Your team is tasked with building a new URL shortening service like bit.ly. The service needs to handle millions of requests per day and ensure that shortened URLs are unique and quickly resolvable.",
+        "task": "Outline the system architecture for this service. Your proposal should cover the API design, the database schema, and the logic for generating and resolving short URLs. How would you ensure the service is fast and can scale to a global audience?",
         "deliverables": [
           "A high-level system architecture diagram.",
-          "A description of your chosen database schema (SQL or NoSQL) and why.",
-          "An outline of the API endpoints (e.g., POST /shorten, GET /{shortCode})."
+          "API endpoint definitions (e.g., for creating and getting URLs).",
+          "A proposed database schema for storing the URL mappings."
         ]
       }
     },
     "openai": {
       "id": "openai",
       "name": "OpenAI",
-      "description": "Work on a problem related to large language models, AI safety, or creative AI applications.",
-      "icon": "Bot",
+      "description": "Work on a challenge related to AI ethics, model interaction, or prompt engineering, reflecting the work done at OpenAI.",
+      "icon": "openai",
       "task": {
         "title": "Develop a Content Moderation Filter",
-        "scenario": "As part of the AI Safety team at OpenAI, you've been tasked with improving the content filter for a new generative AI model. The goal is to prevent the model from generating harmful or inappropriate content.",
-        "task": "Propose a multi-layered filter system. Think about how you would classify different types of harmful content (e.g., hate speech, violence, misinformation) and what actions to take when a potential violation is detected.",
+        "scenario": "Your team is developing a new AI assistant and needs to ensure its responses are safe and appropriate. You are tasked with designing a multi-layered content moderation filter that the AI's output will pass through before being shown to the user.",
+        "task": "Propose a design for this content moderation system. Describe at least three different layers or types of checks your system would perform (e.g., keyword filtering, sentiment analysis, topic detection). Explain how you would handle ambiguous cases and how you might use an AI model as part of the filtering process itself.",
         "deliverables": [
           "A description of at least three layers of your filter.",
           "An example of a prompt that would be flagged and one that would pass, with explanations.",
           "A strategy for minimizing false positives (flagging safe content)."
+        ]
+      }
+    },
+    "netflix": {
+      "id": "netflix",
+      "name": "Netflix",
+      "description": "Solve a challenge in content delivery, recommendation systems, or distributed systems, inspired by the engineering problems at Netflix.",
+      "icon": "netflix",
+      "task": {
+        "title": "Design a 'Top 10' Recommendation System",
+        "scenario": "The product team wants to launch a new 'Top 10 This Week' feature for different regions. This list needs to update daily and be personalized while also reflecting overall trends.",
+        "task": "Outline a strategy for generating these 'Top 10' lists. How would you collect and process viewing data? How would you balance popularity with personalization? Describe the data pipeline, from raw viewing events to the final 'Top 10' list displayed to a user.",
+        "deliverables": [
+          "A data flow diagram showing how view data is processed.",
+          "A brief description of the algorithm for ranking content.",
+          "A plan to address the 'cold start' problem for new content."
+        ]
+      }
+    },
+    "microsoft": {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "description": "Engage with a problem related to enterprise software, cloud computing, or developer tools, mirroring the challenges at Microsoft.",
+      "icon": "microsoft",
+      "task": {
+        "title": "Propose a Cloud Cost-Saving Feature",
+        "scenario": "Your team manages a major cloud service (like Azure) and has noticed that many customers over-provision their resources, leading to high costs. You are asked to propose a new feature that helps customers automatically optimize their spending.",
+        "task": "Design a feature that analyzes a customer's resource usage and suggests or automatically applies cost-saving measures. What data would you track? What kinds of recommendations would you make (e.g., downsizing VMs, using spot instances, deleting unused disks)? How would you present these savings to the user in a clear and trustworthy way?",
+        "deliverables": [
+          "A mock-up or sketch of the user dashboard for this feature.",
+          "A list of at least three specific cost-saving recommendations the system would make.",
+          "An explanation of how you would ensure the optimizations don't negatively impact application performance."
         ]
       }
     }
