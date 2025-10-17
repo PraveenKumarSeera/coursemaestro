@@ -823,7 +823,7 @@ export const getVotesForSubmission = unstable_cache(
 );
 
 // --- Project Showcase Functions ---
-export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl'>): Promise<Project> {
+export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl' | 'tags'> & { tags: string[] }): Promise<Project> {
     const id = randomUUID();
     const placeholder = PlaceHolderImages.find(p => p.imageHint.includes('project')) || PlaceHolderImages[6];
     const newProject: Project = {
@@ -838,15 +838,11 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
 
 export const getAllProjects = unstable_cache(
     async (): Promise<(Project & { student: User })[]> => {
-        const allProjects = Object.values(db.projects);
-
-        // This is the definitive fix. Filter out any null/undefined projects,
-        // then ensure every valid project has a 'tags' array.
-        const sanitizedProjects = allProjects
-            .filter((p): p is Project => p !== null && p !== undefined) // 1. Filter out invalid entries
+        const sanitizedProjects = Object.values(db.projects)
+            .filter((p): p is Project => p !== null && typeof p === 'object' && p.id !== undefined)
             .map(p => ({
                 ...p,
-                tags: Array.isArray(p.tags) ? p.tags : [], // 2. Guarantee 'tags' is an array
+                tags: Array.isArray(p.tags) ? p.tags : [],
             }));
 
         sanitizedProjects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -865,14 +861,11 @@ export const getAllProjects = unstable_cache(
 
 export const getProjectsByStudent = unstable_cache(
     async (studentId: string): Promise<Project[]> => {
-        const studentProjects = Object.values(db.projects);
-        
-        // Apply the same robust sanitization here.
-        const sanitizedProjects = studentProjects
-            .filter((p): p is Project => p && p.studentId === studentId) // 1. Filter and ensure project exists
+        const sanitizedProjects = Object.values(db.projects)
+            .filter((p): p is Project => p !== null && typeof p === 'object' && p.studentId === studentId)
             .map(p => ({
                 ...p,
-                tags: Array.isArray(p.tags) ? p.tags : [], // 2. Guarantee 'tags' is an array
+                tags: Array.isArray(p.tags) ? p.tags : [],
             }));
 
         sanitizedProjects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

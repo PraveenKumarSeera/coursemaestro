@@ -1,4 +1,5 @@
 
+
 import { getAllProjects } from '@/lib/data';
 import {
   Card,
@@ -92,11 +93,13 @@ export default async function ShowcasePage() {
                                     <span className="text-xs">{formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}</span>
                                 </div>
                                 <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{project.description}</p>
-                                <div className="flex flex-wrap gap-2">
-                                    {Array.isArray(project.tags) && project.tags.map(tag => (
-                                    <Badge key={tag} variant="secondary">{tag}</Badge>
-                                    ))}
-                                </div>
+                                {Array.isArray(project.tags) && project.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-2">
+                                        {project.tags.map(tag => (
+                                            <Badge key={tag} variant="secondary">{tag}</Badge>
+                                        ))}
+                                    </div>
+                                )}
                             </CardContent>
                             <CardFooter className="p-6 pt-0">
                                 <Button asChild className="w-full">

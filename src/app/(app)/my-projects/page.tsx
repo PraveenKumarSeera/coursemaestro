@@ -1,4 +1,5 @@
 
+
 import { getSession } from '@/lib/session';
 import { notFound } from 'next/navigation';
 import { getProjectsByStudent } from '@/lib/data';
@@ -52,11 +53,13 @@ export default async function MyProjectsPage() {
                   </CardHeader>
                   <CardContent className="flex-grow">
                     <p className="text-sm text-muted-foreground line-clamp-3 mb-4">{project.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                        {Array.isArray(project.tags) && project.tags.map(tag => (
-                            <Badge key={tag} variant="secondary">{tag}</Badge>
-                        ))}
-                    </div>
+                    {Array.isArray(project.tags) && project.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                            {project.tags.map(tag => (
+                                <Badge key={tag} variant="secondary">{tag}</Badge>
+                            ))}
+                        </div>
+                    )}
                   </CardContent>
                   <CardContent>
                      <Button asChild variant="outline" className="w-full">
