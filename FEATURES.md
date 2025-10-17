@@ -23,8 +23,6 @@ This document provides a comprehensive list of all features available in the Cou
 - **AI Resume Builder:** Automatically generate a professional resume using your completed coursework, grades, and personal information.
 
 ### Skill & Portfolio Building
-- **My Projects:** A dedicated page to upload and manage your personal projects, creating a portfolio to showcase your work.
-- **Public Project Showcase:** A public-facing gallery of all student projects, perfect for sharing with recruiters and peers.
 - **Real-World Challenges:** Participate in industry-inspired challenges, submit your solutions, and vote on others' work to earn "Credibility Points."
 - **Virtual Internship Simulator:** Choose a simulated internship from a top tech company, tackle a realistic technical task, and receive an AI-generated grade and detailed feedback.
 

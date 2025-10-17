@@ -116,17 +116,6 @@ export type ChallengeVote = {
   voterId: string;
 };
 
-export type Project = {
-  id: string;
-  studentId: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  projectUrl: string;
-  tags: string[];
-  createdAt: string;
-};
-
 // Internship Simulator Types
 export type InternshipTask = {
   title: string;

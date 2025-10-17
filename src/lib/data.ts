@@ -7,7 +7,7 @@ import { unstable_cache } from 'next/cache';
 import { differenceInDays, parseISO, isSameDay, subDays } from 'date-fns';
 import { getSession } from './session';
 import { PlaceHolderImages } from './placeholder-images';
-import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote, Project, InternshipDomain } from './types';
+import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote, InternshipDomain } from './types';
 
 
 const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student' };
@@ -29,7 +29,6 @@ type Db = {
     challenges: Record<string, Challenge>;
     challenge_submissions: Record<string, ChallengeSubmission>;
     challenge_votes: Record<string, ChallengeVote>;
-    projects: Record<string, Project>;
     internship_domains: Record<string, InternshipDomain>;
 };
 
@@ -49,7 +48,6 @@ const db: Db = global.__db || {
     notifications: {},
     attendance: {},
     certificates: {},
-    projects: {},
     challenges: {
         "challenge-1": {
             "id": "challenge-1",
@@ -821,70 +819,6 @@ export const getVotesForSubmission = unstable_cache(
     ['votes-for-submission'],
     { tags: ['challenges'] }
 );
-
-// --- Project Showcase Functions ---
-export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl' | 'tags'> & { tags: string[] }): Promise<Project> {
-    const id = randomUUID();
-    const placeholder = PlaceHolderImages.find(p => p.imageHint.includes('project')) || PlaceHolderImages[6];
-    const newProject: Project = {
-        ...data,
-        id,
-        imageUrl: placeholder.imageUrl,
-        createdAt: new Date().toISOString(),
-    };
-    db.projects[id] = newProject;
-    return newProject;
-}
-
-export const getAllProjects = unstable_cache(
-    async (): Promise<(Project & { student: User })[]> => {
-        const projects = Object.values(db.projects);
-
-        // 1. Filter out any null, undefined, or malformed project entries
-        const validProjects = projects.filter((p): p is Project => {
-            return p && typeof p === 'object' && typeof p.id === 'string';
-        });
-
-        // 2. Sanitize and sort the valid projects
-        const sanitizedProjects = validProjects.map(p => ({
-            ...p,
-            tags: Array.isArray(p.tags) ? p.tags : [], // Guarantee tags is an array
-        })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-        // 3. Fetch student data for the sanitized projects
-        return Promise.all(
-            sanitizedProjects.map(async p => {
-                const student = await findUserById(p.studentId);
-                return { ...p, student };
-            })
-        );
-    },
-    ['all-projects'],
-    { tags: ['projects', 'users'] }
-);
-
-
-export const getProjectsByStudent = unstable_cache(
-    async (studentId: string): Promise<Project[]> => {
-        const projects = Object.values(db.projects).filter(p => p && p.studentId === studentId);
-        
-        // 1. Filter out any null, undefined, or malformed project entries
-        const validProjects = projects.filter((p): p is Project => {
-            return p && typeof p === 'object' && typeof p.id === 'string';
-        });
-
-        // 2. Sanitize and sort the valid projects
-        const sanitizedProjects = validProjects.map(p => ({
-            ...p,
-            tags: Array.isArray(p.tags) ? p.tags : [], // Guarantee tags is an array
-        })).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-        return sanitizedProjects;
-    },
-    ['projects-by-student'],
-    { tags: ['projects'] }
-);
-
 
 // --- Internship Functions ---
 export const getInternshipDomains = unstable_cache(

@@ -22,8 +22,6 @@ import {
   Lightbulb,
   Building,
   BrainCircuit,
-  FolderKanban,
-  Rocket,
   HeartHandshake,
   School,
   RadioTower,
@@ -44,7 +42,6 @@ export default function AppSidebar({ user }: AppSidebarProps) {
   const commonRoutes = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/courses', label: user.role === 'student' ? 'My Courses' : 'My Courses', icon: BookOpen },
-    { href: '/showcase', label: 'Project Showcase', icon: Rocket },
   ];
 
   const teacherRoutes = [
@@ -58,7 +55,6 @@ export default function AppSidebar({ user }: AppSidebarProps) {
 
   const studentRoutes = [
     { href: '/my-journey', label: 'My Journey', icon: Map, isNew: true },
-    { href: '/my-projects', label: 'My Projects', icon: FolderKanban },
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },
     { href: '/internship', label: 'Internship Sim', icon: Building },
