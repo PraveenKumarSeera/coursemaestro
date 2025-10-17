@@ -259,6 +259,13 @@
       "courseId": "1759821872336",
       "date": "2025-10-16",
       "isPresent": true
+    },
+    {
+      "id": "1760669705565",
+      "studentId": "1759816290832",
+      "courseId": "1759821872336",
+      "date": "2025-10-17",
+      "isPresent": true
     }
   ],
   "certificates": [
@@ -387,6 +394,88 @@
         "UI/UX"
       ],
       "createdAt": "2025-10-01T02:30:10.578Z"
+    }
+  ],
+  "internshipDomains": [
+    {
+      "id": "google",
+      "name": "Google",
+      "description": "A multinational technology company focusing on search engine technology, online advertising, cloud computing, and more.",
+      "icon": "google",
+      "task": {
+        "title": "Design a Scalable Ad-Targeting Algorithm",
+        "scenario": "The Ads team is looking to improve the relevance of ads served on its content network. Your task is to design a high-level algorithm that can personalize ad delivery based on a user's recent search history and the content of the page they are viewing. Performance and privacy are key considerations.",
+        "task": "Propose a system architecture that can process user data in near real-time to select the most relevant ad from a large inventory. Consider how you would balance personalization with user privacy concerns.",
+        "deliverables": [
+          "A high-level system diagram.",
+          "Pseudo-code for your core ad-selection logic.",
+          "A brief (1-2 paragraphs) explanation of your approach to privacy."
+        ]
+      }
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "description": "An AI research and deployment company. Their mission is to ensure that artificial general intelligence benefits all of humanity.",
+      "icon": "openai",
+      "task": {
+        "title": "Develop a Safety Filter for a Language Model",
+        "scenario": "As part of the safety alignment team, you are tasked with developing a new pre-processing filter for a large language model. This filter should identify and flag potentially harmful or biased content in user prompts before they are sent to the model.",
+        "task": "Design a multi-layered approach to detect harmful content. This could involve keyword matching, sentiment analysis, and even a smaller, specialized classification model. How would you handle ambiguous cases?",
+        "deliverables": [
+          "A description of at least three layers of your filter.",
+          "An example of a prompt that would be flagged and one that would pass, with explanations.",
+          "A strategy for minimizing false positives (flagging safe content)."
+        ]
+      }
+    },
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "description": "A leading streaming service offering a wide variety of award-winning TV shows, movies, anime, documentaries, and more.",
+      "icon": "netflix",
+      "task": {
+        "title": "Architect a \"Skip Intro\" Detection System",
+        "scenario": "The content delivery team wants to automatically identify the \"Skip Intro\" timestamp for all new shows added to the platform. Manually finding this point is time-consuming and inefficient.",
+        "task": "Propose a system that can analyze video and audio data to automatically detect the end of an opening title sequence. Consider audio cues (like a recurring theme song) and visual cues (like recurring title cards or credits).",
+        "deliverables": [
+          "A flowchart of the proposed system.",
+          "A list of key features to extract from video and audio frames.",
+          "An explanation of how you would train and validate your model."
+        ]
+      }
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "description": "A technology corporation that produces computer software, consumer electronics, personal computers, and related services.",
+      "icon": "microsoft",
+      "task": {
+        "title": "Design a Cloud Cost-Saving Feature",
+        "scenario": "The Azure cloud team has noticed that many customers over-provision their resources, leading to wasted spending. You are asked to design a feature for the Azure portal that proactively suggests cost-saving measures.",
+        "task": "Design a system that analyzes a customer's resource usage patterns over time (e.g., CPU, memory, network). Based on this analysis, it should generate specific, actionable recommendations, such as downsizing a VM, using a different storage tier, or scheduling resources to turn off during non-peak hours.",
+        "deliverables": [
+          "A mock-up of the UI for the recommendation dashboard.",
+          "A list of the key metrics your system would need to track.",
+          "An example recommendation with a calculated potential cost saving."
+        ]
+      }
+    },
+    {
+      "id": "innovate",
+      "name": "Innovate Inc.",
+      "description": "A fast-growing startup focused on developer tools and productivity software.",
+      "icon": "innovate",
+      "task": {
+        "title": "Create a Code Review Assistant Bot",
+        "scenario": "To improve code quality and speed up the review process, your team wants to build a GitHub bot that automatically comments on pull requests with suggestions for improvement.",
+        "task": "Design a bot that checks for common issues in new code submissions. It should flag things like missing documentation, functions that are too long (high cyclomatic complexity), and potential security vulnerabilities (e.g., hardcoded secrets).",
+        "deliverables": [
+          "A list of at least five specific rules the bot would check for.",
+          "An example of a code snippet that would trigger a bot comment.",
+          "The text of the comment the bot would post on the pull request."
+        ]
+      }
     }
   ]
 }
