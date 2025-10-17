@@ -4,7 +4,6 @@
 
 import { placeholderImages } from './placeholder-images.json';
 import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission, DiscussionThread, DiscussionPost, Material, Notification, Attendance, Certificate, Challenge, ChallengeSubmission, ChallengeVote, Project, InternshipDomain } from './types';
-import { sql } from '@vercel/postgres';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
 import { differenceInDays, parseISO, isSameDay, subDays } from 'date-fns';
@@ -14,17 +13,134 @@ import { getSession } from './session';
 const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student' };
 
 
+// In a real app, this would be a database. For this demo, we'll use a simple in-memory store.
+// To make this work across server requests in a development environment, we'll attach it to the global object.
+type Db = {
+    users: User[];
+    courses: Course[];
+    enrollments: Enrollment[];
+    assignments: Assignment[];
+    submissions: Submission[];
+    discussion_threads: DiscussionThread[];
+    discussion_posts: DiscussionPost[];
+    materials: Material[];
+    notifications: Notification[];
+    attendance: Attendance[];
+    certificates: Certificate[];
+    challenges: Challenge[];
+    challenge_submissions: ChallengeSubmission[];
+    challenge_votes: ChallengeVote[];
+    projects: Project[];
+    internship_domains: InternshipDomain[];
+};
+
+declare global {
+  var __db: Db | undefined;
+}
+
+const db: Db = global.__db || {
+    users: [
+        { id: '1', name: 'Albus Dumbledore', email: 'teacher@school.com', password: 'password', role: 'teacher' },
+        { id: '2', name: 'Harry Potter', email: 'student@school.com', password: 'password', role: 'student' },
+        { id: '3', name: 'Hermione Granger', email: 'student2@school.com', password: 'password', role: 'student' },
+        { id: '4', name: 'Ron Weasley', email: 'student3@school.com', password: 'password', role: 'student' },
+    ],
+    courses: [
+        { id: '101', title: 'Introduction to Web Development', description: 'Learn the fundamentals of HTML, CSS, and JavaScript to build modern websites.', teacherId: '1', duration: '8 Weeks', imageUrl: 'https://picsum.photos/seed/1/600/400' },
+        { id: '102', title: 'Advanced React Patterns', description: 'Dive deep into React and learn about hooks, context, performance optimization, and advanced patterns.', teacherId: '1', duration: '6 Weeks', imageUrl: 'https://picsum.photos/seed/2/600/400' },
+        { id: '103', title: 'Data Structures & Algorithms', description: 'Understand the core concepts of data structures and algorithms. A fundamental course for any aspiring software engineer.', teacherId: '1', duration: '10 Weeks', imageUrl: 'https://picsum.photos/seed/3/600/400' },
+    ],
+    enrollments: [
+        { id: 'en1', studentId: '2', courseId: '101' },
+        { id: 'en2', studentId: '2', courseId: '102' },
+        { id: 'en3', studentId: '3', courseId: '101' },
+        { id: 'en4', studentId: '3', courseId: '103' },
+        { id: 'en5', studentId: '4', courseId: '101' },
+    ],
+    assignments: [
+        { id: 'as1', courseId: '101', title: 'HTML & CSS Basics', description: 'Create a simple personal portfolio page.', dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 'as2', courseId: '101', title: 'JavaScript Fundamentals', description: 'Build a simple calculator application.', dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 'as3', courseId: '102', title: 'React Hooks', description: 'Refactor a class component to use functional components and hooks.', dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 'as4', courseId: '103', title: 'Big O Notation', description: 'Analyze the time complexity of three different sorting algorithms.', dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+    ],
+    submissions: [
+        { id: 'sub1', assignmentId: 'as1', studentId: '2', content: 'Here is my submission for the portfolio page.', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), grade: 92, feedback: 'Great job on the structure and styling! Consider adding a bit more content.' },
+        { id: 'sub2', assignmentId: 'as4', studentId: '2', content: 'Here is my analysis of the sorting algorithms.', submittedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), grade: 78, feedback: 'Good start, but your analysis of bubble sort could be more detailed.' },
+        { id: 'sub3', assignmentId: 'as1', studentId: '3', content: 'My portfolio page submission.', submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), grade: 98, feedback: 'Excellent work! Very clean code and a beautiful design.' },
+    ],
+    discussion_threads: [
+        { id: 'th1', courseId: '101', title: 'Question about Flexbox', authorId: '2', createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+    ],
+    discussion_posts: [
+        { id: 'po1', threadId: 'th1', authorId: '2', content: 'I\'m having trouble centering a div. Can anyone help?', createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: 'po2', threadId: 'th1', authorId: '1', content: 'Sure! Have you tried using `display: flex; justify-content: center; align-items: center;` on the parent container?', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+    ],
+    materials: [
+        { id: 'mat1', courseId: '101', title: 'MDN Web Docs', link: 'https://developer.mozilla.org', createdAt: new Date().toISOString() },
+    ],
+    notifications: [],
+    attendance: [
+        { id: 'att1', studentId: '2', courseId: '101', date: new Date().toISOString().split('T')[0], isPresent: true },
+        { id: 'att2', studentId: '3', courseId: '101', date: new Date().toISOString().split('T')[0], isPresent: true },
+    ],
+    certificates: [],
+    challenges: [
+      { id: 'ch1', title: 'E-commerce Search Component', description: 'Build a reusable search component for an e-commerce platform that allows filtering by category, price range, and rating. The component should be performant and accessible.', company: 'Shopify', points: 150, icon: 'ShoppingCart' },
+      { id: 'ch2', title: 'Social Media Dashboard UI', description: 'Design and implement a responsive UI for a social media analytics dashboard. It should display key metrics like follower growth, engagement rate, and top posts in a visually appealing way.', company: 'Meta', points: 200, icon: 'Users' },
+    ],
+    challenge_submissions: [],
+    challenge_votes: [],
+    projects: [],
+    internship_domains: [
+        {
+            id: 'google',
+            name: 'Google',
+            description: 'A multinational technology company focusing on search engine technology, online advertising, cloud computing, and more.',
+            icon: 'google',
+            task: {
+                title: 'Design a Scalable Ad-Targeting Algorithm',
+                scenario: 'The Ads team is looking to improve the relevance of ads served on its content network. Your task is to design a high-level algorithm that can personalize ad delivery based on a user\'s recent search history and the content of the page they are viewing. Performance and privacy are key considerations.',
+                task: 'Propose a system architecture that can process user data in near real-time to select the most relevant ad from a large inventory. Consider how you would balance personalization with user privacy concerns.',
+                deliverables: [
+                    'A high-level system diagram.',
+                    'Pseudo-code for your core ad-selection logic.',
+                    'A brief (1-2 paragraphs) explanation of your approach to privacy.'
+                ]
+            }
+        },
+        {
+            id: 'openai',
+            name: 'OpenAI',
+            description: 'An AI research and deployment company. Their mission is to ensure that artificial general intelligence benefits all of humanity.',
+            icon: 'openai',
+            task: {
+                title: 'Develop a Safety Filter for a Language Model',
+                scenario: 'As part of the safety alignment team, you are tasked with developing a new pre-processing filter for a large language model. This filter should identify and flag potentially harmful or biased content in user prompts before they are sent to the model.',
+                task: 'Design a multi-layered approach to detect harmful content. This could involve keyword matching, sentiment analysis, and even a smaller, specialized classification model. How would you handle ambiguous cases?',
+                deliverables: [
+                    'A description of at least three layers of your filter.',
+                    'An example of a prompt that would be flagged and one that would pass, with explanations.',
+                    'A strategy for minimizing false positives (flagging safe content).',
+                ]
+            }
+        },
+    ]
+};
+
+if (process.env.NODE_ENV !== 'production') {
+  global.__db = db;
+}
+
+
 // --- User Functions ---
 export async function findUserByEmail(email: string): Promise<User | undefined> {
-    const { rows } = await sql`SELECT * FROM users WHERE email = ${email}`;
-    return rows[0] as User | undefined;
+    return db.users.find(user => user.email === email);
 }
 
 export const findUserById = unstable_cache(
     async (id: string): Promise<User> => {
         if (!id || id === '0') return unknownUser;
-        const { rows } = await sql`SELECT * FROM users WHERE id = ${id}`;
-        return (rows[0] as User) || unknownUser;
+        return db.users.find(user => user.id === id) || unknownUser;
     },
     ['user'],
     { tags: ['users'], revalidate: 3600 }
@@ -32,26 +148,17 @@ export const findUserById = unstable_cache(
 
 
 export async function createUser(data: Omit<User, 'id'>): Promise<User> {
-    const id = randomUUID();
-    await sql`
-        INSERT INTO users (id, name, email, password, role)
-        VALUES (${id}, ${data.name}, ${data.email}, ${data.password}, ${data.role})
-    `;
-    return { id, ...data };
+    const newUser = { id: randomUUID(), ...data };
+    db.users.push(newUser);
+    return newUser;
 }
 
 export async function updateUser(id: string, data: Partial<Omit<User, 'id' | 'email' | 'role'>>): Promise<User | undefined> {
-    const user = await findUserById(id);
-    if (!user || user.id === '0') return undefined;
+    const userIndex = db.users.findIndex(u => u.id === id);
+    if (userIndex === -1) return undefined;
 
-    const updatedUser = { ...user, ...data };
-    
-    await sql`
-        UPDATE users
-        SET name = ${updatedUser.name}, password = ${updatedUser.password}
-        WHERE id = ${id}
-    `;
-    return updatedUser;
+    db.users[userIndex] = { ...db.users[userIndex], ...data };
+    return db.users[userIndex];
 }
 
 export async function getAuthenticatedUser(): Promise<User | null> {
@@ -61,18 +168,19 @@ export async function getAuthenticatedUser(): Promise<User | null> {
 
 // --- Course Functions ---
 export async function getAllCourses(query?: string): Promise<Course[]> {
-    let coursesQuery = sql`SELECT * FROM courses`;
     if (query) {
-       coursesQuery = sql`SELECT * FROM courses WHERE title ILIKE ${'%' + query + '%'} OR description ILIKE ${'%' + query + '%'}`;
+        const lowercasedQuery = query.toLowerCase();
+        return db.courses.filter(course =>
+            course.title.toLowerCase().includes(lowercasedQuery) ||
+            course.description.toLowerCase().includes(lowercasedQuery)
+        );
     }
-    const { rows } = await coursesQuery;
-    return rows as Course[];
+    return db.courses;
 }
 
 export const getCourseById = unstable_cache(
     async (id: string): Promise<(Course & { teacher: User }) | undefined> => {
-        const { rows } = await sql`SELECT * FROM courses WHERE id = ${id}`;
-        const course = rows[0] as Course | undefined;
+        const course = db.courses.find(c => c.id === id);
         if (!course) return undefined;
         
         const teacher = await findUserById(course.teacherId);
@@ -86,43 +194,28 @@ export const getCourseById = unstable_cache(
 
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
-    const id = randomUUID();
     const newCourse: Course = {
         ...data,
-        id,
+        id: randomUUID(),
         teacherId,
         imageUrl: placeholderImages[Math.floor(Math.random() * placeholderImages.length)].imageUrl,
     };
-    await sql`
-        INSERT INTO courses (id, title, description, duration, "teacherId", "imageUrl", "videoUrl")
-        VALUES (${newCourse.id}, ${newCourse.title}, ${newCourse.description}, ${newCourse.duration}, ${newCourse.teacherId}, ${newCourse.imageUrl}, ${newCourse.videoUrl || null})
-    `;
+    db.courses.push(newCourse);
     return newCourse;
 }
 
 export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' | 'teacherId' | 'imageUrl'>>): Promise<Course | undefined> {
-    const course = await getCourseById(id);
-    if (!course) return undefined;
+    const courseIndex = db.courses.findIndex(c => c.id === id);
+    if (courseIndex === -1) return undefined;
 
-    const updatedCourse = { ...course, ...data };
-
-    await sql`
-        UPDATE courses
-        SET title = ${updatedCourse.title}, description = ${updatedCourse.description}, duration = ${updatedCourse.duration}, "videoUrl" = ${updatedCourse.videoUrl || null}
-        WHERE id = ${id}
-    `;
-    return updatedCourse;
+    db.courses[courseIndex] = { ...db.courses[courseIndex], ...data };
+    return db.courses[courseIndex];
 }
 
 export async function deleteCourse(id: string): Promise<boolean> {
-     await sql.query(`
-        DELETE FROM enrollments WHERE "courseId" = $1;
-        DELETE FROM assignments WHERE "courseId" = $1;
-        DELETE FROM discussion_threads WHERE "courseId" = $1;
-        DELETE FROM materials WHERE "courseId" = $1;
-        DELETE FROM attendance WHERE "courseId" = $1;
-        DELETE FROM courses WHERE id = $1;
-    `, [id]);
+     db.courses = db.courses.filter(c => c.id !== id);
+     db.enrollments = db.enrollments.filter(e => e.courseId !== id);
+     db.assignments = db.assignments.filter(a => a.courseId !== id);
     return true;
 }
 
@@ -132,78 +225,62 @@ export async function getTeacherById(id: string): Promise<User> {
 }
 
 export async function getTeacherCourses(teacherId: string, query?: string): Promise<Course[]> {
-    let querySql = sql`SELECT * FROM courses WHERE "teacherId" = ${teacherId}`;
+    const courses = db.courses.filter(course => course.teacherId === teacherId);
     if (query) {
-        querySql = sql`SELECT * FROM courses WHERE "teacherId" = ${teacherId} AND (title ILIKE ${'%' + query + '%'} OR description ILIKE ${'%' + query + '%'})`;
+        const lowercasedQuery = query.toLowerCase();
+        return courses.filter(course =>
+            course.title.toLowerCase().includes(lowercasedQuery) ||
+            course.description.toLowerCase().includes(lowercasedQuery)
+        );
     }
-    const { rows } = await querySql;
-    return rows as Course[];
+    return courses;
 }
 
 
 // --- Enrollment Functions ---
 export async function getStudentEnrollments(studentId: string): Promise<Enrollment[]> {
-    const { rows } = await sql`SELECT * FROM enrollments WHERE "studentId" = ${studentId}`;
-    return rows as Enrollment[];
+    return db.enrollments.filter(e => e.studentId === studentId);
 }
 
 export async function getStudentsByCourse(courseId: string): Promise<User[]> {
-    const { rows } = await sql`
-        SELECT u.* FROM users u
-        JOIN enrollments e ON u.id = e."studentId"
-        WHERE e."courseId" = ${courseId}
-    `;
-    return rows as User[];
+    const studentIds = db.enrollments.filter(e => e.courseId === courseId).map(e => e.studentId);
+    return db.users.filter(u => studentIds.includes(u.id));
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
-    const { rows } = await sql`SELECT * FROM enrollments WHERE "studentId" = ${studentId} AND "courseId" = ${courseId}`;
-    if (rows.length > 0) return null;
+    const alreadyEnrolled = db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
+    if (alreadyEnrolled) return null;
 
-    const id = randomUUID();
-    const newEnrollment: Enrollment = { id, studentId, courseId };
-    await sql`
-        INSERT INTO enrollments (id, "studentId", "courseId")
-        VALUES (${id}, ${studentId}, ${courseId})
-    `;
+    const newEnrollment: Enrollment = { id: randomUUID(), studentId, courseId };
+    db.enrollments.push(newEnrollment);
     return newEnrollment;
 }
 
 export async function isEnrolled(studentId: string, courseId: string): Promise<boolean> {
-    const { rows } = await sql`SELECT 1 FROM enrollments WHERE "studentId" = ${studentId} AND "courseId" = ${courseId}`;
-    return rows.length > 0;
+    return db.enrollments.some(e => e.studentId === studentId && e.courseId === courseId);
 }
 
 export async function getTeacherStudents(teacherId: string) {
-    const { rows } = await sql`
-        SELECT DISTINCT u.id, u.name, u.email
-        FROM users u
-        JOIN enrollments e ON u.id = e."studentId"
-        JOIN courses c ON e."courseId" = c.id
-        WHERE c."teacherId" = ${teacherId}
-    `;
-
-    const studentStats = await Promise.all(rows.map(async (student) => {
-        const { rows: courseRows } = await sql`
-            SELECT c.title FROM courses c
-            JOIN enrollments e ON c.id = e."courseId"
-            WHERE e."studentId" = ${student.id} AND c."teacherId" = ${teacherId}
-        `;
-        const studentCourses = courseRows.map(r => r.title);
-
-        const { rows: submissionRows } = await sql`
-            SELECT grade FROM submissions
-            WHERE "studentId" = ${student.id} AND grade IS NOT NULL
-            ORDER BY "submittedAt" ASC
-        `;
+    const teacherCourseIds = new Set(db.courses.filter(c => c.teacherId === teacherId).map(c => c.id));
+    const studentIds = new Set(db.enrollments.filter(e => teacherCourseIds.has(e.courseId)).map(e => e.studentId));
+    
+    return Promise.all(Array.from(studentIds).map(async (studentId) => {
+        const student = await findUserById(studentId);
+        const enrolledCourseIds = db.enrollments
+            .filter(e => e.studentId === studentId && teacherCourseIds.has(e.courseId))
+            .map(e => e.courseId);
         
-        const grades = submissionRows.map(r => r.grade);
-        const totalGrade = grades.reduce((acc, grade) => acc + grade, 0);
-        const averageGrade = grades.length > 0 ? Math.round(totalGrade / grades.length) : 0;
+        const courses = db.courses
+            .filter(c => enrolledCourseIds.includes(c.id))
+            .map(c => c.title);
+
+        const submissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
+        const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
+        const averageGrade = submissions.length > 0 ? Math.round(totalGrade / submissions.length) : 0;
 
         let trend: 'improving' | 'declining' | 'stable' = 'stable';
-        if (grades.length >= 3) {
-            const lastThreeGrades = grades.slice(-3);
+        if (submissions.length >= 3) {
+            const lastThreeGrades = submissions.slice(-3).map(s => s.grade || 0);
             const lastThreeAverage = lastThreeGrades.reduce((acc, grade) => acc + grade, 0) / 3;
             if (lastThreeAverage > averageGrade + 5) trend = 'improving';
             else if (lastThreeAverage < averageGrade - 5) trend = 'declining';
@@ -213,256 +290,195 @@ export async function getTeacherStudents(teacherId: string) {
             id: student.id,
             name: student.name,
             email: student.email,
-            courses: studentCourses,
+            courses,
             averageGrade,
-            assignmentsCompleted: grades.length,
+            assignmentsCompleted: submissions.length,
             trend,
         };
     }));
-    return studentStats;
 }
 
 
 // --- Assignment Functions ---
 export async function getAssignmentsByCourse(courseId: string): Promise<Assignment[]> {
-    const { rows } = await sql`SELECT * FROM assignments WHERE "courseId" = ${courseId}`;
-    return rows as Assignment[];
+    return db.assignments.filter(a => a.courseId === courseId);
 }
 
 export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> {
-    const { rows } = await sql`
-        SELECT a.*, c.title as "courseTitle", COUNT(s.id) as submissions
-        FROM assignments a
-        JOIN courses c ON a."courseId" = c.id
-        LEFT JOIN submissions s ON a.id = s."assignmentId"
-        WHERE c."teacherId" = ${teacherId}
-        GROUP BY a.id, c.title
-    `;
-    return rows.map(r => ({...r, submissions: parseInt(r.submissions, 10)})) as (Assignment & { courseTitle: string, submissions: number })[];
+    const teacherCourses = db.courses.filter(c => c.teacherId === teacherId);
+    const teacherCourseIds = teacherCourses.map(c => c.id);
+    
+    const assignments = db.assignments.filter(a => teacherCourseIds.includes(a.courseId));
+
+    return assignments.map(assignment => {
+        const course = teacherCourses.find(c => c.id === assignment.courseId);
+        const submissions = db.submissions.filter(s => s.assignmentId === assignment.id).length;
+        return {
+            ...assignment,
+            courseTitle: course?.title || 'Unknown Course',
+            submissions
+        }
+    });
 }
 
 export async function createAssignment(data: Omit<Assignment, 'id'>): Promise<Assignment> {
-    const id = randomUUID();
-    const newAssignment = { id, ...data };
-    await sql`
-        INSERT INTO assignments (id, "courseId", title, description, "dueDate")
-        VALUES (${id}, ${data.courseId}, ${data.title}, ${data.description}, ${data.dueDate})
-    `;
+    const newAssignment = { id: randomUUID(), ...data };
+    db.assignments.push(newAssignment);
     return newAssignment;
 }
 
 export async function getAssignmentById(id: string): Promise<(Assignment & { submissions: (Submission & { student: User })[] }) | undefined> {
-    const { rows: assignmentRows } = await sql`SELECT * FROM assignments WHERE id = ${id}`;
-    const assignment = assignmentRows[0] as Assignment | undefined;
+    const assignment = db.assignments.find(a => a.id === id);
     if (!assignment) return undefined;
 
-    const { rows: submissionRows } = await sql`
-        SELECT s.*, u.name as "studentName", u.email as "studentEmail"
-        FROM submissions s
-        JOIN users u ON s."studentId" = u.id
-        WHERE s."assignmentId" = ${id}
-    `;
+    const submissions = await Promise.all(
+        db.submissions
+        .filter(s => s.assignmentId === id)
+        .map(async (sub) => {
+            const student = await findUserById(sub.studentId);
+            return { ...sub, student };
+        })
+    );
 
-    const submissionsWithStudents = submissionRows.map(sub => ({
-        ...sub,
-        student: { id: sub.studentId, name: sub.studentName, email: sub.studentEmail, role: 'student' }
-    })) as (Submission & { student: User })[];
-
-    return { ...assignment, submissions: submissionsWithStudents };
+    return { ...assignment, submissions };
 }
 
 
 // --- Submission Functions ---
 export async function getSubmissionById(id: string): Promise<Submission | undefined> {
-    const { rows } = await sql`SELECT * FROM submissions WHERE id = ${id}`;
-    return rows[0] as Submission | undefined;
+    return db.submissions.find(s => s.id === id);
 }
 
 export async function getStudentSubmission(studentId: string, assignmentId: string): Promise<Submission | undefined> {
-    const { rows } = await sql`SELECT * FROM submissions WHERE "studentId" = ${studentId} AND "assignmentId" = ${assignmentId}`;
-    return rows[0] as Submission | undefined;
+    return db.submissions.find(s => s.studentId === studentId && s.assignmentId === assignmentId);
 }
 
 export async function createSubmission(data: Omit<Submission, 'id' | 'submittedAt' | 'grade' | 'feedback'>): Promise<Submission> {
-    const id = randomUUID();
     const newSubmission: Submission = { 
         ...data, 
-        id, 
+        id: randomUUID(), 
         submittedAt: new Date().toISOString(),
         grade: null,
         feedback: null
     };
-    await sql`
-        INSERT INTO submissions (id, "assignmentId", "studentId", content, "submittedAt")
-        VALUES (${id}, ${data.assignmentId}, ${data.studentId}, ${data.content}, ${newSubmission.submittedAt})
-    `;
+    db.submissions.push(newSubmission);
     return newSubmission;
 }
 
 export async function gradeSubmission(submissionId: string, grade: number, feedback: string): Promise<Submission | undefined> {
-    const { rows } = await sql`
-        UPDATE submissions
-        SET grade = ${grade}, feedback = ${feedback}
-        WHERE id = ${submissionId}
-        RETURNING *
-    `;
-    return rows[0] as Submission | undefined;
+    const subIndex = db.submissions.findIndex(s => s.id === submissionId);
+    if (subIndex === -1) return undefined;
+
+    db.submissions[subIndex] = { ...db.submissions[subIndex], grade, feedback };
+    return db.submissions[subIndex];
 }
 
 export async function getStudentGrades(studentId: string): Promise<GradedSubmission[]> {
-    const { rows } = await sql`
-        SELECT s.*, a.title as "assignmentTitle", a.description as "assignmentDescription", a."dueDate" as "assignmentDueDate", c.id as "courseId", c.title as "courseTitle", c.description as "courseDescription", c.duration as "courseDuration"
-        FROM submissions s
-        JOIN assignments a ON s."assignmentId" = a.id
-        JOIN courses c ON a."courseId" = c.id
-        WHERE s."studentId" = ${studentId} AND s.grade IS NOT NULL
-    `;
+    const studentSubmissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
     
-    return rows.map(r => ({
-        ...r,
-        assignment: { id: r.assignmentId, title: r.assignmentTitle, description: r.assignmentDescription, dueDate: r.assignmentDueDate, courseId: r.courseId },
-        course: { id: r.courseId, title: r.courseTitle, description: r.courseDescription, duration: r.courseDuration }
-    })) as GradedSubmission[];
+    return studentSubmissions.map(sub => {
+        const assignment = db.assignments.find(a => a.id === sub.assignmentId);
+        const course = db.courses.find(c => c.id === assignment?.courseId);
+        return {
+            ...sub,
+            assignment: assignment!,
+            course: course!
+        }
+    }).filter(s => s.assignment && s.course) as GradedSubmission[];
 }
 
 
 // --- Discussion Functions ---
 export async function getThreadsByCourse(courseId: string): Promise<(DiscussionThread & { author: User, postCount: number })[]> {
-    const { rows } = await sql`
-        SELECT dt.*, u.name as "authorName", u.email as "authorEmail", COUNT(dp.id) as "postCount"
-        FROM discussion_threads dt
-        JOIN users u ON dt."authorId" = u.id
-        LEFT JOIN discussion_posts dp ON dt.id = dp."threadId"
-        WHERE dt."courseId" = ${courseId}
-        GROUP BY dt.id, u.name, u.email
-    `;
-    return rows.map(r => ({
-        ...r,
-        author: { id: r.authorId, name: r.authorName, email: r.authorEmail, role: 'student'}, // Role is a guess, but not critical here
-        postCount: parseInt(r.postCount, 10)
-    })) as (DiscussionThread & { author: User, postCount: number })[];
+    const threads = db.discussion_threads.filter(t => t.courseId === courseId);
+    return Promise.all(threads.map(async (thread) => {
+        const author = await findUserById(thread.authorId);
+        const postCount = db.discussion_posts.filter(p => p.threadId === thread.id).length;
+        return { ...thread, author, postCount };
+    }));
 }
 
 export async function getThreadById(threadId: string): Promise<(DiscussionThread & { author: User }) | undefined> {
-    const { rows } = await sql`
-        SELECT dt.*, u.name as "authorName", u.email as "authorEmail"
-        FROM discussion_threads dt
-        JOIN users u ON dt."authorId" = u.id
-        WHERE dt.id = ${threadId}
-    `;
-    const thread = rows[0];
+    const thread = db.discussion_threads.find(t => t.id === threadId);
     if (!thread) return undefined;
-    
-    return {
-        ...thread,
-        author: { id: thread.authorId, name: thread.authorName, email: thread.authorEmail, role: 'student' }
-    } as DiscussionThread & { author: User };
+    const author = await findUserById(thread.authorId);
+    return { ...thread, author };
 }
 
 export async function getPostsByThread(threadId: string): Promise<(DiscussionPost & { author: User })[]> {
-    const { rows } = await sql`
-        SELECT dp.*, u.name as "authorName", u.email as "authorEmail"
-        FROM discussion_posts dp
-        JOIN users u ON dp."authorId" = u.id
-        WHERE dp."threadId" = ${threadId}
-        ORDER BY dp."createdAt" ASC
-    `;
-    return rows.map(r => ({
-        ...r,
-        author: { id: r.authorId, name: r.authorName, email: r.authorEmail, role: 'student' }
-    })) as (DiscussionPost & { author: User })[];
+    const posts = db.discussion_posts.filter(p => p.threadId === threadId).sort((a,b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return Promise.all(posts.map(async (post) => {
+        const author = await findUserById(post.authorId);
+        return { ...post, author };
+    }));
 }
 
 export async function createThread(data: Omit<DiscussionThread, 'id' | 'createdAt'>): Promise<DiscussionThread> {
-    const id = randomUUID();
-    const newThread: DiscussionThread = { ...data, id, createdAt: new Date().toISOString() };
-    await sql`
-        INSERT INTO discussion_threads (id, "courseId", title, "authorId", "createdAt")
-        VALUES (${id}, ${data.courseId}, ${data.title}, ${data.authorId}, ${newThread.createdAt})
-    `;
+    const newThread: DiscussionThread = { ...data, id: randomUUID(), createdAt: new Date().toISOString() };
+    db.discussion_threads.push(newThread);
     return newThread;
 }
 
 export async function createPost(data: Omit<DiscussionPost, 'id' | 'createdAt'>): Promise<DiscussionPost> {
-    const id = randomUUID();
-    const newPost: DiscussionPost = { ...data, id, createdAt: new Date().toISOString() };
-    await sql`
-        INSERT INTO discussion_posts (id, "threadId", "authorId", content, "createdAt")
-        VALUES (${id}, ${data.threadId}, ${data.authorId}, ${data.content}, ${newPost.createdAt})
-    `;
+    const newPost: DiscussionPost = { ...data, id: randomUUID(), createdAt: new Date().toISOString() };
+    db.discussion_posts.push(newPost);
     return newPost;
 }
 
 // --- Material Functions ---
 export async function addMaterial(data: Omit<Material, 'id' | 'createdAt'>): Promise<Material> {
-  const id = randomUUID();
   const newMaterial: Material = {
     ...data,
-    id,
+    id: randomUUID(),
     createdAt: new Date().toISOString(),
   };
-    await sql`
-        INSERT INTO materials (id, "courseId", title, link, "createdAt")
-        VALUES (${id}, ${data.courseId}, ${data.title}, ${data.link}, ${newMaterial.createdAt})
-    `;
+  db.materials.push(newMaterial);
   return newMaterial;
 }
 
 export async function getMaterialsByCourse(courseId: string): Promise<Material[]> {
-    const { rows } = await sql`SELECT * FROM materials WHERE "courseId" = ${courseId}`;
-    return rows as Material[];
+    return db.materials.filter(m => m.courseId === courseId);
 }
 
 // --- Notification Functions ---
 export async function createNotification(data: Omit<Notification, 'id' | 'isRead' | 'createdAt'>): Promise<Notification> {
-    const id = randomUUID();
     const newNotification: Notification = {
         ...data,
-        id,
+        id: randomUUID(),
         isRead: false,
         createdAt: new Date().toISOString(),
     };
-    await sql`
-        INSERT INTO notifications (id, "userId", message, link, "isRead", "createdAt")
-        VALUES (${id}, ${data.userId}, ${data.message}, ${data.link}, ${newNotification.isRead}, ${newNotification.createdAt})
-    `;
+    db.notifications.push(newNotification);
     return newNotification;
 }
 
 export async function getNotificationsForUser(userId: string): Promise<Notification[]> {
-    const { rows } = await sql`SELECT * FROM notifications WHERE "userId" = ${userId} ORDER BY "createdAt" DESC`;
-    return rows as Notification[];
+    return db.notifications.filter(n => n.userId === userId).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<boolean> {
-    const result = await sql`
-        UPDATE notifications
-        SET "isRead" = true
-        WHERE id = ${notificationId}
-    `;
-    return result.rowCount > 0;
+    const notification = db.notifications.find(n => n.id === notificationId);
+    if (!notification) return false;
+    notification.isRead = true;
+    return true;
 }
 
 // --- Leaderboard Functions ---
 export async function getStudentRankings(): Promise<{ user: User, averageGrade: number, assignmentsCompleted: number, credibilityPoints: number }[]> {
-    const { rows: students } = await sql`SELECT * FROM users WHERE role = 'student'`;
+    const students = db.users.filter(u => u.role === 'student');
     
-    const studentStats = await Promise.all(students.map(async (student: User) => {
-        const { rows: submissions } = await sql`SELECT grade FROM submissions WHERE "studentId" = ${student.id} AND grade IS NOT NULL`;
-        const totalGrade = submissions.reduce((acc, sub) => acc + sub.grade, 0);
+    return Promise.all(students.map(async (student) => {
+        const submissions = db.submissions.filter(s => s.studentId === student.id && s.grade !== null);
+        const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
         const averageGrade = submissions.length > 0 ? totalGrade / submissions.length : 0;
         
-        const { rows: challengeSubmissions } = await sql`
-            SELECT cs.id, c.points FROM challenge_submissions cs
-            JOIN challenges c ON cs."challengeId" = c.id
-            WHERE cs."studentId" = ${student.id}
-        `;
-
-        let credibilityPoints = 0;
-        for (const cs of challengeSubmissions) {
-            const votes = await getVotesForSubmission(cs.id);
-            credibilityPoints += (votes * 10) + cs.points;
-        }
+        const challengeSubmissions = db.challenge_submissions.filter(cs => cs.studentId === student.id);
+        const credibilityPoints = await challengeSubmissions.reduce(async (accPromise, cs) => {
+            const acc = await accPromise;
+            const challenge = db.challenges.find(c => c.id === cs.challengeId);
+            const votes = db.challenge_votes.filter(v => v.submissionId === cs.id).length;
+            return acc + (votes * 10) + (challenge?.points || 0);
+        }, Promise.resolve(0));
         
         return {
             user: student,
@@ -471,87 +487,67 @@ export async function getStudentRankings(): Promise<{ user: User, averageGrade: 
             credibilityPoints
         };
     }));
-
-    return studentStats.sort((a, b) => {
-        if (b.averageGrade !== a.averageGrade) return b.averageGrade - a.averageGrade;
-        return b.assignmentsCompleted - a.assignmentsCompleted;
-    });
 }
 
 // --- Attendance Functions ---
 export async function markAttendance(studentId: string, courseId: string): Promise<Attendance | null> {
     const today = new Date().toISOString().split('T')[0];
-    const { rows } = await sql`SELECT * FROM attendance WHERE "studentId" = ${studentId} AND "courseId" = ${courseId} AND date = ${today}`;
-    if (rows.length > 0) return null;
+    const existing = db.attendance.find(a => a.studentId === studentId && a.courseId === courseId && a.date === today);
+    if (existing) return null;
 
-    const id = randomUUID();
-    const newRecord: Attendance = { id, studentId, courseId, date: today, isPresent: true };
-    await sql`
-        INSERT INTO attendance (id, "studentId", "courseId", date, "isPresent")
-        VALUES (${id}, ${studentId}, ${courseId}, ${today}, true)
-    `;
+    const newRecord: Attendance = { id: randomUUID(), studentId, courseId, date: today, isPresent: true };
+    db.attendance.push(newRecord);
     return newRecord;
 }
 
 export async function getAllAttendance(): Promise<(Attendance & { student: User, course: Course })[]> {
-    const { rows } = await sql`
-        SELECT att.*, u.name as "studentName", u.email as "studentEmail", c.title as "courseTitle"
-        FROM attendance att
-        JOIN users u ON att."studentId" = u.id
-        JOIN courses c ON att."courseId" = c.id
-        ORDER BY att.date DESC
-    `;
-    return rows.map(r => ({
-        ...r,
-        student: { id: r.studentId, name: r.studentName, email: r.studentEmail, role: 'student' },
-        course: { id: r.courseId, title: r.courseTitle }
-    })) as (Attendance & { student: User, course: Course })[];
+    return db.attendance
+        .map(att => {
+            const student = db.users.find(u => u.id === att.studentId);
+            const course = db.courses.find(c => c.id === att.courseId);
+            if (!student || !course) return null;
+            return { ...att, student, course };
+        })
+        .filter(Boolean) as (Attendance & { student: User, course: Course })[];
 }
 
 // --- Certificate Functions ---
 const PASSING_GRADE = 70;
 
 export async function getCompletedCoursesForStudent(studentId: string): Promise<Course[]> {
-    const { rows: enrollments } = await sql`SELECT "courseId" FROM enrollments WHERE "studentId" = ${studentId}`;
+    const enrollments = db.enrollments.filter(e => e.studentId === studentId);
     const completedCourses: Course[] = [];
 
     for (const enrollment of enrollments) {
         const courseId = enrollment.courseId;
-        const { rows: assignments } = await sql`SELECT id FROM assignments WHERE "courseId" = ${courseId}`;
+        const assignments = db.assignments.filter(a => a.courseId === courseId);
         if (assignments.length === 0) continue;
 
-        const { rows: submissions } = await sql`
-            SELECT grade FROM submissions
-            WHERE "studentId" = ${studentId} AND "assignmentId" = ANY(ARRAY[${assignments.map(a => a.id).join(',')}]::uuid[])
-        `;
-
         const allPassed = assignments.every(a => {
-            const sub = submissions.find(s => s.assignmentId === a.id);
-            return sub && sub.grade >= PASSING_GRADE;
+            const sub = db.submissions.find(s => s.studentId === studentId && s.assignmentId === a.id);
+            return sub && sub.grade !== null && sub.grade >= PASSING_GRADE;
         });
 
         if (allPassed) {
-            const { rows: courseRows } = await sql`SELECT * FROM courses WHERE id = ${courseId}`;
-            if (courseRows.length > 0) completedCourses.push(courseRows[0] as Course);
+            const course = db.courses.find(c => c.id === courseId);
+            if (course) completedCourses.push(course);
         }
     }
     return completedCourses;
 }
 
 export async function getStudentCertificates(studentId: string): Promise<(Certificate & { course: Course })[]> {
-    const { rows } = await sql`
-        SELECT cert.*, c.title as "courseTitle", c.description as "courseDescription"
-        FROM certificates cert
-        JOIN courses c ON cert."courseId" = c.id
-        WHERE cert."studentId" = ${studentId}
-        ORDER BY cert."issuedAt" DESC
-    `;
-    return rows.map(r => ({...r, course: { title: r.courseTitle, description: r.courseDescription }})) as (Certificate & { course: Course })[];
+    return db.certificates
+        .filter(c => c.studentId === studentId)
+        .map(cert => {
+            const course = db.courses.find(c => c.id === cert.courseId);
+            return { ...cert, course: course! };
+        })
+        .filter(c => c.course);
 }
 
 export async function getCertificateById(id: string): Promise<(Certificate & { student: User; course: Course & { teacher: User } }) | undefined> {
-    const { rows } = await sql`SELECT * FROM certificates WHERE id = ${id}`;
-    const certificate = rows[0] as Certificate | undefined;
+    const certificate = db.certificates.find(c => c.id === id);
     if (!certificate) return undefined;
 
     const student = await findUserById(certificate.studentId);
@@ -565,112 +561,82 @@ export async function getCertificateById(id: string): Promise<(Certificate & { s
 
 
 export async function generateCertificate(studentId: string, courseId: string): Promise<Certificate | null> {
-    const { rows } = await sql`SELECT * FROM certificates WHERE "studentId" = ${studentId} AND "courseId" = ${courseId}`;
-    if (rows.length > 0) return null;
+    const existing = db.certificates.find(c => c.studentId === studentId && c.courseId === courseId);
+    if (existing) return null;
 
-    const id = randomUUID();
-    const newCertificate: Certificate = { id, studentId, courseId, issuedAt: new Date().toISOString(), verificationId: randomUUID() };
-    await sql`
-        INSERT INTO certificates (id, "studentId", "courseId", "issuedAt", "verificationId")
-        VALUES (${id}, ${studentId}, ${courseId}, ${newCertificate.issuedAt}, ${newCertificate.verificationId})
-    `;
+    const newCertificate: Certificate = { id: randomUUID(), studentId, courseId, issuedAt: new Date().toISOString(), verificationId: randomUUID() };
+    db.certificates.push(newCertificate);
     return newCertificate;
 }
 
 // --- Challenge Functions ---
 export async function getAllChallenges(): Promise<Challenge[]> {
-    const { rows } = await sql`SELECT * FROM challenges`;
-    return rows as Challenge[];
+    return db.challenges;
 }
 
 export async function getChallengeById(id: string): Promise<Challenge | undefined> {
-    const { rows } = await sql`SELECT * FROM challenges WHERE id = ${id}`;
-    return rows[0] as Challenge | undefined;
+    return db.challenges.find(c => c.id === id);
 }
 
 export async function getSubmissionsForChallenge(challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> {
-    const { rows } = await sql`
-        SELECT cs.*, u.name as "studentName", u.email as "studentEmail", COUNT(cv.id) as votes
-        FROM challenge_submissions cs
-        JOIN users u ON cs."studentId" = u.id
-        LEFT JOIN challenge_votes cv ON cs.id = cv."submissionId"
-        WHERE cs."challengeId" = ${challengeId}
-        GROUP BY cs.id, u.name, u.email
-    `;
-    return rows.map(r => ({
-        ...r,
-        student: { id: r.studentId, name: r.studentName, email: r.studentEmail, role: 'student' },
-        votes: parseInt(r.votes, 10)
-    })) as (ChallengeSubmission & { student: User; votes: number })[];
+    const submissions = db.challenge_submissions.filter(cs => cs.challengeId === challengeId);
+    return Promise.all(submissions.map(async (sub) => {
+        const student = await findUserById(sub.studentId);
+        const votes = db.challenge_votes.filter(v => v.submissionId === sub.id).length;
+        return { ...sub, student, votes };
+    }));
 }
 
 export async function createChallengeSubmission(data: Omit<ChallengeSubmission, 'id' | 'submittedAt'>): Promise<ChallengeSubmission> {
-    const id = randomUUID();
-    const newSubmission: ChallengeSubmission = { ...data, id, submittedAt: new Date().toISOString() };
-    await sql`
-        INSERT INTO challenge_submissions (id, "challengeId", "studentId", content, "submittedAt")
-        VALUES (${id}, ${data.challengeId}, ${data.studentId}, ${data.content}, ${newSubmission.submittedAt})
-    `;
+    const newSubmission: ChallengeSubmission = { ...data, id: randomUUID(), submittedAt: new Date().toISOString() };
+    db.challenge_submissions.push(newSubmission);
     return newSubmission;
 }
 
 export async function voteOnSubmission(submissionId: string, voterId: string): Promise<ChallengeVote | null> {
-    const { rows: subRows } = await sql`SELECT "studentId" FROM challenge_submissions WHERE id = ${submissionId}`;
-    if (subRows.length === 0 || subRows[0].studentId === voterId) return null;
+    const sub = db.challenge_submissions.find(cs => cs.id === submissionId);
+    if (!sub || sub.studentId === voterId) return null;
 
-    try {
-        const id = randomUUID();
-        await sql`INSERT INTO challenge_votes (id, "submissionId", "voterId") VALUES (${id}, ${submissionId}, ${voterId})`;
-        return { id, submissionId, voterId };
-    } catch (error) {
-        // This will fail if the unique constraint (submissionId, voterId) is violated
-        return null;
-    }
+    const existingVote = db.challenge_votes.find(v => v.submissionId === submissionId && v.voterId === voterId);
+    if (existingVote) return null;
+
+    const newVote: ChallengeVote = { id: randomUUID(), submissionId, voterId };
+    db.challenge_votes.push(newVote);
+    return newVote;
 }
 
 export async function getVotesForSubmission(submissionId: string): Promise<number> {
-    const { rows } = await sql`SELECT COUNT(*) as count FROM challenge_votes WHERE "submissionId" = ${submissionId}`;
-    return parseInt(rows[0].count, 10);
+    return db.challenge_votes.filter(v => v.submissionId === submissionId).length;
 }
 
 // --- Project Showcase Functions ---
 export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl'>): Promise<Project> {
-    const id = randomUUID();
     const newProject: Project = {
         ...data,
-        id,
+        id: randomUUID(),
         imageUrl: `https://picsum.photos/seed/proj${Date.now()}/600/400`,
         createdAt: new Date().toISOString(),
     };
-    await sql`
-        INSERT INTO projects (id, "studentId", title, description, "imageUrl", "projectUrl", tags, "createdAt")
-        VALUES (${id}, ${data.studentId}, ${data.title}, ${data.description}, ${newProject.imageUrl}, ${data.projectUrl}, ${data.tags}, ${newProject.createdAt})
-    `;
+    db.projects.push(newProject);
     return newProject;
 }
 
 export async function getAllProjects(): Promise<(Project & { student: User })[]> {
-    const { rows } = await sql`
-        SELECT p.*, u.name as "studentName", u.email as "studentEmail"
-        FROM projects p
-        JOIN users u ON p."studentId" = u.id
-        ORDER BY p."createdAt" DESC
-    `;
-    return rows.map(r => ({
-        ...r,
-        student: { id: r.studentId, name: r.studentName, email: r.studentEmail, role: 'student' }
-    })) as (Project & { student: User })[];
+    return Promise.all(
+        db.projects.map(async p => {
+            const student = await findUserById(p.studentId);
+            return { ...p, student };
+        })
+    );
 }
 
 export async function getProjectsByStudent(studentId: string): Promise<Project[]> {
-    const { rows } = await sql`SELECT * FROM projects WHERE "studentId" = ${studentId} ORDER BY "createdAt" DESC`;
-    return rows as Project[];
+    return db.projects.filter(p => p.studentId === studentId);
 }
 
 // --- Internship Functions ---
 export async function getInternshipDomains(): Promise<InternshipDomain[]> {
-    const { rows } = await sql`SELECT * FROM internship_domains`;
-    return rows as InternshipDomain[];
+    return db.internship_domains;
 }
 
 
@@ -724,33 +690,32 @@ export type DashboardStats = StudentDashboardStats | TeacherDashboardStats;
 
 export async function getDashboardData(userId: string, role: 'teacher' | 'student'): Promise<DashboardStats> {
     if (role === 'teacher') {
-        const { rows: courses } = await sql`SELECT id, title FROM courses WHERE "teacherId" = ${userId}`;
+        const courses = db.courses.filter(c => c.teacherId === userId);
         const courseIds = courses.map(c => c.id);
         
-        const { rows: enrollments } = await sql`SELECT DISTINCT "studentId" FROM enrollments WHERE "courseId" = ANY(ARRAY[${courseIds.join(',')}]::uuid[])`;
-        const studentIds = new Set(enrollments.map(e => e.studentId));
+        const studentIds = new Set(db.enrollments.filter(e => courseIds.includes(e.courseId)).map(e => e.studentId));
 
-        const { rows: assignments } = await sql`SELECT id FROM assignments WHERE "courseId" = ANY(ARRAY[${courseIds.join(',')}]::uuid[])`;
+        const assignments = db.assignments.filter(a => courseIds.includes(a.courseId));
         const assignmentIds = assignments.map(a => a.id);
 
-        const { rows: submissions } = await sql`SELECT grade FROM submissions WHERE "assignmentId" = ANY(ARRAY[${assignmentIds.join(',')}]::uuid[])`;
-        const pendingSubmissions = submissions.filter(s => s.grade === null).length;
+        const pendingSubmissions = db.submissions.filter(s => assignmentIds.includes(s.assignmentId) && s.grade === null).length;
 
         const coursePerformances: CoursePerformance[] = await Promise.all(courses.map(async (course) => {
-            const { rows: courseAssignments } = await sql`SELECT id FROM assignments WHERE "courseId" = ${course.id}`;
+            const courseAssignments = db.assignments.filter(a => a.courseId === course.id);
             const courseAssignmentIds = courseAssignments.map(a => a.id);
-            const { rows: courseSubmissions } = await sql`SELECT grade FROM submissions WHERE "assignmentId" = ANY(ARRAY[${courseAssignmentIds.join(',')}]::uuid[]) AND grade IS NOT NULL`;
+            const courseSubmissions = db.submissions.filter(s => courseAssignmentIds.includes(s.assignmentId) && s.grade !== null);
             
             const gradeDistribution = [
                 { name: 'A (90+)', students: 0 }, { name: 'B (80-89)', students: 0 },
                 { name: 'C (70-79)', students: 0 }, { name: 'D (60-69)', students: 0 }, { name: 'F (<60)', students: 0 },
             ];
             
+            // This logic is simplified; it counts submissions, not unique students per grade bucket
             courseSubmissions.forEach(sub => {
-                if (sub.grade >= 90) gradeDistribution[0].students++;
-                else if (sub.grade >= 80) gradeDistribution[1].students++;
-                else if (sub.grade >= 70) gradeDistribution[2].students++;
-                else if (sub.grade >= 60) gradeDistribution[3].students++;
+                if (sub.grade! >= 90) gradeDistribution[0].students++;
+                else if (sub.grade! >= 80) gradeDistribution[1].students++;
+                else if (sub.grade! >= 70) gradeDistribution[2].students++;
+                else if (sub.grade! >= 60) gradeDistribution[3].students++;
                 else gradeDistribution[4].students++;
             });
             return { courseId: course.id, courseTitle: course.title, gradeDistribution };
@@ -760,13 +725,12 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         if (studentIds.size > 0) {
             const studentScores: { studentId: string; name: string; score: number; grade: number }[] = [];
             for (const studentId of Array.from(studentIds)) {
-                const { rows: studentRows } = await sql`SELECT name FROM users WHERE id = ${studentId}`;
-                if (studentRows.length === 0) continue;
-                const { rows: studentSubmissions } = await sql`SELECT grade FROM submissions WHERE "studentId" = ${studentId} AND grade IS NOT NULL`;
+                const student = await findUserById(studentId);
+                const studentSubmissions = db.submissions.filter(s => s.studentId === studentId && s.grade !== null);
                 if (studentSubmissions.length > 0) {
-                    const totalGrade = studentSubmissions.reduce((acc, sub) => acc + sub.grade, 0);
+                    const totalGrade = studentSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
                     const averageGrade = totalGrade / studentSubmissions.length;
-                    studentScores.push({ studentId, name: studentRows[0].name, score: averageGrade + (studentSubmissions.length * 2), grade: Math.round(averageGrade) });
+                    studentScores.push({ studentId, name: student.name, score: averageGrade + (studentSubmissions.length * 2), grade: Math.round(averageGrade) });
                 }
             }
             if (studentScores.length > 0) {
@@ -786,33 +750,33 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
             studentOfTheWeek
         };
     } else { // Student role
-        const { rows: enrollments } = await sql`SELECT "courseId" FROM enrollments WHERE "studentId" = ${userId}`;
+        const enrollments = db.enrollments.filter(e => e.studentId === userId);
         const enrolledCourseIds = enrollments.map(e => e.courseId);
 
-        const { rows: allAssignments } = await sql`SELECT id, "dueDate" FROM assignments WHERE "courseId" = ANY(ARRAY[${enrolledCourseIds.join(',')}]::uuid[])`;
+        const allAssignments = db.assignments.filter(a => enrolledCourseIds.includes(a.courseId));
         
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-        const { rows: studentSubmissions } = await sql`SELECT "assignmentId", grade FROM submissions WHERE "studentId" = ${userId}`;
+        const studentSubmissions = db.submissions.filter(s => s.studentId === userId);
         const submittedAssignmentIds = new Set(studentSubmissions.map(s => s.assignmentId));
         const assignmentsDueSoon = allAssignments.filter(a => new Date(a.dueDate) > new Date() && new Date(a.dueDate) <= sevenDaysFromNow && !submittedAssignmentIds.has(a.id)).length;
         
         const gradedSubmissions = studentSubmissions.filter(s => s.grade !== null);
-        const totalGrade = gradedSubmissions.reduce((acc, sub) => acc + sub.grade, 0);
+        const totalGrade = gradedSubmissions.reduce((acc, sub) => acc + sub.grade!, 0);
         const averageGrade = gradedSubmissions.length > 0 ? Math.round(totalGrade / gradedSubmissions.length) : 0;
         
         const gradeToLetter = (grade: number) => {
             if (grade >= 90) return 'A'; if (grade >= 80) return 'B'; if (grade >= 70) return 'C'; if (grade >= 60) return 'D'; return grade > 0 ? 'F' : 'N/A';
         };
 
-        const { rows: attendanceRows } = await sql`SELECT date, "courseId" FROM attendance WHERE "studentId" = ${userId}`;
+        const attendanceRows = db.attendance.filter(a => a.studentId === userId);
         let totalAttention = 0, totalCompletion = 0;
         for (const enrollment of enrollments) {
             const firstAttendance = attendanceRows.find(a => a.courseId === enrollment.courseId);
             if (!firstAttendance) continue;
 
             const daysSinceEnrollment = differenceInDays(new Date(), new Date(firstAttendance.date)) + 1;
-            const attendanceDays = new Set(attendanceRows.filter(a => a.courseId === enrollment.courseId).map(a => new Date(a.date).toDateString())).size;
+            const attendanceDays = new Set(attendanceRows.filter(a => a.courseId === enrollment.courseId).map(a => a.date)).size;
             totalAttention += (attendanceDays / daysSinceEnrollment);
 
             const courseAssignments = allAssignments.filter(a => a.courseId === enrollment.courseId);
@@ -826,10 +790,10 @@ export async function getDashboardData(userId: string, role: 'teacher' | 'studen
         const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 0;
         const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (averageGrade * 0.35);
 
-        const { rows: sortedAttendance } = await sql`SELECT date FROM attendance WHERE "studentId" = ${userId} ORDER BY date DESC`;
+        const sortedAttendance = db.attendance.filter(a => a.studentId === userId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         let streak = 0;
         if (sortedAttendance.length > 0) {
-            const uniqueDates = [...new Set(sortedAttendance.map(d => d.date.toISOString().split('T')[0]))].map(d => parseISO(d)).sort((a,b) => b.getTime() - a.getTime());
+            const uniqueDates = [...new Set(sortedAttendance.map(d => d.date))].map(d => parseISO(d)).sort((a,b) => b.getTime() - a.getTime());
             if (uniqueDates.length > 0) {
                  const lastDay = uniqueDates[0];
                  const today = new Date();
