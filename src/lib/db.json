@@ -2,17 +2,20 @@
   "users": {
     "u1": { "id": "u1", "name": "Alice Johnson", "email": "alice@example.com", "password": "password123", "role": "student" },
     "u2": { "id": "u2", "name": "Bob Williams", "email": "bob@example.com", "password": "password123", "role": "student" },
-    "t1": { "id": "t1", "name": "Dr. Evelyn Reed", "email": "evelyn@example.com", "password": "password123", "role": "teacher" }
+    "u3": { "id": "u3", "name": "Charlie Brown", "email": "charlie@example.com", "password": "password123", "role": "student" },
+    "t1": { "id": "t1", "name": "Prof. Davis", "email": "davis@example.com", "password": "password123", "role": "teacher" },
+    "t2": { "id": "t2", "name": "Dr. Miller", "email": "miller@example.com", "password": "password123", "role": "teacher" }
   },
   "courses": {
-    "c1": { "id": "c1", "title": "Intro to Web Development", "description": "Learn the fundamentals of HTML, CSS, and JavaScript.", "duration": "8 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/1/600/400" },
-    "c2": { "id": "c2", "title": "Advanced React Patterns", "description": "Master advanced techniques in React for scalable applications.", "duration": "6 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/2/600/400" },
-    "c3": { "id": "c3", "title": "Data Structures & Algorithms", "description": "Understand core computer science concepts for efficient problem-solving.", "duration": "10 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/3/600/400" }
+    "c1": { "id": "c1", "title": "Intro to Web Development", "description": "Learn the fundamentals of HTML, CSS, and JavaScript.", "duration": "8 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/1/600/400", "videoUrl": "https://www.youtube.com/watch?v=G3e-cpL7ofc" },
+    "c2": { "id": "c2", "title": "Advanced React", "description": "Master React hooks, state management, and performance.", "duration": "6 Weeks", "teacherId": "t1", "imageUrl": "https://picsum.photos/seed/2/600/400" },
+    "c3": { "id": "c3", "title": "Data Structures & Algorithms", "description": "Understand fundamental data structures and algorithms.", "duration": "10 Weeks", "teacherId": "t2", "imageUrl": "https://picsum.photos/seed/3/600/400" }
   },
   "enrollments": {
     "e1": { "id": "e1", "studentId": "u1", "courseId": "c1" },
     "e2": { "id": "e2", "studentId": "u1", "courseId": "c2" },
-    "e3": { "id": "e3", "studentId": "u2", "courseId": "c1" }
+    "e3": { "id": "e3", "studentId": "u2", "courseId": "c1" },
+    "e4": { "id": "e4", "studentId": "u3", "courseId": "c3" }
   },
   "assignments": {
     "as1": { "id": "as1", "courseId": "c1", "title": "HTML & CSS Basics", "description": "Create a simple personal portfolio page.", "dueDate": "2024-06-08T23:59:59.000Z" },
@@ -21,149 +24,147 @@
     "as4": { "id": "as4", "courseId": "c3", "title": "Big O Notation", "description": "Analyze the time complexity of given algorithms.", "dueDate": "2024-05-29T23:59:59.000Z" }
   },
   "submissions": {
-    "sub1": { "id": "sub1", "assignmentId": "as1", "studentId": "u1", "content": "Here is my portfolio submission. I used Flexbox for the layout.", "submittedAt": "2024-05-30T10:00:00.000Z", "grade": 95, "feedback": "Excellent work! Your CSS is clean and your HTML is semantic." },
-    "sub2": { "id": "sub2", "assignmentId": "as2", "studentId": "u2", "content": "My calculator app submission.", "submittedAt": "2024-05-28T14:30:00.000Z", "grade": 88, "feedback": "Good job. The logic is sound, but consider adding error handling for division by zero." },
-    "sub3": { "id": "sub3", "assignmentId": "as3", "studentId": "u1", "content": "My todo list works well, but I had trouble with useEffect.", "submittedAt": "2024-05-30T18:00:00.000Z", "grade": 72, "feedback": "A good attempt. The state management could be cleaner. Let's review the useEffect dependency array rules." }
+    "sub1": { "id": "sub1", "assignmentId": "as1", "studentId": "u1", "content": "Here is my portfolio. I used flexbox for the layout.", "submittedAt": "2024-06-01T10:00:00.000Z", "grade": 95, "feedback": "Excellent work! Your CSS is clean and your HTML is semantic." },
+    "sub2": { "id": "sub2", "assignmentId": "as4", "studentId": "u3", "content": "I believe the time complexity is O(n log n).", "submittedAt": "2024-05-28T14:30:00.000Z", "grade": 88, "feedback": "Correct analysis. Well done." },
+    "sub3": { "id": "sub3", "assignmentId": "as2", "studentId": "u1", "content": "My calculator app is complete.", "submittedAt": "2024-06-14T10:00:00.000Z", "grade": 72, "feedback": "Functionality is there, but the UI could be improved. Also, consider edge cases like division by zero." }
   },
   "discussion_threads": {
-    "th1": { "id": "th1", "courseId": "c1", "title": "Is `var` still used in modern JavaScript?", "authorId": "u2", "createdAt": "2024-05-29T11:00:00.000Z" }
+    "th1": { "id": "th1", "courseId": "c1", "title": "Question about CSS Flexbox", "authorId": "u2", "createdAt": "2024-06-02T11:00:00.000Z" }
   },
   "discussion_posts": {
-    "po1": { "id": "po1", "threadId": "th1", "authorId": "u2", "content": "I see `var` in older tutorials, but modern guides use `let` and `const`. Is there any reason to use `var` anymore?", "createdAt": "2024-05-29T11:00:00.000Z" },
-    "po2": { "id": "po2", "threadId": "th1", "authorId": "t1", "content": "Great question! Generally, you should avoid `var` in modern JS. It has some quirky scoping rules (it's function-scoped, not block-scoped) that can lead to bugs. `let` and `const` are block-scoped and safer to use.", "createdAt": "2024-05-30T09:00:00.000Z" }
+    "po1": { "id": "po1", "threadId": "th1", "authorId": "u2", "content": "I'm having trouble centering a div. Can anyone help?", "createdAt": "2024-06-02T11:00:00.000Z" },
+    "po2": { "id": "po2", "threadId": "th1", "authorId": "t1", "content": "Sure! Try using `display: flex; justify-content: center; align-items: center;` on the parent container.", "createdAt": "2024-06-02T12:30:00.000Z" }
   },
   "materials": {
-    "mat1": { "id": "mat1", "courseId": "c1", "title": "MDN Web Docs", "link": "https://developer.mozilla.org/", "createdAt": "2024-06-01T12:00:00.000Z" }
+    "mat1": { "id": "mat1", "courseId": "c1", "title": "MDN Web Docs", "link": "https://developer.mozilla.org/", "createdAt": "2024-06-01T09:00:00.000Z" }
   },
-  "notifications": {
-    "n1": { "id": "n1", "userId": "u1", "message": "A new assignment 'React Hooks' has been posted for Advanced React Patterns.", "link": "/courses/c2", "isRead": false, "createdAt": "2024-05-30T10:00:00Z" }
-  },
+  "notifications": {},
   "attendance": {
-    "att1": { "id": "att1", "studentId": "u1", "courseId": "c1", "date": "2024-06-01", "isPresent": true },
-    "att2": { "id": "att2", "studentId": "u2", "courseId": "c1", "date": "2024-06-01", "isPresent": true }
+    "att1": { "id": "att1", "studentId": "u1", "courseId": "c1", "date": "2024-06-03", "isPresent": true },
+    "att2": { "id": "att2", "studentId": "u2", "courseId": "c1", "date": "2024-06-03", "isPresent": true }
   },
   "certificates": {},
   "challenges": {
-      "ch1": { "id": "ch1", "title": "E-commerce Homepage UI", "description": "Design and build a responsive homepage for a modern e-commerce site. Focus on a clean UI and intuitive user experience.", "company": "Shopify", "points": 100, "icon": "ShoppingCart" },
-      "ch2": { "id": "ch2", "title": "User Authentication Flow", "description": "Implement a secure user sign-up and login flow. Your solution should include password hashing and session management.", "company": "Auth0", "points": 150, "icon": "Users" },
-      "ch3": { "id": "ch3", "title": "API Data Fetching", "description": "Create a component that fetches data from a public API (e.g., a weather API) and displays it cleanly. Handle loading and error states.", "company": "Vercel", "points": 80, "icon": "Code" }
+      "chal1": { "id": "chal1", "title": "E-commerce Search API", "description": "Design and document a RESTful API for an e-commerce platform that allows users to search for products with filters and sorting. Focus on the API contract, not the implementation.", "company": "Innovate Inc.", "points": 100, "icon": "Code" },
+      "chal2": { "id": "chal2", "title": "Social Media Feed Algorithm", "description": "Propose an algorithm for a social media feed that prioritizes user engagement. Consider factors like recency, user interactions, and content type. Write a whitepaper explaining your approach.", "company": "ConnectSphere", "points": 150, "icon": "Users" },
+      "chal3": { "id": "chal3", "title": "Database Schema for a Booking App", "description": "Design a normalized database schema for a hotel booking application. The schema should handle users, hotels, rooms, and bookings. Provide an ERD (Entity-Relationship Diagram).", "company": "TravelPro", "points": 120, "icon": "Database"}
   },
   "challenge_submissions": {},
   "challenge_votes": {},
   "projects": {
-    "proj1": { "id": "proj1", "studentId": "u1", "title": "My Personal Portfolio", "description": "A portfolio site built with React and Tailwind CSS to showcase my projects.", "imageUrl": "https://picsum.photos/seed/proj1/600/400", "projectUrl": "https://example.com", "tags": ["React", "Tailwind CSS", "Next.js"], "createdAt": "2024-05-25T12:00:00Z" },
-    "proj2": { "id": "proj2", "studentId": "u2", "title": "AI Blog Generator", "description": "A full-stack application that uses generative AI to create blog posts from a simple prompt. Built with Next.js and Genkit.", "imageUrl": "https://picsum.photos/seed/proj3/600/400", "projectUrl": "https://example.com", "tags": ["AI", "Genkit", "Full-Stack"], "createdAt": "2024-05-28T10:00:00Z" }
+      "proj1": {"id": "proj1", "studentId": "u1", "title": "My Personal Portfolio", "description": "A responsive portfolio website built with React and Tailwind CSS to showcase my projects and skills. Features a dark mode toggle and a contact form.", "imageUrl": "https://picsum.photos/seed/proj1/600/400", "projectUrl": "https://github.com", "tags": ["React", "Tailwind CSS", "Next.js"], "createdAt": "2024-06-01T10:00:00.000Z"},
+      "proj2": {"id": "proj2", "studentId": "u2", "title": "Data Visualization Dashboard", "description": "A dashboard for visualizing sales data using D3.js. It includes interactive charts and filters to explore trends over time.", "imageUrl": "https://picsum.photos/seed/proj7/600/400", "projectUrl": "https://github.com", "tags": ["D3.js", "JavaScript", "Data Viz"], "createdAt": "2024-05-28T14:30:00.000Z"}
   },
   "internship_domains": {
-    "google": {
-      "id": "google",
+    "d1": {
+      "id": "d1",
       "name": "Google",
-      "description": "Tackle a problem in large-scale system design or data processing.",
+      "description": "Tackle a challenge in large-scale systems, search, or cloud computing.",
       "icon": "google",
       "task": {
-        "title": "Design a URL Shortening Service",
-        "scenario": "You're an engineer on the Google Cloud team tasked with designing a highly scalable URL shortening service like bit.ly. The service needs to handle billions of URLs and high request volumes.",
-        "task": "Design the system architecture for this service. Consider the data model, how to generate unique short URLs, and how you would handle read/write traffic.",
+        "title": "Design a Scalable URL Shortener",
+        "scenario": "You're an intern on the Google Cloud Platform team. A major client needs to create a highly scalable URL shortening service, similar to bit.ly, that can handle billions of requests per month. They need a high-level technical design proposal before they commit resources.",
+        "task": "Design the system architecture for this service. Consider how you would handle generating unique short URLs, redirecting users, and storing the mapping. Think about scalability, reliability, and analytics.",
         "deliverables": [
-          "A high-level system architecture diagram.",
-          "A description of your data model (e.g., SQL or NoSQL schema).",
-          "Pseudo-code for generating a short URL and handling redirects."
+          "A high-level system diagram showing the main components (e.g., Load Balancer, Web Servers, Database, Caching Layer).",
+          "A brief (1-2 paragraphs) explanation of your choice of database (e.g., SQL vs. NoSQL) and why.",
+          "Pseudo-code for the function that would generate a unique short code from a long URL."
         ]
       }
     },
-    "openai": {
-      "id": "openai",
+    "d2": {
+      "id": "d2",
       "name": "OpenAI",
-      "description": "Develop a strategy for implementing a safety-focused AI feature.",
+      "description": "Explore the frontiers of AI by designing an application that leverages large language models.",
       "icon": "openai",
       "task": {
-        "title": "Develop a Content Moderation Filter",
-        "scenario": "As part of the safety systems team at OpenAI, you've been asked to design a multi-layered filter to detect and prevent harmful content generation in a new AI model.",
-        "task": "Propose a design for a content moderation system. Your design should balance safety with user freedom and avoid excessive censorship.",
+        "title": "Develop a Concept for an AI-Powered Code Review Tool",
+        "scenario": "You're interning with the applied engineering team at OpenAI. Your manager wants to explore new applications for GPT-4. You've been tasked with creating a concept proposal for a tool that automates parts of the code review process.",
+        "task": "Conceptualize a tool that integrates with GitHub and uses an LLM to analyze pull requests. The tool should identify potential bugs, suggest improvements for clarity and style, and summarize the changes for the human reviewer. Your focus is on the product features and user experience, not the underlying model.",
         "deliverables": [
-          "A description of at least three layers of your filter.",
-          "An example of a prompt that would be flagged and one that would pass, with explanations.",
-          "A strategy for minimizing false positives (flagging safe content)."
+          "A 1-page proposal outlining the tool's key features and user benefits.",
+          "A mock-up or wireframe (can be described in text) of how the tool's feedback would appear in a GitHub pull request.",
+          "A sample prompt that you might send to the LLM to analyze a piece of code."
         ]
       }
     },
-    "netflix": {
-      "id": "netflix",
+    "d3": {
+      "id": "d3",
       "name": "Netflix",
-      "description": "Design a system for content delivery and personalization.",
+      "description": "Work on a problem related to content delivery, recommendation systems, or streaming media.",
       "icon": "netflix",
       "task": {
-        "title": "Design a 'Trending Now' Feature",
-        "scenario": "You're on the Netflix personalization team. Your task is to design the logic for the 'Trending Now' row on the homepage, which should update in near real-time.",
-        "task": "Outline an algorithm and system architecture to identify and display trending content. Consider factors like view counts, social media mentions, and regional popularity.",
+        "title": "Algorithm for 'Continue Watching' List",
+        "scenario": "You are on the personalization team at Netflix. The current 'Continue Watching' list is purely chronological. Your team wants to make it smarter by prioritizing content the user is more likely to want to finish.",
+        "task": "Propose a new algorithm for ordering the 'Continue Watching' list. Consider factors like how recently the item was watched, how much of it is left, the type of content (movie vs. series), and user interaction patterns.",
         "deliverables": [
-          "An outline of the data points you would track.",
-          "A high-level algorithm for calculating a 'trend score'.",
-          "A brief explanation of how you would personalize this for different users."
+          "A list of at least 5 factors (signals) you would use in your algorithm, with a weight or priority for each.",
+          "A high-level description of the logic (e.g., a scoring function) that would use these signals to rank the list.",
+          "An explanation of one edge case your algorithm handles (e.g., a movie watched 99% of the way through)."
         ]
       }
     },
-    "microsoft": {
-      "id": "microsoft",
+    "d4": {
+      "id": "d4",
       "name": "Microsoft",
-      "description": "Architect a cloud-native solution for enterprise customers.",
+      "description": "Solve a complex problem in enterprise software, cloud services, or developer tools.",
       "icon": "microsoft",
       "task": {
-        "title": "Architect a Cloud Backup Solution",
-        "scenario": "As a cloud solutions architect at Microsoft Azure, a client wants a proposal for a secure and cost-effective solution to back up their on-premise file servers to the cloud.",
-        "task": "Propose an Azure architecture for this backup solution. Focus on security, cost-efficiency, and disaster recovery.",
+        "title": "Feature Proposal for VS Code",
+        "scenario": "You're an intern on the Visual Studio Code team. Your task is to propose a new, innovative feature that would significantly improve developer productivity.",
+        "task": "Identify a common pain point for developers that isn't perfectly solved by existing VS Code features or extensions. Propose a new feature to address it. Your proposal should be convincing enough to be considered for the product roadmap.",
         "deliverables": [
-          "A list of the Azure services you would use (e.g., Azure Blob Storage, Azure VPN Gateway).",
-          "A diagram showing the data flow from on-premise to the cloud.",
-          "A brief summary of the security measures you would implement."
+          "A short 'press release' (1-2 paragraphs) announcing the new feature and its benefits.",
+          "A list of the key user stories this feature would enable.",
+          "A description of how you would measure the success or adoption of this feature after launch."
         ]
       }
     },
-    "aws": {
-      "id": "aws",
-      "name": "Amazon Web Services",
-      "description": "Architect a scalable, serverless backend for a web application.",
+    "d5": {
+      "id": "d5",
+      "name": "AWS",
+      "description": "Design a cloud-native solution for a common business problem using AWS services.",
       "icon": "aws",
       "task": {
-        "title": "Serverless API for a Mobile App",
-        "scenario": "A startup is building a social media app and needs a backend that can scale to millions of users. They want to use serverless technology on AWS to keep costs low.",
-        "task": "Design a serverless architecture using AWS services like API Gateway, Lambda, and DynamoDB to handle user profiles and posts.",
+        "title": "Serverless Architecture for Image Processing",
+        "scenario": "A social media startup needs to process user-uploaded images to create thumbnails of different sizes. They want a cost-effective, highly scalable solution on AWS without managing any servers.",
+        "task": "Design a serverless architecture using AWS services to handle this workflow. The process should trigger automatically whenever a new image is uploaded.",
         "deliverables": [
-          "A system diagram showing the interaction between services.",
-          "A sample data model for user profiles in DynamoDB.",
-          "Pseudo-code for a Lambda function that creates a new post."
+          "An architecture diagram showing the flow of data between the chosen AWS services (e.g., S3, Lambda, etc.).",
+          "A numbered list explaining the role of each service in the architecture.",
+          "A brief explanation of why this serverless approach is better than a traditional server-based one for this use case."
         ]
       }
     },
-    "apple": {
-      "id": "apple",
+    "d6": {
+      "id": "d6",
       "name": "Apple",
-      "description": "Design an intuitive and privacy-focused user feature.",
+      "description": "Design an intuitive and elegant user experience for a new mobile application feature.",
       "icon": "apple",
       "task": {
-        "title": "Design a 'Screen Time' Widget",
-        "scenario": "You're a designer on the iOS team. Your task is to design a new Home Screen widget for 'Screen Time' that is both informative and respectful of user privacy.",
-        "task": "Create a design specification for the widget. It should be available in small, medium, and large sizes and provide useful insights at a glance without being intrusive.",
+        "title": "UX Design for a Collaborative 'Memories' Feature",
+        "scenario": "You are a UX design intern on the Photos app team at Apple. You are tasked with designing a new feature that allows multiple users to contribute photos and videos to a shared 'Memory' album from an event, like a wedding or a vacation.",
+        "task": "Describe the user experience for creating, contributing to, and viewing a collaborative Memory. Focus on making the process seamless, private, and delightful, in line with Apple's design philosophy.",
         "deliverables": [
-          "Sketches or wireframes for the three widget sizes.",
-          "A description of what information each widget size would display.",
-          "An explanation of how your design prioritizes user privacy."
+          "A step-by-step user flow for how a user would invite others to a collaborative Memory.",
+          "A description of the main screen for viewing a collaborative Memory, highlighting key UI elements.",
+          "An explanation of how you would handle privacy and permissions (e.g., who can add photos, who can view)."
         ]
       }
     },
-    "meta": {
-      "id": "meta",
+    "d7": {
+      "id": "d7",
       "name": "Meta",
-      "description": "Develop a strategy for a new feature in a social application.",
+      "description": "Explore new ways to connect people through social technology or the metaverse.",
       "icon": "meta",
       "task": {
-        "title": "Feature Proposal: 'Community Events'",
-        "scenario": "You are a Product Manager for a social media platform. You need to propose a new 'Community Events' feature to encourage local, real-world interactions among users.",
-        "task": "Write a 1-page product brief for this feature. It should outline the problem it solves, the target audience, key functionalities, and metrics for success.",
+        "title": "Concept for a Hyper-Local Community Feature",
+        "scenario": "You're an intern on the Facebook Groups team. Your group is brainstorming ways to help people connect with their immediate neighbors (e.g., on their street or in their apartment building) more effectively.",
+        "task": "Propose a new feature concept for the Facebook app that facilitates hyper-local community building. Consider features for sharing information, organizing local events, or offering help to neighbors. The key is to balance usefulness with user privacy.",
         "deliverables": [
-          "A one-paragraph summary of the feature's value proposition.",
-          "A bulleted list of 5-7 key functionalities (e.g., 'Create an event', 'RSVP', 'View on map').",
-          "A list of 3 Key Performance Indicators (KPIs) to measure success."
+          "A name and a one-sentence tagline for your proposed feature.",
+          "A list of the top 3-5 functionalities the feature would offer.",
+          "A brief discussion on how you would address potential safety and privacy concerns."
         ]
       }
     }
