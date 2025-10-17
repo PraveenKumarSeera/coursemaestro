@@ -16,7 +16,7 @@ export async function gradeInternshipSubmissionAction(
         return { grade: null, message: 'Submission must be at least 50 characters long.' };
     }
 
-    // --- Non-AI Grading Logic ---
+    // --- System-Generated Grading Logic ---
     const textLength = submissionText.trim().length;
     
     // Base scores
@@ -49,7 +49,7 @@ export async function gradeInternshipSubmissionAction(
         overall,
         feedback,
     };
-    // --- End Non-AI Grading Logic ---
+    // --- End System-Generated Grading Logic ---
 
     // Simulate a short delay to make it feel like it's processing
     await new Promise(resolve => setTimeout(resolve, 1000));

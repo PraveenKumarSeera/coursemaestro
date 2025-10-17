@@ -97,17 +97,17 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
 
     const launchQuiz = useCallback((question: QuizQuestion, duration: number) => {
         const timestamp = Date.now();
-        lastEventTimestamp.current = timestamp;
         const payload: QuizBroadcast = { action: 'start', question, duration, timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
+        // Manually trigger for the sender's tab
         handleStartQuiz(question, duration);
     }, [handleStartQuiz]);
 
     const endQuiz = useCallback(() => {
         const timestamp = Date.now();
-        lastEventTimestamp.current = timestamp;
         const payload: QuizBroadcast = { action: 'end', timestamp };
         localStorage.setItem(QUIZ_BROADCAST_KEY, JSON.stringify(payload));
+        // Manually trigger for the sender's tab
         handleEndQuiz();
     }, [handleEndQuiz]);
 
@@ -121,7 +121,6 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             userName: user.name,
             answer,
         };
-        // Use a consistent key but unique value to trigger the event
         localStorage.setItem(QUIZ_RESPONSE_KEY, JSON.stringify({ ...payload, timestamp: Date.now() }));
     }, []);
 
@@ -131,9 +130,6 @@ export function LiveQuizProvider({ children }: { children: ReactNode }) {
             if (event.key === QUIZ_BROADCAST_KEY && event.newValue) {
                 try {
                     const payload: QuizBroadcast = JSON.parse(event.newValue);
-                    if (payload.timestamp <= lastEventTimestamp.current) return;
-                    lastEventTimestamp.current = payload.timestamp;
-
                     if (payload.action === 'start' && payload.question && payload.duration) {
                         handleStartQuiz(payload.question, payload.duration);
                     } else if (payload.action === 'end') {
