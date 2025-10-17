@@ -1,3 +1,4 @@
+
 'use client';
 import type { User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,9 +32,10 @@ type ThreadWithAuthor = {
 type DiscussionListProps = {
   courseId: string;
   threads: ThreadWithAuthor[];
+  isTeacher: boolean;
 };
 
-export default function DiscussionList({ courseId, threads }: DiscussionListProps) {
+export default function DiscussionList({ courseId, threads, isTeacher }: DiscussionListProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   return (

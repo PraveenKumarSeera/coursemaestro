@@ -3,21 +3,56 @@
 import type { Material } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { Link2 } from 'lucide-react';
+import { Link2, Plus } from 'lucide-react';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '../ui/button';
+import { useState } from 'react';
+import AddMaterialForm from './add-material-form';
 
 type MaterialListProps = {
   materials: Material[];
+  courseId: string;
+  isTeacher: boolean;
 };
 
-export default function MaterialList({ materials }: MaterialListProps) {
+export default function MaterialList({ materials, courseId, isTeacher }: MaterialListProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Course Materials</CardTitle>
-        <CardDescription>
-          Shared links and resources from your teacher.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <CardTitle>Course Materials</CardTitle>
+            <CardDescription>
+            Shared links and resources from your teacher.
+            </CardDescription>
+        </div>
+        {isTeacher && (
+           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" /> Add Material
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-xl">
+                <DialogHeader>
+                  <DialogTitle>Add New Material</DialogTitle>
+                  <DialogDescription>
+                    Provide a title and a shareable link for your new material.
+                  </DialogDescription>
+                </DialogHeader>
+                <AddMaterialForm courseId={courseId} setDialogOpen={setIsDialogOpen} />
+              </DialogContent>
+            </Dialog>
+        )}
       </CardHeader>
       <CardContent>
         {materials.length > 0 ? (

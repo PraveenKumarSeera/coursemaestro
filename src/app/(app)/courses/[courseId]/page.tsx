@@ -188,11 +188,14 @@ export default async function CourseDetailPage({
             <DiscussionList 
                 courseId={course.id}
                 threads={discussionThreads}
+                isTeacher={isTeacher}
             />
         </TabsContent>
         <TabsContent value="materials">
             <MaterialList 
                 materials={materials}
+                courseId={course.id}
+                isTeacher={isTeacher}
             />
         </TabsContent>
          <TabsContent value="mood">

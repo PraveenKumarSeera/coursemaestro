@@ -20,7 +20,7 @@ export async function addMaterialLinkAction(
 
   if (!courseId || !title || !link) {
     return {
-        message: 'Please select a course, provide a title, and paste a link.',
+        message: 'Please provide a title and a link.',
         success: false,
     };
   }
@@ -39,9 +39,8 @@ export async function addMaterialLinkAction(
       link,
     });
     
-    // Revalidate the course detail page and the main courses page
+    // This server-side revalidation is still good practice as a fallback
     revalidatePath(`/courses/${courseId}`);
-    revalidatePath('/courses');
 
     return {
       message: 'Successfully added material link.',

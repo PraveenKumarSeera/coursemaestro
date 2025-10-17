@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -30,6 +31,7 @@ export default function CreateThreadForm({ courseId, setDialogOpen }: CreateThre
   const initialState = { message: '', success: false };
   const [state, formAction] = useActionState(createThreadAction, initialState);
   const { toast } = useToast();
+  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
@@ -42,9 +44,10 @@ export default function CreateThreadForm({ courseId, setDialogOpen }: CreateThre
       if (state.success) {
         formRef.current?.reset();
         setDialogOpen(false);
+        router.refresh();
       }
     }
-  }, [state, toast, setDialogOpen]);
+  }, [state, toast, setDialogOpen, router]);
 
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
