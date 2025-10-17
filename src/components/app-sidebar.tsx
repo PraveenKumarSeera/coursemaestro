@@ -62,7 +62,6 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/courses/browse', label: 'Browse Courses', icon: Library },
     { href: '/challenges', label: 'Challenges', icon: Lightbulb },
     { href: '/internship', label: 'Internship Sim', icon: Building },
-    { href: '/brain-stretches', label: 'Brain Stretches', icon: BrainCircuit },
     { href: '/my-grades', label: 'My Grades', icon: GraduationCap },
     { href: '/my-certificates', label: 'My Certificates', icon: Award },
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },

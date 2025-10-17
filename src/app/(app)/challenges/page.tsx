@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Briefcase, ArrowRight, Star, ShoppingCart, Users, Code, MessageSquare, GitMerge, Database } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import BrainStretchClient from "@/components/brain-stretches/brain-stretch-client";
 
 const iconMap: { [key: string]: LucideIcon } = {
     ShoppingCart,
@@ -20,11 +21,13 @@ export default async function ChallengesPage() {
     const challenges = await getAllChallenges();
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            <BrainStretchClient />
+            
             <div className='space-y-1'>
                 <h1 className="text-3xl font-bold font-headline">Real-World Challenge Board</h1>
                 <p className="text-muted-foreground">
-                    Apply your skills to industry problems and earn credibility.
+                    Apply your skills to industry problems, submit solutions, and earn credibility by getting votes from your peers.
                 </p>
             </div>
             
