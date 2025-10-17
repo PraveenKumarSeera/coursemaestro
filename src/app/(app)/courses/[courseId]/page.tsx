@@ -21,13 +21,11 @@ import CourseMoodCloud from '@/components/courses/course-mood-cloud';
 
 export const revalidate = 0;
 
-export default async function CourseDetailPage({
-  params,
-  searchParams,
-}: {
+export default async function CourseDetailPage(props: {
   params: { courseId: string };
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
+  const { params, searchParams } = props;
   const { user } = await getSession();
   const course = await getCourseById(params.courseId);
 
