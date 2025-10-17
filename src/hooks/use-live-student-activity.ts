@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { User } from '@/lib/types';
 import { getSession } from '@/lib/session';
 
@@ -57,18 +57,23 @@ export function useLiveStudentActivity(initialStudents: User[]) {
   const [recentPings, setRecentPings] = useState<number[]>([]);
   const [pulse, setPulse] = useState(0);
 
-  const updateStudent = useCallback((userId: string, name: string, status: ActivityStatus, timestamp: number) => {
+  const updateStudentState = useCallback((userId: string, name: string, status: ActivityStatus, timestamp: number) => {
     setStudents(prev => {
         const studentExists = prev.some(s => s.id === userId);
-        const newStudentList = studentExists
-            ? prev.map(s => s.id === userId ? { ...s, status, lastActive: new Date(timestamp) } : s)
-            : [...prev, { id: userId, name: name, email: '', role: 'student', status, lastActive: new Date(timestamp) }];
-        
+        let newStudentList;
+        if (studentExists) {
+            newStudentList = prev.map(s => 
+                s.id === userId ? { ...s, status, lastActive: new Date(timestamp) } : s
+            );
+        } else {
+            // This handles the case where a student might join the session late
+            newStudentList = [...prev, { id: userId, name: name, email: '', role: 'student', status, lastActive: new Date(timestamp) }];
+        }
         return newStudentList;
     });
 
     if (status !== 'idle') {
-        setRecentPings(prev => [...prev, timestamp]);
+        setRecentPings(currentPings => [...currentPings, timestamp]);
     }
   }, []);
 
@@ -76,36 +81,39 @@ export function useLiveStudentActivity(initialStudents: User[]) {
       if (event.key === BROADCAST_KEY && event.newValue) {
         try {
             const payload: ActivityBroadcast = JSON.parse(event.newValue);
-            updateStudent(payload.userId, payload.name, payload.status, payload.timestamp);
+            updateStudentState(payload.userId, payload.name, payload.status, payload.timestamp);
         } catch (e) {
             console.error("Failed to parse activity broadcast", e);
         }
       }
-    }, [updateStudent]);
+    }, [updateStudentState]);
 
   useEffect(() => {
     window.addEventListener('storage', handleStorageChange);
     
     const idleCheckInterval = setInterval(() => {
+        const now = Date.now();
         setStudents(prev => prev.map(s => {
-            const isIdle = Date.now() - s.lastActive.getTime() > IDLE_TIMEOUT;
+            const isIdle = now - s.lastActive.getTime() > IDLE_TIMEOUT;
+            // Only update if the status needs to change to 'idle'
             if (s.status !== 'idle' && isIdle) {
                 return { ...s, status: 'idle' };
             }
             return s;
-        }))
+        }));
     }, 5000);
 
     const pulseInterval = setInterval(() => {
         const now = Date.now();
-        setRecentPings(currentPings => {
-            const activePings = currentPings.filter(ping => now - ping < PULSE_WINDOW);
-            const activeStudents = new Set(students.filter(s => s.status !== 'idle').map(s => s.id)).size;
-            const totalStudents = Math.max(1, students.length);
-            const engagement = Math.min(100, (activeStudents / totalStudents) * 100);
-            setPulse(engagement);
-            return activePings;
-        });
+        // Filter out old pings
+        const activePingsInWindow = recentPings.filter(ping => now - ping < PULSE_WINDOW);
+        setRecentPings(activePingsInWindow);
+
+        const activeStudentCount = new Set(students.filter(s => s.status !== 'idle').map(s => s.id)).size;
+        const totalStudents = Math.max(1, students.length);
+        
+        const engagement = Math.min(100, (activeStudentCount / totalStudents) * 100);
+        setPulse(engagement);
     }, 2000);
 
     return () => {
@@ -113,7 +121,8 @@ export function useLiveStudentActivity(initialStudents: User[]) {
       clearInterval(idleCheckInterval);
       clearInterval(pulseInterval);
     };
-  }, [handleStorageChange, students.length]);
+  }, [handleStorageChange, students.length, recentPings]);
+
 
   const summary = useMemo(() => {
     return students.reduce(
