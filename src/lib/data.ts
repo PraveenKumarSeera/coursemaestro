@@ -241,20 +241,16 @@ const defaultDb: Db = {
     ],
 };
 
-// --- Caching Layer for DB Reads ---
-const getDb = async (): Promise<Db> => {
+const getDb = unstable_cache(async () => {
     try {
         await fs.access(dbPath);
     } catch (error) {
-        // If the file doesn't exist, create it with default data
-         await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
+        await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
     }
     const data = await fs.readFile(dbPath, 'utf-8');
     const dbContent = JSON.parse(data);
-
-    // Ensure all data arrays exist
     return { ...defaultDb, ...dbContent } as Db;
-};
+}, ['database'], { revalidate: 1 });
 
 
 async function writeDb(data: Db): Promise<void> {
