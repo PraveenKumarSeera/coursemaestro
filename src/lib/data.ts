@@ -781,22 +781,44 @@ export const getChallengeById = unstable_cache(
 
 export const getSubmissionsForChallenge = unstable_cache(
     async (challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> => {
-        const submissions = Object.values(db.challenge_submissions)
-            .filter(cs => cs && cs.challengeId === challengeId);
+        // Step 1: Get all raw submission records from the database.
+        const allSubmissions = Object.values(db.challenge_submissions);
+        
+        // Step 2: Filter for submissions that are not null/undefined and belong to the correct challenge.
+        const relevantSubmissions = allSubmissions.filter(sub => {
+            return sub && sub.challengeId === challengeId;
+        });
 
-        const results = await Promise.all(submissions.map(async (sub) => {
-            if (!sub) return null;
-            const student = await findUserById(sub.studentId);
-            if (!student || student.id === '0') return null; // Filter out submissions with no valid user
-            const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
-            return { ...sub, student, votes };
-        }));
+        // Step 3: Process the valid submissions, fetching related data.
+        const processedSubmissions = await Promise.all(
+            relevantSubmissions.map(async (sub) => {
+                // Fetch the student associated with the submission.
+                const student = await findUserById(sub.studentId);
+                
+                // If the student is not found or is the 'unknown' user, we cannot use this submission.
+                if (!student || student.id === '0') {
+                    return null;
+                }
 
-        return results.filter(Boolean) as (ChallengeSubmission & { student: User; votes: number })[];
+                // Count the votes for this specific submission.
+                const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
+
+                // Return the fully formed, clean submission object.
+                return { 
+                    ...sub, 
+                    student, 
+                    votes 
+                };
+            })
+        );
+        
+        // Step 4: Filter out any null results from the processing step to ensure the final array is clean.
+        return processedSubmissions.filter(Boolean) as (ChallengeSubmission & { student: User; votes: number })[];
     },
     ['submissions-for-challenge'],
-    { tags: ['challenges', 'users'] }
+    { tags: ['challenges', 'users', 'challenge_submissions', 'challenge_votes'] }
 );
+
 
 export async function createChallengeSubmission(data: Omit<ChallengeSubmission, 'id' | 'submittedAt'>): Promise<ChallengeSubmission> {
     const id = randomUUID();
@@ -1050,4 +1072,5 @@ if (Object.keys(db.users).length === 0) {
 }
 
     
+
 
