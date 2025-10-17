@@ -1,7 +1,6 @@
 
 'use server';
 
-import dbData from './db.json';
 import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
 import { differenceInDays, parseISO, isSameDay, subDays } from 'date-fns';
@@ -12,6 +11,8 @@ import type { Course, Enrollment, User, Assignment, Submission, GradedSubmission
 
 const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student' };
 
+// In a real app, this would be a proper database. For this demo, we'll use a global in-memory object.
+// This ensures data persists across server-side renders during development.
 type Db = {
     users: Record<string, User>;
     courses: Record<string, Course>;
@@ -35,7 +36,183 @@ declare global {
   var __db: Db | undefined;
 }
 
-const db: Db = global.__db || dbData;
+const db: Db = global.__db || {
+    users: {},
+    courses: {},
+    enrollments: {},
+    assignments: {},
+    submissions: {},
+    discussion_threads: {},
+    discussion_posts: {},
+    materials: {},
+    notifications: {},
+    attendance: {},
+    certificates: {},
+    challenges: {
+        "challenge-1": {
+            "id": "challenge-1",
+            "title": "E-commerce Recommendation API",
+            "description": "Design a REST API for an e-commerce platform that provides personalized product recommendations based on a user's browsing history and past purchases. Focus on the API endpoints, request/response schemas, and data model.",
+            "company": "Shopify",
+            "points": 100,
+            "icon": "ShoppingCart"
+        },
+        "challenge-2": {
+            "id": "challenge-2",
+            "title": "Social Media Feed Algorithm",
+            "description": "Propose an algorithm for a social media feed that balances recency, user engagement, and content diversity. Explain how you would handle potential echo chambers and misinformation.",
+            "company": "Meta",
+            "points": 120,
+            "icon": "Users"
+        },
+        "challenge-3": {
+            "id": "challenge-3",
+            "title": "Real-time Collaborative Editor",
+            "description": "Outline the architecture for a real-time collaborative text editor, similar to Google Docs. Describe how you would handle concurrent edits and maintain consistency across all clients.",
+            "company": "Google",
+            "points": 150,
+            "icon": "Code"
+        },
+        "challenge-4": {
+            "id": "challenge-4",
+            "title": "Chat Application System Design",
+            "description": "Design the system architecture for a scalable chat application like WhatsApp or Slack. Consider message delivery, online presence, and storage of chat history.",
+            "company": "Slack",
+            "points": 130,
+            "icon": "MessageSquare"
+        },
+        "challenge-5": {
+            "id": "challenge-5",
+            "title": "CI/CD Pipeline for Microservices",
+            "description": "Design a CI/CD pipeline for a microservices-based application. Your design should include steps for building, testing (unit, integration, E2E), and deploying services independently.",
+            "company": "GitHub",
+            "points": 110,
+            "icon": "GitMerge"
+        },
+        "challenge-6": {
+            "id": "challenge-6",
+            "title": "NoSQL Database Schema Design",
+            "description": "You are building a social network. Design the NoSQL (document-based) database schema for user profiles, posts, comments, and followers. Justify your design choices regarding data duplication and access patterns.",
+            "company": "MongoDB",
+            "points": 90,
+            "icon": "Database"
+        }
+    },
+    internship_domains: {
+        "google": {
+            "id": "google",
+            "name": "Google",
+            "description": "Tackle a problem at the scale of a global tech giant, focusing on algorithms and system design.",
+            "icon": "google",
+            "task": {
+                "title": "Design a Scalable URL Shortener",
+                "scenario": "As an intern on the Google Cloud Platform team, you've been tasked with designing a new URL shortening service similar to bit.ly. The service needs to handle millions of requests per day and must be highly available and scalable.",
+                "task": "Your task is to create a high-level technical design for this service. You should consider the API design (how users create and retrieve URLs), the data model for storing the mappings, and the overall system architecture. How would you generate unique short codes? How would you handle custom URLs?",
+                "deliverables": [
+                    "A 1-page technical proposal outlining your design.",
+                    "API endpoint definitions (e.g., POST /shorten, GET /{shortCode}).",
+                    "A schema for your chosen database (SQL or NoSQL)."
+                ]
+            }
+        },
+        "openai": {
+            "id": "openai",
+            "name": "OpenAI",
+            "description": "Work on a challenge at the intersection of AI, product design, and responsible innovation.",
+            "icon": "openai",
+            "task": {
+                "title": "Develop a Moderation System for AI-Generated Content",
+                "scenario": "The OpenAI safety team is developing a new tool to help developers moderate content generated by their AI models. The goal is to detect and flag potentially harmful or biased content before it reaches end-users.",
+                "task": "Propose a multi-layered moderation system. Think beyond simple keyword filtering. How could you use AI to understand context and nuance? What categories of harmful content would you prioritize? How would you design a system that is both effective and fair, minimizing false positives?",
+                "deliverables": [
+                    "A policy document defining content categories and moderation criteria.",
+                    "A high-level diagram of your proposed system architecture.",
+                    "An explanation of how you would handle appeals and edge cases."
+                ]
+            }
+        },
+        "netflix": {
+            "id": "netflix",
+            "name": "Netflix",
+            "description": "Solve a complex engineering challenge related to content delivery and user experience at a massive scale.",
+            "icon": "netflix",
+            "task": {
+              "title": "Design a 'Skip Intro' Feature",
+              "scenario": "The content platform team at Netflix wants to expand the 'Skip Intro' feature. Currently, it's a manual process. They want you to design an automated system that can detect intro sequences in TV shows.",
+              "task": "Propose a technical solution to automatically identify the start and end times of intro sequences. Consider audio fingerprints, visual cues (like recurring title cards), and machine learning approaches. How would your system handle variations in intro length or placement?",
+              "deliverables": [
+                "A technical proposal detailing your proposed method.",
+                "A description of the data you would need to train a potential model.",
+                "A plan for how to handle potential errors or inaccuracies."
+              ]
+            }
+        },
+        "microsoft": {
+            "id": "microsoft",
+            "name": "Microsoft",
+            "description": "Engage with enterprise-level software challenges, focusing on cloud computing, productivity, and developer tools.",
+            "icon": "microsoft",
+            "task": {
+              "title": "Architect a Cloud-Based Document Syncing Service",
+              "scenario": "The Microsoft 365 team is re-architecting the sync engine for OneDrive. They need a robust system that can handle billions of files and provide near-instantaneous updates across multiple devices (desktop, web, mobile).",
+              "task": "Design the high-level architecture for this file-syncing service. How would you efficiently detect changes? What strategy would you use for handling large files (e.g., chunking)? How would you resolve sync conflicts when a file is edited offline on two different devices?",
+              "deliverables": [
+                "A system architecture diagram (components, databases, APIs).",
+                "An explanation of your conflict resolution strategy.",
+                "A proposal for the client-side database schema to track file state."
+              ]
+            }
+        },
+        "aws": {
+            "id": "aws",
+            "name": "Amazon Web Services",
+            "description": "Design and architect a new cloud service focusing on reliability, scalability, and cost-effectiveness.",
+            "icon": "aws",
+            "task": {
+                "title": "Design a Serverless Image Processing Service",
+                "scenario": "As an intern on the AWS Lambda team, you are tasked with designing a new, fully-managed service for on-the-fly image transformations. The service should take an image URL and a set of transformations (e.g., resize, crop, apply filter) and return a new image.",
+                "task": "Architect this service using AWS components. How would you ensure low latency? How would you handle caching of original and transformed images to reduce cost and improve performance? What is the API design for this service?",
+                "deliverables": [
+                    "An architecture diagram using AWS service icons (e.g., API Gateway, Lambda, S3, CloudFront).",
+                    "API endpoint definitions with request/response examples.",
+                    "A description of your caching strategy."
+                ]
+            }
+        },
+        "apple": {
+            "id": "apple",
+            "name": "Apple",
+            "description": "Focus on a challenge related to user experience, privacy, and seamless integration across an ecosystem of devices.",
+            "icon": "apple",
+            "task": {
+                "title": "Design a Privacy-Preserving Health Feature",
+                "scenario": "The Apple Health team wants to introduce a new feature that allows users to share anonymized health data with researchers to contribute to medical studies. User privacy is the absolute top priority.",
+                "task": "Propose a system that allows users to opt-in and share their data while guaranteeing their anonymity. How would you use on-device processing and techniques like differential privacy to protect user identity? How would the data be collected, aggregated, and provided to researchers securely?",
+                "deliverables": [
+                    "A proposal on how to use differential privacy in this context.",
+                    "A user-flow diagram for the opt-in process.",
+                    "A high-level diagram of the data pipeline from device to researcher."
+                ]
+            }
+        },
+        "meta": {
+            "id": "meta",
+            "name": "Meta",
+            "description": "Work on a product challenge that involves social graphs, user engagement, and building communities at a global scale.",
+            "icon": "meta",
+            "task": {
+                "title": "Develop a 'Group Recommendations' Feature",
+                "scenario": "The Facebook Groups team wants to improve how they recommend new groups to users. The goal is to suggest relevant and healthy communities, not just groups their friends have joined.",
+                "task": "Design an algorithm to recommend groups. What signals would you use (e.g., user's interests from their profile, page likes, past group activity, content of posts they engage with)? How would you identify 'healthy' or high-quality groups versus spammy or toxic ones?",
+                "deliverables": [
+                    "A list of signals and their proposed weights for your algorithm.",
+                    "A strategy for identifying and down-ranking low-quality groups.",
+                    "A plan for A/B testing your new recommendation algorithm."
+                ]
+            }
+        }
+    },
+};
 
 if (process.env.NODE_ENV !== 'production') {
   global.__db = db;
@@ -184,7 +361,7 @@ export const getStudentEnrollments = unstable_cache(
 export const getStudentsByCourse = unstable_cache(
     async (courseId: string): Promise<User[]> => {
         const studentIds = Object.values(db.enrollments).filter(e => e.courseId === courseId).map(e => e.studentId);
-        return studentIds.map(id => db.users[id]).filter(Boolean);
+        return Promise.all(studentIds.map(id => findUserById(id)));
     },
     ['students-by-course'],
     { tags: ['enrollments', 'users'] }
@@ -210,21 +387,19 @@ export const isEnrolled = unstable_cache(
 
 export const getTeacherStudents = unstable_cache(
     async (teacherId: string) => {
-        const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
+        const teacherCourseIds = new Set(Object.values(db.courses).filter(c => c.teacherId === teacherId).map(c => c.id));
         
-        const studentIds = new Set(
-            Object.values(db.enrollments)
-                .filter(e => teacherCourseIds.has(e.courseId))
-                .map(e => e.studentId)
-        );
+        const studentEnrollments = Object.values(db.enrollments).filter(e => teacherCourseIds.has(e.courseId));
+        const studentIds = new Set(studentEnrollments.map(e => e.studentId));
         
+        const allStudentSubmissions = Object.values(db.submissions);
+
         return Promise.all(Array.from(studentIds).map(async (studentId) => {
             const student = await findUserById(studentId);
-            const enrolledCourseIds = Object.keys(db.enrollments).filter(id => db.enrollments[id].studentId === studentId && teacherCourseIds.has(db.enrollments[id].courseId)).map(id => db.enrollments[id].courseId);
-            
+            const enrolledCourseIds = studentEnrollments.filter(e => e.studentId === studentId).map(e => e.courseId);
             const courses = enrolledCourseIds.map(id => db.courses[id]?.title).filter(Boolean);
 
-            const submissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
+            const submissions = allStudentSubmissions.filter(s => s.studentId === studentId && s.grade !== null);
             const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
             const averageGrade = submissions.length > 0 ? Math.round(totalGrade / submissions.length) : 0;
 
@@ -262,8 +437,7 @@ export const getAssignmentsByCourse = unstable_cache(
 
 export const getAssignmentsByTeacher = unstable_cache(
     async (teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> => {
-        const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
-        
+        const teacherCourseIds = new Set(Object.values(db.courses).filter(c => c.teacherId === teacherId).map(c => c.id));
         const assignments = Object.values(db.assignments).filter(a => teacherCourseIds.has(a.courseId));
 
         return assignments.map(assignment => {
@@ -349,7 +523,7 @@ export const getStudentGrades = unstable_cache(
         
         return studentSubmissions.map(sub => {
             const assignment = db.assignments[sub.assignmentId];
-            const course = db.courses[assignment?.courseId];
+            const course = assignment ? db.courses[assignment.courseId] : undefined;
             return {
                 ...sub,
                 assignment: assignment!,
@@ -764,13 +938,23 @@ export const getDashboardData = unstable_cache(
                     { name: 'C (70-79)', students: 0 }, { name: 'D (60-69)', students: 0 }, { name: 'F (<60)', students: 0 },
                 ];
                 
-                courseSubmissions.forEach(sub => {
-                    if (sub.grade! >= 90) gradeDistribution[0].students++;
-                    else if (sub.grade! >= 80) gradeDistribution[1].students++;
-                    else if (sub.grade! >= 70) gradeDistribution[2].students++;
-                    else if (sub.grade! >= 60) gradeDistribution[3].students++;
+                const studentGrades: Record<string, number[]> = {};
+                 courseSubmissions.forEach(sub => {
+                    if (!studentGrades[sub.studentId]) {
+                        studentGrades[sub.studentId] = [];
+                    }
+                    studentGrades[sub.studentId].push(sub.grade!);
+                });
+
+                Object.values(studentGrades).forEach(grades => {
+                    const avg = grades.reduce((a, b) => a + b, 0) / grades.length;
+                    if (avg >= 90) gradeDistribution[0].students++;
+                    else if (avg >= 80) gradeDistribution[1].students++;
+                    else if (avg >= 70) gradeDistribution[2].students++;
+                    else if (avg >= 60) gradeDistribution[3].students++;
                     else gradeDistribution[4].students++;
                 });
+
                 return { courseId: course.id, courseTitle: course.title, gradeDistribution };
             }));
 
@@ -797,7 +981,7 @@ export const getDashboardData = unstable_cache(
                 stats: [
                     { title: 'Courses Taught', value: courses.length, subtitle: 'Total active courses', icon: 'BookOpen', link: { href: "/courses", text: "Manage Courses"} },
                     { title: 'Total Students', value: studentIds.size, subtitle: 'Across all courses', icon: 'Users', link: { href: "/students", text: "View Students"} },
-                    { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap' },
+                    { title: 'Pending Submissions', value: pendingSubmissions, subtitle: 'Awaiting grading', icon: 'GraduationCap', link: { href: "/assignments", text: "Grade Now" } },
                 ],
                 coursePerformances,
                 studentOfTheWeek
@@ -825,22 +1009,27 @@ export const getDashboardData = unstable_cache(
             const attendanceRows = Object.values(db.attendance).filter(a => a.studentId === userId);
             let totalAttention = 0, totalCompletion = 0;
             for (const enrollment of enrollments) {
-                const firstAttendance = attendanceRows.find(a => a.courseId === enrollment.courseId);
-                if (!firstAttendance) continue;
-
-                const daysSinceEnrollment = differenceInDays(new Date(), new Date(firstAttendance.date)) + 1;
-                const attendanceDays = new Set(attendanceRows.filter(a => a.courseId === enrollment.courseId).map(a => a.date)).size;
-                totalAttention += (attendanceDays / daysSinceEnrollment);
-
                 const courseAssignments = allAssignments.filter(a => a.courseId === enrollment.courseId);
+                const firstAttendance = attendanceRows.find(a => a.courseId === enrollment.courseId);
+
+                if (firstAttendance && courseAssignments.length > 0) {
+                     const daysSinceEnrollment = differenceInDays(new Date(), new Date(firstAttendance.date)) + 1;
+                     if (daysSinceEnrollment > 0) {
+                         const attendanceDays = new Set(attendanceRows.filter(a => a.courseId === enrollment.courseId).map(a => a.date)).size;
+                         totalAttention += (attendanceDays / daysSinceEnrollment);
+                     }
+                }
+                
                 if (courseAssignments.length > 0) {
                      const courseSubmissions = studentSubmissions.filter(s => courseAssignments.some(a => a.id === s.assignmentId));
                      totalCompletion += (courseSubmissions.length / courseAssignments.length);
+                } else {
+                    totalCompletion += 1; // if no assignments, completion is 100%
                 }
             }
             
-            const attentionScore = enrollments.length > 0 ? (totalAttention / enrollments.length) * 100 : 0;
-            const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 0;
+            const attentionScore = enrollments.length > 0 ? (totalAttention / enrollments.length) * 100 : 100;
+            const completionScore = enrollments.length > 0 ? (totalCompletion / enrollments.length) * 100 : 100;
             const efficiencyScore = (attentionScore * 0.25) + (completionScore * 0.4) + (averageGrade * 0.35);
 
             const sortedAttendance = Object.values(db.attendance).filter(a => a.studentId === userId).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -852,17 +1041,16 @@ export const getDashboardData = unstable_cache(
                      const today = new Date();
                      const yesterday = subDays(today, 1);
                      if (isSameDay(lastDay, today) || isSameDay(lastDay, yesterday)) {
-                        let currentStreak = 1;
+                        streak = 1;
                         let expectedDate = isSameDay(lastDay, today) ? yesterday : subDays(yesterday, 1);
                         for (let i = 1; i < uniqueDates.length; i++) {
                             if (isSameDay(uniqueDates[i], expectedDate)) {
-                                currentStreak++;
+                                streak++;
                                 expectedDate = subDays(expectedDate, 1);
                             } else {
                                 break;
                             }
                         }
-                        streak = currentStreak;
                      }
                 }
             }
@@ -871,7 +1059,7 @@ export const getDashboardData = unstable_cache(
                 stats: [
                     { title: 'Enrolled Courses', value: enrollments.length, subtitle: 'Ready to learn', icon: 'BookOpen', link: { href: "/courses", text: "View Courses"} },
                     { title: 'Assignments Due', value: assignmentsDueSoon, subtitle: 'In the next 7 days', icon: 'ClipboardList' },
-                    { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Keep it up!', icon: 'GraduationCap' },
+                    { title: 'Overall Grade', value: gradeToLetter(averageGrade), subtitle: 'Across all courses', icon: 'GraduationCap', link: { href: '/my-grades', text: "View Grades"} },
                 ],
                 learningEfficiency: { score: Math.round(efficiencyScore), components: { attention: Math.round(attentionScore), completion: Math.round(completionScore), accuracy: Math.round(averageGrade) } },
                 streak,
