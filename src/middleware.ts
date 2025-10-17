@@ -6,11 +6,16 @@ import type { NextRequest } from 'next/server';
 
 const SESSION_COOKIE_NAME = 'coursepilot_session';
 const PROTECTED_ROUTES = ['/dashboard', '/courses', '/assignments', '/students', '/attendance', '/materials', '/my-grades', '/my-certificates', '/leaderboard', '/career-advisor', '/resume-builder', '/timetable', '/internship', '/challenges', '/brain-stretches', '/my-projects', '/wellness-check', '/live-progress', '/instant-quiz', '/my-journey'];
-const PUBLIC_ROUTES = ['/login', '/signup', '/showcase'];
+const PUBLIC_ONLY_ROUTES = ['/login', '/signup'];
 
 export function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME);
   const { pathname } = request.nextUrl;
+
+  // Allow access to public showcase page
+  if (pathname === '/showcase') {
+    return NextResponse.next();
+  }
 
   const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
   
@@ -22,8 +27,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If visiting a public-only route (like login) with a session, redirect to dashboard
-  if (['/login', '/signup'].includes(pathname) && sessionCookie) {
+  // If visiting a public-only route (like login/signup) with a session, redirect to dashboard
+  if (PUBLIC_ONLY_ROUTES.includes(pathname) && sessionCookie) {
      const url = request.nextUrl.clone();
      url.pathname = '/dashboard';
      return NextResponse.redirect(url);
