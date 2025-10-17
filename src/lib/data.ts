@@ -48,6 +48,7 @@ const db: Db = global.__db || {
     notifications: {},
     attendance: {},
     certificates: {},
+    projects: {},
     challenges: {
         "challenge-1": {
             "id": "challenge-1",
@@ -212,6 +213,8 @@ const db: Db = global.__db || {
             }
         }
     },
+    challenge_submissions: {},
+    challenge_votes: {},
 };
 
 if (process.env.NODE_ENV !== 'production') {
@@ -834,7 +837,10 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
 
 export const getAllProjects = unstable_cache(
     async (): Promise<(Project & { student: User })[]> => {
-        const projects = Object.values(db.projects);
+        const projects = Object.values(db.projects).map(p => ({
+            ...p,
+            tags: p.tags || [], // Ensure tags is always an array
+        }));
         projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         return Promise.all(
             projects.map(async p => {
