@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { randomUUID } from 'crypto';
@@ -781,13 +782,17 @@ export const getChallengeById = unstable_cache(
 export const getSubmissionsForChallenge = unstable_cache(
     async (challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> => {
         const submissions = Object.values(db.challenge_submissions)
-            .filter(cs => cs && cs.challengeId === challengeId); // Filter out null/undefined entries
+            .filter(cs => cs && cs.challengeId === challengeId);
 
-        return Promise.all(submissions.map(async (sub) => {
+        const results = await Promise.all(submissions.map(async (sub) => {
+            if (!sub) return null;
             const student = await findUserById(sub.studentId);
+            if (!student || student.id === '0') return null; // Filter out submissions with no valid user
             const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
             return { ...sub, student, votes };
         }));
+
+        return results.filter(Boolean) as (ChallengeSubmission & { student: User; votes: number })[];
     },
     ['submissions-for-challenge'],
     { tags: ['challenges', 'users'] }
@@ -1045,3 +1050,4 @@ if (Object.keys(db.users).length === 0) {
 }
 
     
+
