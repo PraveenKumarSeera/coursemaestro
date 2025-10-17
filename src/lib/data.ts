@@ -839,7 +839,7 @@ export const getAllProjects = unstable_cache(
     async (): Promise<(Project & { student: User })[]> => {
         const projects = Object.values(db.projects).map(p => ({
             ...p,
-            tags: p.tags || [], // Ensure tags is always an array
+            tags: Array.isArray(p.tags) ? p.tags : [], // Ensure tags is always an array
         }));
         projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         return Promise.all(
@@ -855,13 +855,19 @@ export const getAllProjects = unstable_cache(
 
 export const getProjectsByStudent = unstable_cache(
     async (studentId: string): Promise<Project[]> => {
-        const projects = Object.values(db.projects).filter(p => p.studentId === studentId);
+        const projects = Object.values(db.projects)
+            .filter(p => p.studentId === studentId)
+            .map(p => ({
+                ...p,
+                tags: Array.isArray(p.tags) ? p.tags : [], // Ensure tags is always an array
+            }));
         projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         return projects;
     },
     ['projects-by-student'],
     { tags: ['projects'] }
 );
+
 
 // --- Internship Functions ---
 export const getInternshipDomains = unstable_cache(
@@ -1075,3 +1081,13 @@ export const getDashboardData = unstable_cache(
     ['dashboard-data'],
     { tags: ['users', 'courses', 'enrollments', 'assignments', 'submissions', 'attendance'] }
 );
+
+// --- Initial data seeding ---
+if (Object.keys(db.users).length === 0) {
+    const teacher = { id: 'teacher-1', name: 'Albus Dumbledore', email: 'teacher@example.com', password: 'password', role: 'teacher' as const };
+    const student1 = { id: 'student-1', name: 'Harry Potter', email: 'student1@example.com', password: 'password', role: 'student' as const };
+    const student2 = { id: 'student-2', name: 'Hermione Granger', email: 'student2@example.com', password: 'password', role: 'student' as const };
+    db.users[teacher.id] = teacher;
+    db.users[student1.id] = student1;
+    db.users[student2.id] = student2;
+}

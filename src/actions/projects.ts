@@ -60,5 +60,3 @@ export async function createProjectAction(
     return { message: 'Failed to create project.', success: false };
   }
 }
-
-    
