@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { randomUUID } from 'crypto';
@@ -839,15 +840,16 @@ export const getAllProjects = unstable_cache(
     async (): Promise<(Project & { student: User })[]> => {
         const allProjects = Object.values(db.projects);
 
-        const sanitizedProjects = allProjects.map(p => {
-            if (!p) return null;
-            return {
+        // This is the definitive fix. Filter out any null/undefined projects,
+        // then ensure every valid project has a 'tags' array.
+        const sanitizedProjects = allProjects
+            .filter((p): p is Project => p !== null && p !== undefined) // 1. Filter out invalid entries
+            .map(p => ({
                 ...p,
-                tags: Array.isArray(p.tags) ? p.tags : [],
-            };
-        }).filter((p): p is Project => p !== null);
+                tags: Array.isArray(p.tags) ? p.tags : [], // 2. Guarantee 'tags' is an array
+            }));
 
-        sanitizedProjects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sanitizedProjects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         return Promise.all(
             sanitizedProjects.map(async p => {
@@ -860,14 +862,18 @@ export const getAllProjects = unstable_cache(
     { tags: ['projects', 'users'] }
 );
 
+
 export const getProjectsByStudent = unstable_cache(
     async (studentId: string): Promise<Project[]> => {
-        const studentProjects = Object.values(db.projects).filter(p => p && p.studentId === studentId);
-
-        const sanitizedProjects = studentProjects.map(p => ({
-            ...p,
-            tags: Array.isArray(p.tags) ? p.tags : [],
-        }));
+        const studentProjects = Object.values(db.projects);
+        
+        // Apply the same robust sanitization here.
+        const sanitizedProjects = studentProjects
+            .filter((p): p is Project => p && p.studentId === studentId) // 1. Filter and ensure project exists
+            .map(p => ({
+                ...p,
+                tags: Array.isArray(p.tags) ? p.tags : [], // 2. Guarantee 'tags' is an array
+            }));
 
         sanitizedProjects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         return sanitizedProjects;
@@ -1099,3 +1105,5 @@ if (Object.keys(db.users).length === 0) {
     db.users[student1.id] = student1;
     db.users[student2.id] = student2;
 }
+
+    
