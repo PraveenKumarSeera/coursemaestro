@@ -94,24 +94,6 @@ export const CourseBuilderOutputSchema = z.object({
 export type CourseBuilderOutput = z.infer<typeof CourseBuilderOutputSchema>;
 
 
-// Resume Builder
-export const ResumeBuilderInputSchema = z.object({
-  studentName: z.string().describe("The full name of the student."),
-  studentEmail: z.string().email().describe("The email address of the student."),
-  studentPhone: z.string().optional().describe("The phone number of the student."),
-  education: z.string().describe("The student's educational background, including courses taken."),
-  experience: z.string().optional().describe("The student's professional experience."),
-  studentPerformanceData: z.string().describe("A string summarizing the student's high-performing assignments."),
-  template: z.string().describe("The selected resume template (e.g., 'modern', 'professional')."),
-});
-export type ResumeBuilderInput = z.infer<typeof ResumeBuilderInputSchema>;
-
-export const ResumeBuilderOutputSchema = z.object({
-  resumeMarkdown: z.string().describe("The full resume formatted as a Markdown string."),
-});
-export type ResumeBuilderOutput = z.infer<typeof ResumeBuilderOutputSchema>;
-
-
 // Teaching Assistant
 export const TeachingAssistantInputSchema = z.object({
   submissionText: z.string().describe('The text of the student submission to be analyzed.'),

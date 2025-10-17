@@ -10,7 +10,7 @@ import './flows/ai-career-advisor';
 import './flows/ai-material-parser';
 import './flows/ai-motivation-bot';
 import './flows/ai-performance-analyzer';
-import './flows/ai-resume-builder';
+
 import './flows/ai-study-assistant';
 import './flows/ai-teaching-assistant';
 import './flows/ai-timetable-generator';

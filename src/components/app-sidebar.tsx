@@ -63,7 +63,6 @@ export default function AppSidebar({ user }: AppSidebarProps) {
     { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/timetable', label: 'Smart Timetable', icon: CalendarClock },
     { href: '/career-advisor', label: 'Career Advisor', icon: Briefcase, isNew: true },
-    { href: '/resume-builder', label: 'Resume Builder', icon: FileDown },
     { href: '/wellness-check', label: 'Wellness Check-in', icon: HeartHandshake, isNew: true },
   ];
   
