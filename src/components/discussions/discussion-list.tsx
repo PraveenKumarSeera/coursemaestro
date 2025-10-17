@@ -1,6 +1,5 @@
-
 'use client';
-import type { DiscussionThread, User } from '@/lib/types';
+import type { User } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageSquare, Plus } from 'lucide-react';
@@ -19,7 +18,15 @@ import CreateThreadForm from './create-thread-form';
 import { useState } from 'react';
 
 
-type ThreadWithAuthor = DiscussionThread & { author: User, postCount: number };
+type ThreadWithAuthor = {
+    id: string;
+    courseId: string;
+    title: string;
+    authorId: string;
+    createdAt: string;
+    author: User;
+    postCount: number;
+};
 
 type DiscussionListProps = {
   courseId: string;

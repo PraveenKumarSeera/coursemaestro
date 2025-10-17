@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import dbData from './db.json';
@@ -8,6 +7,7 @@ import { randomUUID } from 'crypto';
 import { unstable_cache } from 'next/cache';
 import { differenceInDays, parseISO, isSameDay, subDays } from 'date-fns';
 import { getSession } from './session';
+import { PlaceHolderImages } from './placeholder-images';
 
 
 const unknownUser: User = { id: '0', name: 'Unknown User', email: '', role: 'student' };
@@ -121,11 +121,12 @@ export const getCourseById = unstable_cache(
 
 export async function createCourse(data: Omit<Course, 'id' | 'teacherId' | 'imageUrl'>, teacherId: string): Promise<Course> {
     const id = randomUUID();
+    const placeholder = PlaceHolderImages.find(p => p.id === 'course-intro-to-web-dev') || PlaceHolderImages[0];
     const newCourse: Course = {
         ...data,
-        id: id,
+        id,
         teacherId,
-        imageUrl: `https://picsum.photos/seed/${id}/600/400`,
+        imageUrl: placeholder.imageUrl,
     };
     db.courses[id] = newCourse;
     return newCourse;
@@ -139,17 +140,21 @@ export async function updateCourse(id: string, data: Partial<Omit<Course, 'id' |
 }
 
 export async function deleteCourse(id: string): Promise<boolean> {
+     if (!db.courses[id]) return false;
      delete db.courses[id];
-     for (const enrollmentId in db.enrollments) {
+     
+     Object.keys(db.enrollments).forEach(enrollmentId => {
         if (db.enrollments[enrollmentId].courseId === id) {
             delete db.enrollments[enrollmentId];
         }
-     }
-     for (const assignmentId in db.assignments) {
+     });
+
+     Object.keys(db.assignments).forEach(assignmentId => {
          if (db.assignments[assignmentId].courseId === id) {
              delete db.assignments[assignmentId];
          }
-     }
+     });
+
     return true;
 }
 
@@ -178,7 +183,7 @@ export async function getStudentEnrollments(studentId: string): Promise<Enrollme
 
 export async function getStudentsByCourse(courseId: string): Promise<User[]> {
     const studentIds = Object.values(db.enrollments).filter(e => e.courseId === courseId).map(e => e.studentId);
-    return Object.values(db.users).filter(u => studentIds.includes(u.id));
+    return studentIds.map(id => db.users[id]).filter(Boolean);
 }
 
 export async function enrollInCourse(studentId: string, courseId: string): Promise<Enrollment | null> {
@@ -196,18 +201,19 @@ export async function isEnrolled(studentId: string, courseId: string): Promise<b
 }
 
 export async function getTeacherStudents(teacherId: string) {
-    const teacherCourseIds = new Set(Object.values(db.courses).filter(c => c.teacherId === teacherId).map(c => c.id));
-    const studentIds = new Set(Object.values(db.enrollments).filter(e => teacherCourseIds.has(e.courseId)).map(e => e.studentId));
+    const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
+    
+    const studentIds = new Set(
+        Object.values(db.enrollments)
+            .filter(e => teacherCourseIds.has(e.courseId))
+            .map(e => e.studentId)
+    );
     
     return Promise.all(Array.from(studentIds).map(async (studentId) => {
         const student = await findUserById(studentId);
-        const enrolledCourseIds = Object.values(db.enrollments)
-            .filter(e => e.studentId === studentId && teacherCourseIds.has(e.courseId))
-            .map(e => e.courseId);
+        const enrolledCourseIds = Object.keys(db.enrollments).filter(id => db.enrollments[id].studentId === studentId && teacherCourseIds.has(db.enrollments[id].courseId)).map(id => db.enrollments[id].courseId);
         
-        const courses = Object.values(db.courses)
-            .filter(c => enrolledCourseIds.includes(c.id))
-            .map(c => c.title);
+        const courses = enrolledCourseIds.map(id => db.courses[id]?.title).filter(Boolean);
 
         const submissions = Object.values(db.submissions).filter(s => s.studentId === studentId && s.grade !== null);
         const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
@@ -240,13 +246,12 @@ export async function getAssignmentsByCourse(courseId: string): Promise<Assignme
 }
 
 export async function getAssignmentsByTeacher(teacherId: string): Promise<(Assignment & { courseTitle: string, submissions: number })[]> {
-    const teacherCourses = Object.values(db.courses).filter(c => c.teacherId === teacherId);
-    const teacherCourseIds = teacherCourses.map(c => c.id);
+    const teacherCourseIds = new Set(Object.keys(db.courses).filter(id => db.courses[id].teacherId === teacherId));
     
-    const assignments = Object.values(db.assignments).filter(a => teacherCourseIds.includes(a.courseId));
+    const assignments = Object.values(db.assignments).filter(a => teacherCourseIds.has(a.courseId));
 
     return assignments.map(assignment => {
-        const course = teacherCourses.find(c => c.id === assignment.courseId);
+        const course = db.courses[assignment.courseId];
         const submissions = Object.values(db.submissions).filter(s => s.assignmentId === assignment.id).length;
         return {
             ...assignment,
@@ -412,12 +417,12 @@ export async function getStudentRankings(): Promise<{ user: User, averageGrade: 
         const averageGrade = submissions.length > 0 ? totalGrade / submissions.length : 0;
         
         const challengeSubmissions = Object.values(db.challenge_submissions).filter(cs => cs.studentId === student.id);
-        const credibilityPoints = await challengeSubmissions.reduce(async (accPromise, cs) => {
-            const acc = await accPromise;
+        let credibilityPoints = 0;
+        for (const cs of challengeSubmissions) {
             const challenge = db.challenges[cs.challengeId];
             const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === cs.id).length;
-            return acc + (votes * 10) + (challenge?.points || 0);
-        }, Promise.resolve(0));
+            credibilityPoints += (votes * 10) + (challenge?.points || 0);
+        }
         
         return {
             user: student,
@@ -555,10 +560,11 @@ export async function getVotesForSubmission(submissionId: string): Promise<numbe
 // --- Project Showcase Functions ---
 export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'imageUrl'>): Promise<Project> {
     const id = randomUUID();
+    const placeholder = PlaceHolderImages.find(p => p.imageHint.includes('project')) || PlaceHolderImages[6];
     const newProject: Project = {
         ...data,
         id,
-        imageUrl: `https://picsum.photos/seed/proj${Date.now()}/600/400`,
+        imageUrl: placeholder.imageUrl,
         createdAt: new Date().toISOString(),
     };
     db.projects[id] = newProject;
@@ -566,8 +572,10 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
 }
 
 export async function getAllProjects(): Promise<(Project & { student: User })[]> {
+    const projects = Object.values(db.projects);
+    projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return Promise.all(
-        Object.values(db.projects).map(async p => {
+        projects.map(async p => {
             const student = await findUserById(p.studentId);
             return { ...p, student };
         })
@@ -575,7 +583,9 @@ export async function getAllProjects(): Promise<(Project & { student: User })[]>
 }
 
 export async function getProjectsByStudent(studentId: string): Promise<Project[]> {
-    return Object.values(db.projects).filter(p => p.studentId === studentId);
+    const projects = Object.values(db.projects).filter(p => p.studentId === studentId);
+    projects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return projects;
 }
 
 // --- Internship Functions ---

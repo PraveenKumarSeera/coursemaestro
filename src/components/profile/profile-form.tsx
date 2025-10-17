@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
@@ -40,8 +39,15 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         variant: state.success ? 'default' : 'destructive',
       });
       if (state.success) {
-        formRef.current?.reset();
-        // Force a reload to reflect name change in the header
+        // Only reset password fields
+        if (formRef.current) {
+          const passwordInput = formRef.current.querySelector<HTMLInputElement>('input[name="password"]');
+          const confirmPasswordInput = formRef.current.querySelector<HTMLInputElement>('input[name="confirmPassword"]');
+          if (passwordInput) passwordInput.value = '';
+          if (confirmPasswordInput) confirmPasswordInput.value = '';
+        }
+        // Force a reload to reflect name change in the header.
+        // A more advanced solution might use a global state manager.
         window.location.reload();
       }
     }

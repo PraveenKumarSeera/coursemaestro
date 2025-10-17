@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useActionState } from 'react';
@@ -7,7 +6,7 @@ import { askAI } from '@/app/actions/ai';
 import type { Course } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, User, Bot, AlertTriangle } from 'lucide-react';
+import { Loader2, Sparkles, User, Bot, AlertTriangle, Send } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -22,12 +21,13 @@ type Message = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="sm" disabled={pending}>
+    <Button type="submit" size="icon" disabled={pending}>
       {pending ? (
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
-        'Send'
+        <Send className="h-4 w-4"/>
       )}
+      <span className="sr-only">Send</span>
     </Button>
   );
 }
@@ -105,11 +105,11 @@ export default function AiAssistant({ course }: { course: Course }) {
               <div key={index} className="flex items-start gap-3">
                  {message.role === 'user' ? (
                     <>
+                         <div className="bg-primary/10 rounded-lg p-3 text-sm ml-auto">
+                            <p>{message.content}</p>
+                        </div>
                         <div className="p-2 bg-primary/10 rounded-full">
                             <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="bg-primary/10 rounded-lg p-3 text-sm">
-                            <p>{message.content}</p>
                         </div>
                     </>
                  ) : (

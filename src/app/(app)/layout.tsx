@@ -1,10 +1,9 @@
-
 'use client';
 
 import AppHeader from '@/components/app-header';
 import AppSidebar from '@/components/app-sidebar';
 import type { User, Notification } from '@/lib/types';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { ReactFlowProvider } from 'reactflow';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { getSession } from '@/lib/session';
@@ -19,7 +18,6 @@ import { LiveQuizProvider } from '@/hooks/use-live-quiz.tsx';
 const NOTIFICATION_STORAGE_KEY = 'coursepilot-notifications-update';
 const IDLE_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 
-
 function useUserSession() {
   const [user, setUser] = useState<User | null>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -28,7 +26,7 @@ function useUserSession() {
   const { broadcastActivity } = useStudentActivityBroadcaster();
   const idleTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const playNotificationSound = () => {
+  const playNotificationSound = useCallback(() => {
     try {
       const context = new (window.AudioContext || (window as any).webkitAudioContext)();
       if (!context) return;
@@ -48,10 +46,29 @@ function useUserSession() {
     } catch (e) {
       console.error("Failed to play notification sound", e);
     }
-  };
-  
-  const fetchNotifications = useCallback(async (currentUser: User) => {
-      const userNotifications = await getNotificationsForUser(currentUser.id);
+  }, []);
+
+  // Effect to load the user session once on mount
+  useEffect(() => {
+    async function loadSession() {
+      try {
+        const { user: sessionUser } = await getSession();
+        setUser(sessionUser);
+      } catch (error) {
+        console.error("Failed to load session:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSession();
+  }, []);
+
+  // Effect for handling notifications and activity broadcasting, runs only when user is loaded
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchNotifications = async () => {
+      const userNotifications = await getNotificationsForUser(user.id);
       setNotifications(userNotifications);
 
       const currentUnreadCount = userNotifications.filter(n => !n.isRead).length;
@@ -59,54 +76,45 @@ function useUserSession() {
         playNotificationSound();
       }
       previousUnreadCount.current = currentUnreadCount;
-  }, []);
+    };
 
-  const resetIdleTimer = useCallback(() => {
-    if (idleTimer.current) {
-      clearTimeout(idleTimer.current);
-    }
-    idleTimer.current = setTimeout(() => {
-      broadcastActivity('idle');
-    }, IDLE_TIMEOUT);
-  }, [broadcastActivity]);
-
-  useEffect(() => {
-    async function loadSession() {
-      const { user } = await getSession();
-      if (user) {
-        setUser(user);
-        await fetchNotifications(user); // Initial fetch
-
-        if (user.role === 'student') {
-            const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
-            events.forEach(event => window.addEventListener(event, resetIdleTimer));
-            resetIdleTimer(); // Start the timer initially
-        }
-      }
-      setLoading(false);
-    }
-    loadSession();
+    fetchNotifications(); // Initial fetch for the logged-in user
 
     const handleStorageChange = (event: StorageEvent) => {
-        if (event.key === NOTIFICATION_STORAGE_KEY && user) {
-            fetchNotifications(user);
-        }
+      if (event.key === NOTIFICATION_STORAGE_KEY) {
+        fetchNotifications();
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
 
-    return () => {
-        window.removeEventListener('storage', handleStorageChange);
-         if (user && user.role === 'student') {
-            const events: (keyof WindowEventMap)[] = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
-            events.forEach(event => window.removeEventListener(event, resetIdleTimer));
-             if (idleTimer.current) {
-                clearTimeout(idleTimer.current);
-            }
-        }
+    // --- Student-specific activity tracking ---
+    let events: (keyof WindowEventMap)[] = [];
+    const resetIdleTimer = () => {
+      if (idleTimer.current) {
+        clearTimeout(idleTimer.current);
+      }
+      idleTimer.current = setTimeout(() => {
+        broadcastActivity('idle');
+      }, IDLE_TIMEOUT);
     };
 
-  }, [fetchNotifications, user, resetIdleTimer]);
+    if (user.role === 'student') {
+      events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart'];
+      events.forEach(event => window.addEventListener(event, resetIdleTimer));
+      resetIdleTimer();
+    }
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      if (user.role === 'student') {
+        events.forEach(event => window.removeEventListener(event, resetIdleTimer));
+        if (idleTimer.current) {
+          clearTimeout(idleTimer.current);
+        }
+      }
+    };
+  }, [user, playNotificationSound, broadcastActivity]);
 
   return { user, notifications, loading };
 }
