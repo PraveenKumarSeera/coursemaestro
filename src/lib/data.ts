@@ -838,15 +838,20 @@ export async function createProject(data: Omit<Project, 'id' | 'createdAt' | 'im
 
 export const getAllProjects = unstable_cache(
     async (): Promise<(Project & { student: User })[]> => {
-        const sanitizedProjects = Object.values(db.projects)
-            .filter((p): p is Project => p !== null && typeof p === 'object' && p.id !== undefined)
-            .map(p => ({
-                ...p,
-                tags: Array.isArray(p.tags) ? p.tags : [],
-            }));
+        const projects = Object.values(db.projects);
 
-        sanitizedProjects.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        // 1. Filter out any null, undefined, or malformed project entries
+        const validProjects = projects.filter((p): p is Project => {
+            return p && typeof p === 'object' && typeof p.id === 'string';
+        });
 
+        // 2. Sanitize and sort the valid projects
+        const sanitizedProjects = validProjects.map(p => ({
+            ...p,
+            tags: Array.isArray(p.tags) ? p.tags : [], // Guarantee tags is an array
+        })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        // 3. Fetch student data for the sanitized projects
         return Promise.all(
             sanitizedProjects.map(async p => {
                 const student = await findUserById(p.studentId);
@@ -861,14 +866,19 @@ export const getAllProjects = unstable_cache(
 
 export const getProjectsByStudent = unstable_cache(
     async (studentId: string): Promise<Project[]> => {
-        const sanitizedProjects = Object.values(db.projects)
-            .filter((p): p is Project => p !== null && typeof p === 'object' && p.studentId === studentId)
-            .map(p => ({
-                ...p,
-                tags: Array.isArray(p.tags) ? p.tags : [],
-            }));
+        const projects = Object.values(db.projects).filter(p => p && p.studentId === studentId);
+        
+        // 1. Filter out any null, undefined, or malformed project entries
+        const validProjects = projects.filter((p): p is Project => {
+            return p && typeof p === 'object' && typeof p.id === 'string';
+        });
 
-        sanitizedProjects.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        // 2. Sanitize and sort the valid projects
+        const sanitizedProjects = validProjects.map(p => ({
+            ...p,
+            tags: Array.isArray(p.tags) ? p.tags : [], // Guarantee tags is an array
+        })).sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
         return sanitizedProjects;
     },
     ['projects-by-student'],
