@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { randomUUID } from 'crypto';
@@ -645,7 +644,7 @@ export const getStudentRankings = unstable_cache(
             const totalGrade = submissions.reduce((acc, sub) => acc + (sub.grade || 0), 0);
             const averageGrade = submissions.length > 0 ? totalGrade / submissions.length : 0;
             
-            const challengeSubmissions = Object.values(db.challenge_submissions).filter(cs => cs.studentId === student.id);
+            const challengeSubmissions = Object.values(db.challenge_submissions).filter(cs => cs && cs.studentId === student.id);
             let credibilityPoints = 0;
             for (const cs of challengeSubmissions) {
                 const challenge = db.challenges[cs.challengeId];
@@ -781,29 +780,22 @@ export const getChallengeById = unstable_cache(
 
 export const getSubmissionsForChallenge = unstable_cache(
     async (challengeId: string): Promise<(ChallengeSubmission & { student: User; votes: number })[]> => {
-        // Step 1: Get all raw submission records from the database.
         const allSubmissions = Object.values(db.challenge_submissions);
         
-        // Step 2: Filter for submissions that are not null/undefined and belong to the correct challenge.
-        const relevantSubmissions = allSubmissions.filter(sub => {
-            return sub && sub.challengeId === challengeId;
-        });
+        const validSubmissions = allSubmissions.filter(Boolean);
 
-        // Step 3: Process the valid submissions, fetching related data.
+        const relevantSubmissions = validSubmissions.filter(sub => sub.challengeId === challengeId);
+
         const processedSubmissions = await Promise.all(
             relevantSubmissions.map(async (sub) => {
-                // Fetch the student associated with the submission.
                 const student = await findUserById(sub.studentId);
                 
-                // If the student is not found or is the 'unknown' user, we cannot use this submission.
-                if (!student || student.id === '0') {
+                if (student.id === '0') {
                     return null;
                 }
 
-                // Count the votes for this specific submission.
                 const votes = Object.values(db.challenge_votes).filter(v => v.submissionId === sub.id).length;
 
-                // Return the fully formed, clean submission object.
                 return { 
                     ...sub, 
                     student, 
@@ -812,7 +804,6 @@ export const getSubmissionsForChallenge = unstable_cache(
             })
         );
         
-        // Step 4: Filter out any null results from the processing step to ensure the final array is clean.
         return processedSubmissions.filter(Boolean) as (ChallengeSubmission & { student: User; votes: number })[];
     },
     ['submissions-for-challenge'],
@@ -1072,5 +1063,6 @@ if (Object.keys(db.users).length === 0) {
 }
 
     
+
 
 
